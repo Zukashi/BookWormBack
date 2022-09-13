@@ -1,6 +1,7 @@
 import express, { json } from 'express';
 import cors from 'cors';
 import 'express-async-errors';
+import { registerRouter } from './routers/Register';
 
 const app = express();
 app.use(cors({
@@ -8,7 +9,7 @@ app.use(cors({
 }));
 
 app.use(json());
-
+app.use('/', registerRouter);
 app.listen(3001, '0.0.0.0', () => {
   console.log('Listening on port http://localhost:3001');
 });
