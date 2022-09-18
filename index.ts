@@ -5,6 +5,7 @@ import mongoose from 'mongoose';
 import { registerRouter } from './routers/Register';
 import { loginRouter } from './routers/Login';
 import { authorRouter } from './routers/Author';
+import { searchRouter } from './routers/Search';
 
 const app = express();
 app.use(cors({
@@ -17,6 +18,8 @@ app.use(json());
 app.use('/', registerRouter);
 app.use('/', authorRouter);
 app.use('/', loginRouter);
+app.use('/', searchRouter);
+
 app.listen(3001, '0.0.0.0', () => {
   console.log('Listening on port http://localhost:3000');
 });
