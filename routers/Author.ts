@@ -12,7 +12,14 @@ authorRouter.get('/author', async (req, res) => {
 }).get('/author/:authorId', async (req, res) => {
   console.log(req.params.authorId);
   const response = await fetch(`https://openlibrary.org/authors/${req.params.authorId}.json`);
-  const data = await response.json();
-  console.log(data);
-  res.end();
+  const authorInfo = await response.json();
+  console.log(authorInfo);
+
+  const response2 = await fetch(`https://covers.openlibrary.org/a/olid/${req.params.authorId}-L.json`);
+  const authorImg = await response2.json();
+  // console.log(authorImg.width);
+  res.json({
+    authorInfo,
+    authorImg,
+  });
 });
