@@ -11,15 +11,9 @@ authorRouter.get('/author', async (req, res) => {
   res.json(data);
 }).get('/author/:authorId', async (req, res) => {
   console.log(req.params.authorId);
+  // Searching for author through authorID
   const response = await fetch(`https://openlibrary.org/authors/${req.params.authorId}.json`);
   const authorInfo = await response.json();
   console.log(authorInfo);
-
-  const response2 = await fetch(`https://covers.openlibrary.org/a/olid/${req.params.authorId}-L.json`);
-  const authorImg = await response2.json();
-  // console.log(authorImg.width);
-  res.json({
-    authorInfo,
-    authorImg,
-  });
+  res.json(authorInfo);
 });
