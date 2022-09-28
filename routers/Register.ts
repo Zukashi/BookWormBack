@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { User } from '../Schemas/User';
-
+import nodemailer from 'nodemailer';
+let testAccount = await nodemailer.createTestAccount();
+let transporter = nodemailer.createTransport(transport[, defaults]);
 const bcrypt = require('bcrypt');
 // eslint-disable-next-line import/prefer-default-export,no-undef
 export const registerRouter = Router();
@@ -17,4 +19,6 @@ registerRouter.post('/register', async (req, res) => {
     await user.save();
   });
   res.end();
+}).post('/send', (req, res) => {
+
 });
