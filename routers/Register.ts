@@ -13,7 +13,7 @@ registerRouter.post('/register', async (req, res) => {
     service: 'gmail',
     auth: {
       user: 'ziomski40@gmail.com',
-      pass: 'HisakiZukashi2',
+      pass: 'ZukashiHisaki2',
     },
   });
   const details = {
