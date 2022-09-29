@@ -17,6 +17,13 @@ const userSchema = new mongoose.Schema({
     min: 3,
     max: 20,
   },
+  firstName: String,
+  gender: String,
+  lastName: String,
+  city: String,
+  age: String,
+  dateOfBirth: Date,
+  Country: String,
 });
 
 export const User = mongoose.model('User', userSchema);
