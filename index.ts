@@ -6,6 +6,7 @@ import { registerRouter } from './routers/Register';
 import { loginRouter } from './routers/Login';
 import { authorRouter } from './routers/Author';
 import { searchRouter } from './routers/Search';
+import { userRouter } from './routers/User';
 
 const app = express();
 app.use(cors({
@@ -19,6 +20,7 @@ app.use('/', registerRouter);
 app.use('/', authorRouter);
 app.use('/', loginRouter);
 app.use('/', searchRouter);
+app.use('/user', userRouter);
 
 app.listen(3001, '0.0.0.0', () => {
   console.log('Listening on port http://localhost:3000');
