@@ -23,7 +23,7 @@ const userSchema = new mongoose.Schema({
   city: String,
   age: Number,
   dateOfBirth: Date,
-  Country: String,
+  country: String,
 });
 
 export const User = mongoose.model('User', userSchema);

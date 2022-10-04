@@ -39,7 +39,7 @@ registerRouter.post('/register', async (req, res) => {
       gender: '',
       city: '',
       age: 0,
-      Country: '',
+      country: '',
       lastName: '',
       dateOfBirth: Date.now(),
     });

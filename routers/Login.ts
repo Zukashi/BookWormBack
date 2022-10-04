@@ -16,7 +16,4 @@ loginRouter.post('/login', async (req, res) => {
   } else {
     res.json({ error: 'error 404' });
   }
-})
-  .put('/user/userId', (req, res) => {
-
-  });
+});
