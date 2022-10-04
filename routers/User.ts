@@ -24,4 +24,30 @@ userRouter
     } else {
       res.json('Current Password Invalid');
     }
+  }).put('/:userId', async (req, res) => {
+    const { userId } = req.params;
+    const {
+      email, password, _id,
+    } = await User.findById(`${userId}`);
+    const {
+      firstName, gender, lastName, city, age, country, dateOfBirth, username,
+    } = req.body;
+    await User.deleteOne({ id: userId });
+    console.log(1);
+    const newUser = new User({
+      _id,
+      username,
+      email,
+      password,
+      firstName,
+      gender,
+      city,
+      age,
+      country,
+      lastName,
+      dateOfBirth: Date.parse(dateOfBirth),
+    });
+    console.log(2);
+    await newUser.save();
+    res.end();
   });
