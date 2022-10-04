@@ -35,6 +35,13 @@ registerRouter.post('/register', async (req, res) => {
       username,
       email,
       password: hash,
+      firstName: '',
+      gender: '',
+      city: '',
+      age: 0,
+      Country: '',
+      lastName: '',
+      dateOfBirth: Date.now(),
     });
     await user.save();
   });

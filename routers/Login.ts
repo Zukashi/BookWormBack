@@ -10,6 +10,7 @@ loginRouter.post('/login', async (req, res) => {
   const user = await User.find({ username });
   const hash = user[0].password;
   const isSamePassword = await bcrypt.compare(password, hash);
+  console.log(user[0]);
   if (isSamePassword) {
     res.json(user[0]);
   } else {
