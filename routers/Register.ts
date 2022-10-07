@@ -41,7 +41,7 @@ registerRouter.post('/register', async (req, res) => {
       age: 0,
       country: '',
       lastName: '',
-      dateOfBirth: Date.now(),
+      dateOfBirth: '',
     });
     await user.save();
   });
