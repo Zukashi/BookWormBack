@@ -34,6 +34,8 @@ userRouter
     } = req.body;
     await User.deleteOne({ id: userId });
     console.log(1);
+    console.log(dateOfBirth);
+    console.log(new Date(dateOfBirth));
     const newUser = new User({
       _id,
       username,
@@ -45,7 +47,7 @@ userRouter
       age,
       country,
       lastName,
-      dateOfBirth: Date.parse(dateOfBirth),
+      dateOfBirth,
     });
     console.log(2);
     await newUser.save();
