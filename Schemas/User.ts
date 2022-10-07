@@ -22,7 +22,7 @@ const userSchema = new mongoose.Schema({
   lastName: String,
   city: String,
   age: Number,
-  dateOfBirth: Date,
+  dateOfBirth: String,
   country: String,
 });
 
