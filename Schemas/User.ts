@@ -24,6 +24,7 @@ const userSchema = new mongoose.Schema({
   age: Number,
   dateOfBirth: String,
   country: String,
+  favorites: [String],
 });
 
 export const User = mongoose.model('User', userSchema);

@@ -55,4 +55,13 @@ userRouter
   }).get('/:userId', async (req, res) => {
     const user = await User.findById(req.params.userId);
     res.json(user);
+  }).put('/:userId/favorite', async (req, res) => {
+    console.log(req.params, req.body);
+    const user = await User.findById(req.params.userId);
+    user.favorites.push(req.body.isbn);
+    await user.save();
+    console.log(user);
+  })
+  .delete('/:userId/favorite', async (req, res) => {
+    const filtered = user.favorites.filter((value, index, arr) => value !== req.body.isbn);
   });
