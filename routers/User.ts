@@ -63,5 +63,8 @@ userRouter
     console.log(user);
   })
   .delete('/:userId/favorite', async (req, res) => {
+    const user = await User.findById(req.params.userId);
     const filtered = user.favorites.filter((value, index, arr) => value !== req.body.isbn);
+    user.favorites = [...filtered];
+    await user.save();
   });
