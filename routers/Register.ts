@@ -42,6 +42,7 @@ registerRouter.post('/register', async (req, res) => {
       country: '',
       lastName: '',
       dateOfBirth: '',
+      favorites: [],
     });
     await user.save();
   });

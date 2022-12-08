@@ -12,5 +12,6 @@ searchRouter.get('/search/:category/:key', async (req, res) => {
   console.log(req.params.bookId);
   const response = await fetch(`https://openlibrary.org/works/${req.params.bookId}.json`);
   const data = await response.json();
+  console.log(data);
   res.json(data);
 });
