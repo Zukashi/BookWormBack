@@ -3,6 +3,10 @@ import { User } from '../Schemas/User';
 
 const bcrypt = require('bcrypt');
 
+const accountSid = 'ACb180490ec56aae49f9e66d21245e4abf';
+const authToken = 'ffcc735a9c51aab68d6a0f5f1592b9b0';
+const client = require('twilio')(accountSid, authToken);
+
 export const userRouter = Router();
 
 userRouter
@@ -55,4 +59,28 @@ userRouter
   }).get('/:userId', async (req, res) => {
     const user = await User.findById(req.params.userId);
     res.json(user);
+  }).put('/:userId/favorite', async (req, res) => {
+    const user = await User.findById(req.params.userId);
+    console.log(user, 222);
+    user.favorites.push(req.body.isbn);
+    await user.save();
+    res.end();
+  })
+  .delete('/:userId/favorite', async (req, res) => {
+    const user = await User.findById(req.params.userId);
+    console.log(user, 444);
+    const filtered = user.favorites.filter((value) => value !== req.body.isbn);
+    console.log(filtered);
+    user.favorites = [];
+    user.favorites = [...filtered];
+    await user.save();
+    res.end();
+  })
+  .post('/:userId/sms', async (req, res) => {
+    const user = await User.findById(req.params.userId);
+    console.log(user);
+
+    client.messages
+      .create({ body: 'Hello from Twilio', from: '+16506632010', to: '+48513031628' })
+      .then((message:any) => console.log(message.sid));
   });
