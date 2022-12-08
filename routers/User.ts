@@ -56,15 +56,19 @@ userRouter
     const user = await User.findById(req.params.userId);
     res.json(user);
   }).put('/:userId/favorite', async (req, res) => {
-    console.log(req.params, req.body);
     const user = await User.findById(req.params.userId);
+    console.log(user, 222);
     user.favorites.push(req.body.isbn);
     await user.save();
-    console.log(user);
+    res.end();
   })
   .delete('/:userId/favorite', async (req, res) => {
     const user = await User.findById(req.params.userId);
-    const filtered = user.favorites.filter((value, index, arr) => value !== req.body.isbn);
+    console.log(user, 444);
+    const filtered = user.favorites.filter((value) => value !== req.body.isbn);
+    console.log(filtered);
+    user.favorites = [];
     user.favorites = [...filtered];
     await user.save();
+    res.end();
   });
