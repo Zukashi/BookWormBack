@@ -7,6 +7,7 @@ import { loginRouter } from './routers/Login';
 import { authorRouter } from './routers/Author';
 import { searchRouter } from './routers/Search';
 import { userRouter } from './routers/User';
+import { bookRouter } from './routers/Book';
 
 const app = express();
 app.use(cors({
