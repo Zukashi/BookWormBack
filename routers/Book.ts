@@ -9,4 +9,6 @@ bookRouter.get('/book', async (req, res) => {
   const response = await fetch(`https://openlibrary.org/search/authors.json?q=${encodedQuery}`);
   const data = await response.json();
   res.json(data);
+}).post('/book', async (req, res) => {
+  const { isbn, title, author } = req.body;
 });
