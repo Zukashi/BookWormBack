@@ -29,7 +29,7 @@ userRouter
   }).put('/:userId', async (req, res) => {
     const { userId } = req.params;
     const {
-      email, password, _id,
+      email, password, _id, favorites,
     } = await User.findById(`${userId}`);
     const {
       firstName, gender, lastName, city, age, country, dateOfBirth, username,
@@ -38,6 +38,7 @@ userRouter
     const newUser = new User({
       _id,
       username,
+      favorites,
       email,
       password,
       firstName,
