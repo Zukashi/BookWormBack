@@ -6,7 +6,13 @@ export const bookRouter = Router();
 
 bookRouter.get('/books', async (req, res) => {
   const books = await Book.find({});
-  res.json(books);
+  const result = books.map(async (book) => {
+    const response = await fetch(`https://openlibrary.org/isbn/${book.isbn}.json`);
+    const data = await response.json();
+    return data;
+  });
+  const values = await Promise.all(result);
+  res.json(values);
 }).post('/book', async (req, res) => {
   const { isbn, title, author } = req.body;
 }).post('/addBook', async (req, res) => {
