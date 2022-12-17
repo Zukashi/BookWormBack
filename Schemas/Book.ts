@@ -12,8 +12,17 @@ const bookSchema = new mongoose.Schema({
   isbn: {
     type: String,
     required: true,
-    min: 13,
+    min: 10,
     max: 13,
+  },
+  publish_date: {
+    type: String,
+  },
+  publishers: {
+    type: [String],
+  },
+  languages: {
+    type: [{ key: String }],
   },
 });
 export const Book = mongoose.model('Book', bookSchema);
