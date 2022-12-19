@@ -1,6 +1,6 @@
 {
   "name": "book-worm-back",
-  "version": "0.3.8",
+  "version": "0.3.8b",
   "description": "",
   "main": "index.js",
   "scripts": {
