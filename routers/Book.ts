@@ -28,6 +28,7 @@ bookRouter.get('/books', async (req, res) => {
     author,
     isbn,
     ...data,
+    authors: data.authors,
   });
   await book.save();
   res.end();

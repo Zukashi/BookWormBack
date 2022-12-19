@@ -14,6 +14,9 @@ authorRouter.get('/author', async (req, res) => {
   // Searching for author through authorID
   const response = await fetch(`https://openlibrary.org/authors/${req.params.authorId}.json`);
   const authorInfo = await response.json();
-  console.log(authorInfo);
+  res.json(authorInfo);
+}).get('/author/authors/:olId', async (req, res) => {
+  const response = await fetch(`https://openlibrary.org/authors/${req.params.olId}.json`);
+  const authorInfo = await response.json();
   res.json(authorInfo);
 });
