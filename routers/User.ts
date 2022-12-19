@@ -74,13 +74,9 @@ userRouter
       .create({ body: 'Hello from Twilio', from: '+16506632010', to: '+48513031628' })
       .then((message:any) => console.log(message.sid));
   })
-  .get('/:userId/favorite', async (req, res) => {
-    console.log(123);
-    const user = await User.findById(req.params.userId);
-  })
   .get('/:userId/favorites', async (req, res) => {
     const user = await User.findById(req.params.userId);
-    console.log(12345);
+    console.log(user);
     const result = user.favorites.map(async (isbn) => {
       const response = await fetch(`https://openlibrary.org/isbn/${isbn}.json`);
       const data = await response.json();
