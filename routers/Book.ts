@@ -32,4 +32,8 @@ bookRouter.get('/books', async (req, res) => {
   });
   await book.save();
   res.end();
+}).delete('/book/:bookId', async (req, res) => {
+  const { bookId } = req.params;
+  await Book.deleteOne({ _id: bookId });
+  res.end();
 });

@@ -76,7 +76,7 @@ userRouter
   })
   .get('/:userId/favorites', async (req, res) => {
     const user = await User.findById(req.params.userId);
-    console.log(12345);
+    console.log(user);
     const result = user.favorites.map(async (isbn) => {
       const response = await fetch(`https://openlibrary.org/isbn/${isbn}.json`);
       const data = await response.json();
