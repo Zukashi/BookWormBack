@@ -7,7 +7,6 @@ const bookSchema = new mongoose.Schema({
   },
   author: {
     type: String,
-    required: true,
   },
   isbn: {
     type: String,
@@ -27,5 +26,12 @@ const bookSchema = new mongoose.Schema({
   authors: {
     type: [{ key: String }],
   },
+  subjects: {
+    type: [String],
+  },
+  subject_people: {
+    type: [String],
+  },
+  description: String,
 });
 export const Book = mongoose.model('Book', bookSchema);
