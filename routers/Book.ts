@@ -13,6 +13,9 @@ bookRouter.get('/books', async (req, res) => {
   // });
   // const values = await Promise.all(result);
   res.json(books);
+}).get('/book/:id', async (req, res) => {
+  const book = await Book.findById(req.params.id);
+  res.json(book);
 }).post('/book', async (req, res) => {
   const { isbn, title, author } = req.body;
 }).post('/addBook', async (req, res) => {
@@ -36,8 +39,9 @@ bookRouter.get('/books', async (req, res) => {
   });
   await book.save();
   res.end();
-}).delete('/book/:bookId', async (req, res) => {
-  const { bookId } = req.params;
-  await Book.deleteOne({ _id: bookId });
-  res.end();
-});
+})
+  .delete('/book/:bookId', async (req, res) => {
+    const { bookId } = req.params;
+    await Book.deleteOne({ _id: bookId });
+    res.end();
+  });
