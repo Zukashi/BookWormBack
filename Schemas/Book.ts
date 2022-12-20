@@ -27,5 +27,12 @@ const bookSchema = new mongoose.Schema({
   authors: {
     type: [{ key: String }],
   },
+  subjects: {
+    type: [String],
+  },
+  subject_people: {
+    type: [String],
+  },
+  description: String,
 });
 export const Book = mongoose.model('Book', bookSchema);

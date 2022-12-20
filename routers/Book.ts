@@ -21,10 +21,15 @@ bookRouter.get('/books', async (req, res) => {
   console.log(req.body);
   const response = await fetch(`https://openlibrary.org/isbn/${isbn}.json`);
   const data = await response.json();
+  const response2 = await fetch(`https://openlibrary.org${data.works[0].key}.json`);
+  const data2 = await response2.json();
   console.log(data);
   const book = new Book({
 
     title: data.title,
+    description: data2.description,
+    subjects: data2.subjects,
+    subject_people: data2.subject_people,
     author,
     isbn,
     ...data,
