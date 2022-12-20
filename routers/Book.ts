@@ -44,9 +44,17 @@ bookRouter.get('/books', async (req, res) => {
     const form = req.body;
     const book = await Book.findById(form._id);
     await Book.findByIdAndDelete(form._id);
+    const { subjects } = form;
+    let newSubjects = [];
+    if (!Array.isArray(subjects)) {
+      newSubjects = subjects.split(' ');
+    } else {
+      newSubjects = [...subjects];
+    }
     const newBook = new Book({
       ...book,
       ...form,
+      subjects: newSubjects,
     });
     await newBook.save();
     res.end();
