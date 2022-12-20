@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { Book } from './Book';
 
 const userSchema = new mongoose.Schema({
   username: {
@@ -24,7 +25,10 @@ const userSchema = new mongoose.Schema({
   age: Number,
   dateOfBirth: String,
   country: String,
-  favorites: [String],
+  favorites: [{
+    type: mongoose.SchemaTypes.ObjectId,
+    ref: Book,
+  }],
 });
 
 export const User = mongoose.model('User', userSchema);
