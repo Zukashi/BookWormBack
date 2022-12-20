@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { ObjectId } from 'mongodb';
 import { User } from '../Schemas/User';
 
 const bcrypt = require('bcrypt');
@@ -56,16 +57,22 @@ userRouter
     res.json(user);
   }).put('/:userId/favorite', async (req, res) => {
     const user = await User.findById(req.params.userId);
-    user.favorites.push(req.body.isbn);
+    user.favorites.push(req.body);
     await user.save();
     res.end();
   })
   .delete('/:userId/favorite', async (req, res) => {
+    const { book } = req.body;
     const user = await User.findById(req.params.userId);
-    const filtered = user.favorites.filter((value) => value !== req.body.isbn);
-    user.favorites = [];
-    user.favorites = [...filtered];
-    await user.save();
+    const doc = await User.find({ favorites: req.body, id: req.params.userId }).populate('favorites');
+    await User.findByIdAndDelete(req.params.userId);
+    const filtered = doc[0].favorites.filter((value:any) => value.isbn !== req.body.isbn);
+    const obj = user.toObject();
+    const newUser = new User({
+      ...obj,
+      favorites: filtered,
+    });
+    await newUser.save();
     res.end();
   })
   .post('/:userId/sms', async (req, res) => {
@@ -75,13 +82,6 @@ userRouter
       .then((message:any) => console.log(message.sid));
   })
   .get('/:userId/favorites', async (req, res) => {
-    const user = await User.findById(req.params.userId);
-    const result = user.favorites.map(async (isbn) => {
-      const response = await fetch(`https://openlibrary.org/isbn/${isbn}.json`);
-      const data = await response.json();
-      return data;
-    });
-    const values = await Promise.all(result);
-    console.log(values);
-    res.json(values);
+    const user = await User.findById(req.params.userId).populate('favorites');
+    res.json(user.favorites);
   });
