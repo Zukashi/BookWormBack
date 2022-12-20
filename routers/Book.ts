@@ -26,13 +26,21 @@ bookRouter.get('/books', async (req, res) => {
   const data2 = await response2.json();
   const response3 = await fetch(`http://localhost:3001/author${data.authors[0].key}`);
   const data3 = await response3.json();
+  let description;
+  if (data2.description.value) {
+    description = data2.description.value;
+  } else if (typeof data2.description === 'string') {
+    description = data2.description;
+  } else {
+    description = '';
+  }
   const book = new Book({
 
     title: data.title,
-    description: data2.description,
+    description,
     subjects: data2.subjects,
     subject_people: data2.subject_people,
-    author: data3.personal_name,
+    author: data3.personal_name ? data3.personal_name : data3.name,
     isbn,
     ...data,
     authors: data.authors,
