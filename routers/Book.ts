@@ -40,6 +40,17 @@ bookRouter.get('/books', async (req, res) => {
   await book.save();
   res.end();
 })
+  .put('/book', async (req, res) => {
+    const form = req.body;
+    const book = await Book.findById(form._id);
+    await Book.findByIdAndDelete(form._id);
+    const newBook = new Book({
+      ...book,
+      ...form,
+    });
+    await newBook.save();
+    res.end();
+  })
   .delete('/book/:bookId', async (req, res) => {
     const { bookId } = req.params;
     await Book.deleteOne({ _id: bookId });
