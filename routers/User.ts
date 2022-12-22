@@ -11,6 +11,15 @@ const client = require('twilio')(accountSid, authToken);
 
 export const userRouter = Router();
 
+export interface User {
+    _id: string,
+    username: string,
+    firstName: string,
+    lastName: string,
+    age: number,
+    city: string,
+}
+
 userRouter.get('/users', async (req, res) => {
   const users = await User.find({});
   console.log(users, 1234);
@@ -30,13 +39,21 @@ userRouter.get('/users', async (req, res) => {
   });
   await newUser.save();
   res.end();
+}).post('/search/:value', async (req, res) => {
+  const users: User[] = await User.find({});
+  const newUsers = users.filter((user) => user.username?.toLowerCase().trim().includes(req.body.value.toLowerCase()) || user.firstName?.toLowerCase().trim().includes(req.body.value) || user.lastName?.toLowerCase().trim().includes(req.body.value));
+  if (!req.body.value) {
+    res.json(users);
+  } else {
+    res.json(newUsers);
+  }
 })
   .put('/password', async (req, res) => {
     const user = await User.findById(`${req.body.id}`);
     const isSamePassword = await bcrypt.compare(req.body.currentPassword, user.password);
     if (isSamePassword) {
       if (req.body.newPassword === req.body.verifyPassword) {
-        bcrypt.hash(req.body.verifyPassword, 10, async (err:string, hash:string) => {
+        bcrypt.hash(req.body.verifyPassword, 10, async (err: string, hash: string) => {
           user.password = hash;
           await user.save();
           res.end().status(200);
@@ -85,7 +102,7 @@ userRouter.get('/users', async (req, res) => {
     const user = await User.findById(req.params.userId);
     const doc = await User.find({ favorites: req.body, id: req.params.userId }).populate('favorites');
     await User.findByIdAndDelete(req.params.userId);
-    const filtered = doc[0].favorites.filter((value:any) => value.isbn !== req.body.isbn);
+    const filtered = doc[0].favorites.filter((value: any) => value.isbn !== req.body.isbn);
     const obj = user.toObject();
     const newUser = new User({
       ...obj,
@@ -98,7 +115,7 @@ userRouter.get('/users', async (req, res) => {
     const user = await User.findById(req.params.userId);
     client.messages
       .create({ body: 'Hello from Twilio', from: '+16506632010', to: '+48513031628' })
-      .then((message:any) => console.log(message.sid));
+      .then((message: any) => console.log(message.sid));
   })
   .get('/:userId/favorites', async (req, res) => {
     const user = await User.findById(req.params.userId).populate('favorites');
