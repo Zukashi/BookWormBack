@@ -19,10 +19,8 @@ export interface User {
     age: number,
     city: string,
 }
-
 userRouter.get('/users', async (req, res) => {
   const users = await User.find({});
-  console.log(users, 1234);
   res.json(users);
 }).get('/:userId', async (req, res) => {
   const user = await User.findById(req.params.userId);
@@ -64,6 +62,17 @@ userRouter.get('/users', async (req, res) => {
     } else {
       res.json('Current Password Invalid');
     }
+  })
+  .put('/:userId/avatar', async (req, res) => {
+    const user = await User.findById(req.params.userId);
+    await User.findByIdAndDelete(req.params.userId);
+    const obj = user.toObject();
+    const newUser = new User({
+      ...obj,
+      base64Avatar: req.body.preview,
+    });
+    await newUser.save();
+    res.end();
   })
   .put('/:userId', async (req, res) => {
     const { userId } = req.params;
