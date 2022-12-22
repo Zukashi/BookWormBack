@@ -60,10 +60,10 @@ bookRouter.get('/books', async (req, res) => {
     await book.save();
     res.end();
   })
-  .put('/book', async (req, res) => {
+  .put('/book/:bookId', async (req, res) => {
     const form = req.body;
-    const book = await Book.findById(form._id);
-    await Book.findByIdAndDelete(form._id);
+    const book = await Book.findById(req.params.bookId);
+    await Book.findByIdAndDelete(req.params.bookId);
     const { subjects } = form;
     let newSubjects = [];
     if (!Array.isArray(subjects)) {

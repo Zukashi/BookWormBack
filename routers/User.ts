@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { ObjectId } from 'mongodb';
 import { User } from '../Schemas/User';
+import { Book } from '../Schemas/Book';
 
 const bcrypt = require('bcrypt');
 
@@ -10,7 +11,26 @@ const client = require('twilio')(accountSid, authToken);
 
 export const userRouter = Router();
 
-userRouter
+userRouter.get('/users', async (req, res) => {
+  const users = await User.find({});
+  console.log(users, 1234);
+  res.json(users);
+}).get('/:userId', async (req, res) => {
+  const user = await User.findById(req.params.userId);
+  res.json(user);
+}).put('/admin/:userId', async (req, res) => {
+  const form = req.body;
+  const user = await User.findById(req.params.userId);
+  await User.findByIdAndDelete(req.params.userId);
+
+  const newUser = new User({
+    ...user,
+    ...form,
+
+  });
+  await newUser.save();
+  res.end();
+})
   .put('/password', async (req, res) => {
     const user = await User.findById(`${req.body.id}`);
     const isSamePassword = await bcrypt.compare(req.body.currentPassword, user.password);
@@ -27,7 +47,8 @@ userRouter
     } else {
       res.json('Current Password Invalid');
     }
-  }).put('/:userId', async (req, res) => {
+  })
+  .put('/:userId', async (req, res) => {
     const { userId } = req.params;
     const {
       email, password, _id, favorites,
@@ -52,10 +73,8 @@ userRouter
     });
     await newUser.save();
     res.end();
-  }).get('/:userId', async (req, res) => {
-    const user = await User.findById(req.params.userId);
-    res.json(user);
-  }).put('/:userId/favorite', async (req, res) => {
+  })
+  .put('/:userId/favorite', async (req, res) => {
     const user = await User.findById(req.params.userId);
     user.favorites.push(req.body);
     await user.save();
@@ -84,4 +103,8 @@ userRouter
   .get('/:userId/favorites', async (req, res) => {
     const user = await User.findById(req.params.userId).populate('favorites');
     res.json(user.favorites);
+  })
+  .delete('/:userId', async (req, res) => {
+    await User.findByIdAndDelete(req.params.userId);
+    res.end();
   });
