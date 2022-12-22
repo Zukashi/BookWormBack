@@ -18,6 +18,7 @@ const userSchema = new mongoose.Schema({
     min: 3,
     max: 20,
   },
+  base64Avatar: String,
   firstName: String,
   gender: String,
   lastName: String,
