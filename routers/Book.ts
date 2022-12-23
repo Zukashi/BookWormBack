@@ -83,4 +83,18 @@ bookRouter.get('/books', async (req, res) => {
     const { bookId } = req.params;
     await Book.deleteOne({ _id: bookId });
     res.end();
+  })
+  .put('/book/:bookId/:rating', async (req, res) => {
+    const book = await Book.findById(req.params.bookId);
+
+    await Book.findByIdAndDelete(req.params.bookId);
+    const obj = book.toObject();
+    const newBook = new Book({
+      ...obj,
+      sumOfRates: obj.sumOfRates + parseInt(req.params.rating, 10),
+      rating: (obj.sumOfRates + parseInt(req.params.rating, 10)) / (obj.amountOfRates + 1),
+      amountOfRates: obj.amountOfRates + 1,
+    });
+    await newBook.save();
+    res.json(newBook);
   });

@@ -77,7 +77,7 @@ userRouter.get('/users', async (req, res) => {
   .put('/:userId', async (req, res) => {
     const { userId } = req.params;
     const {
-      email, password, _id, favorites,
+      email, password, _id, favorites, base64Avatar,
     } = await User.findById(`${userId}`);
     const {
       firstName, gender, lastName, city, age, country, dateOfBirth, username,
@@ -96,6 +96,7 @@ userRouter.get('/users', async (req, res) => {
       country,
       lastName,
       dateOfBirth,
+      base64Avatar,
     });
     await newUser.save();
     res.end();

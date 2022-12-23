@@ -33,5 +33,8 @@ const bookSchema = new mongoose.Schema({
     type: [String],
   },
   description: String,
+  rating: Number,
+  amountOfRates: Number,
+  sumOfRates: Number,
 });
 export const Book = mongoose.model('Book', bookSchema);
