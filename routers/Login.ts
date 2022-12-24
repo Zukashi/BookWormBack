@@ -12,23 +12,23 @@ loginRouter.post('/login', async (req, res) => {
   if (!user) return res.sendStatus(404).send('yo');
   const hash = user[0].password;
   const isSamePassword = await bcrypt.compare(password, hash);
-  console.log(user[0]);
   if (isSamePassword) {
     const userJWT = { name: user[0]._id };
-    const accessToken = jwt.sign(userJWT, 'abc');
-    res.json(user[0]);
+    const accessToken = jwt.sign(userJWT, process.env.ACCESS_TOKEN_SECRET);
+    res.json({ user: user[0], accessToken });
   } else {
     res.json({ error: 'error 404' });
   }
 });
 
-// function authenticateToken(req:any, res:any, next:any) {
-//   const authHeader = req.header.authorization;
-//   const token = authHeader && authHeader.split(' ')[1];
-//   if (token == null) return res.sendStatus(401);
-//   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err:any, user:any) => {
-//     if (err) return res.sendStatus(403);
-//     req.user = user;
-//     next();
-//   });
-// }
+export function authenticateToken(req:any, res:any, next:any) {
+  const authHeader = req.header('Authorization');
+  console.log(authHeader);
+  const token = authHeader && authHeader.split(' ')[1];
+  if (token == null) return res.sendStatus(401);
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err:any, user:any) => {
+    if (err) return res.sendStatus(403);
+    req.user = user;
+    next();
+  });
+}
