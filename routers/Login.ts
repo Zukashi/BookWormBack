@@ -14,8 +14,10 @@ loginRouter.post('/login', async (req, res) => {
   const isSamePassword = await bcrypt.compare(password, hash);
   if (isSamePassword) {
     const userJWT = { name: user[0]._id };
-    const accessToken = jwt.sign(userJWT, process.env.ACCESS_TOKEN_SECRET);
-    res.json({ user: user[0], accessToken });
+    const accessToken = jwt.sign(userJWT, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
+    res.json({ user: user[0], accessToken }).cookie('token', accessToken, {
+      httpOnly: true,
+    });
   } else {
     res.json({ error: 'error 404' });
   }
