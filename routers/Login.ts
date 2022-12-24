@@ -24,13 +24,12 @@ loginRouter.post('/login', async (req, res) => {
 });
 
 export function authenticateToken(req:any, res:any, next:any) {
-  const authHeader = req.header('Authorization');
-  console.log(authHeader);
-  const token = authHeader && authHeader.split(' ')[1];
+  const { token } = req.cookies;
+  console.log(token);
   if (token == null) return res.sendStatus(401);
-  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err:any, user:any) => {
+  const user = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err:any, user:any) => {
     if (err) return res.sendStatus(403);
-    req.user = user;
-    next();
   });
+  req.user = user;
+  next();
 }
