@@ -128,7 +128,7 @@ userRouter.get('/users', async (req, res) => {
       .then((message: any) => console.log(message.sid));
   })
   .get('/:userId/favorites', async (req, res) => {
-    const user = await User.findById(req.params.userId).populate('favorites');
+    const user = await User.findById('63a615fe31cc812d2de9fdca');
     res.json(user.favorites);
   })
   .delete('/:userId', async (req, res) => {

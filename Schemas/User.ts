@@ -1,8 +1,9 @@
 import mongoose from 'mongoose';
+import { ObjectId } from 'mongodb';
 import { Book } from './Book';
 
 const userSchema = new mongoose.Schema({
-  _id: String,
+  _id: ObjectId,
   username: {
     type: String,
     required: true,
