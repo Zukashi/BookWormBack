@@ -15,19 +15,19 @@ loginRouter.post('/login', async (req, res) => {
   if (isSamePassword) {
     const userJWT = { name: user[0]._id };
     const accessToken = jwt.sign(userJWT, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
-    res.json({ user: user[0], accessToken }).cookie('token', accessToken, {
+    res.cookie('sessionId', accessToken, {
       httpOnly: true,
-    });
+    }).json({ user: user[0], accessToken });
   } else {
     res.json({ error: 'error 404' });
   }
 });
 
 export function authenticateToken(req:any, res:any, next:any) {
-  const { token } = req.cookies;
-  console.log(token);
-  if (token == null) return res.sendStatus(401);
-  const user = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err:any, user:any) => {
+  const { sessionId } = req.cookies;
+  console.log(sessionId);
+  if (sessionId == null) return res.sendStatus(401);
+  const user = jwt.verify(sessionId, process.env.ACCESS_TOKEN_SECRET, (err:any, user:any) => {
     if (err) return res.sendStatus(403);
   });
   req.user = user;
