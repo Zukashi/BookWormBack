@@ -1,39 +1,31 @@
 import { Router } from 'express';
 import nodemailer from 'nodemailer';
+import Joi from 'joi';
 import { User } from '../Schemas/User';
 
+const schema = Joi.object({
+  username: Joi.string().max(18).min(6).required(),
+  password: Joi.string().min(8).max(24).required(),
+  email: Joi.string().email().required(),
+
+});
 const bcrypt = require('bcrypt');
 // eslint-disable-next-line import/prefer-default-export,no-undef
 export const registerRouter = Router();
 
 registerRouter.post('/register', async (req, res) => {
   const { username, email, password } = req.body;
+
+  try {
+    const value = await schema.validateAsync({ username, email, password });
+  } catch (err) {
+    console.log(err);
+  }
   const saltAmount = 10;
-  // const mailTransporter = nodemailer.createTransport({
-  //   service: 'gmail',
-  //   auth: {
-  //     user: 'ziomski40@gmail.com',
-  //     pass: 'ZukashiHisaki2',
-  //   },
-  // });
-  // const details = {
-  //   from: 'ziomski40@gmail.com',
-  //   to: 'bartek.kaszowski@spoko.pl',
-  //   subject: 'testing our nodemailer',
-  //   text: 'testing',
-  // };
-  //
-  // mailTransporter.sendMail(details, (err) => {
-  //   if (err) {
-  //     console.log('error of ', err);
-  //   } else {
-  //     console.log('email has been sent');
-  //   }
-  // });
   bcrypt.hash(password, saltAmount, async (err:string, hash:string) => {
     const user = new User({
-      username,
-      email,
+      username: username.trim(),
+      email: email.trim(),
       password: hash,
       firstName: '',
       gender: '',
