@@ -17,6 +17,8 @@ loginRouter.post('/login', async (req, res) => {
     const accessToken = jwt.sign(userJWT, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
     res.cookie('sessionId', accessToken, {
       httpOnly: true,
+      sameSite: 'none',
+      secure: true,
     }).json({ user: user[0], accessToken });
   } else {
     res.json({ error: 'error 404' });
