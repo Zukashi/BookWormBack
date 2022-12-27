@@ -13,7 +13,7 @@ bookRouter.get('/books', authenticateToken, async (req, res) => {
   //   return data;
   // });
   // const values = await Promise.all(result);
-  res.json(books);
+  res.json(books).sendStatus(201);
 }).get('/book/:id', async (req, res) => {
   const book = await Book.findById(req.params.id);
   res.json(book);
