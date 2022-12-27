@@ -9,9 +9,10 @@ import { searchRouter } from './routers/Search';
 import { userRouter } from './routers/User';
 import { bookRouter } from './routers/Book';
 
+const cookieParser = require('cookie-parser');
+
 const cors = require('cors');
 
-const cookieParser = require('cookie-parser');
 // see https://github.com/motdotla/dotenv#how-do-i-use-dotenv-with-import
 dotenv.config();
 
@@ -20,10 +21,6 @@ app.use(cors({
   origin: 'http://localhost:3000',
   credentials: true,
 }));
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Credentials', 'true');
-  next();
-});
 (async function () {
   await mongoose.connect('mongodb://0.0.0.0:27017/BookWorm');
 }());
