@@ -77,7 +77,7 @@ userRouter.get('/users', async (req, res) => {
   .put('/:userId', async (req, res) => {
     const { userId } = req.params;
     const {
-      email, password, _id, favorites, base64Avatar,
+      email, password, _id, favorites, base64Avatar, refreshTokenId,
     } = await User.findById(`${userId}`);
     const {
       firstName, gender, lastName, city, age, country, dateOfBirth, username,
@@ -97,6 +97,7 @@ userRouter.get('/users', async (req, res) => {
       lastName,
       dateOfBirth,
       base64Avatar,
+      refreshTokenId,
     });
     await newUser.save();
     res.end();
@@ -128,7 +129,7 @@ userRouter.get('/users', async (req, res) => {
       .then((message: any) => console.log(message.sid));
   })
   .get('/:userId/favorites', async (req, res) => {
-    const user = await User.findById('63a615fe31cc812d2de9fdca').populate('favorites');
+    const user = await User.findById(req.params.userId).populate('favorites');
     res.json(user.favorites);
   })
   .delete('/:userId', async (req, res) => {
