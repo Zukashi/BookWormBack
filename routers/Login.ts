@@ -8,9 +8,9 @@ export const loginRouter = Router();
 
 loginRouter.post('/auth/refreshToken', async (req, res) => {
   const { refreshToken } = req.cookies;
-  const user = await User.where('refreshTokenId').equals(refreshToken);
+  const user2 = await User.where('refreshTokenId').equals(refreshToken);
   if (refreshToken === null) return res.sendStatus(401).redirect('/');
-  if (!user) return res.sendStatus(403);
+  if (!user2) return res.sendStatus(403);
 
   jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err:any, user:any) => {
     if (err) return res.sendStatus(403);
@@ -25,7 +25,7 @@ loginRouter.post('/auth/refreshToken', async (req, res) => {
       sameSite: 'none',
       secure: true,
       expires: accessCookieExpiryDate,
-    }).status(201).json({ user: user.id, token: accessToken });
+    }).status(201).json({ user: user2, token: accessToken });
   });
 });
 
