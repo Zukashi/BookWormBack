@@ -31,6 +31,7 @@ const userSchema = new mongoose.Schema({
     type: mongoose.SchemaTypes.ObjectId,
     ref: Book,
   }],
+  refreshTokenId: String,
 });
 
 export const User = mongoose.model('User', userSchema);
