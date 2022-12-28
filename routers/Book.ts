@@ -1,11 +1,11 @@
 import { Router } from 'express';
 import { User } from '../Schemas/User';
 import { Book } from '../Schemas/Book';
-import { authenticateToken } from './Login';
+import { authenticateToken, authRole, setUser } from './Login';
 
 export const bookRouter = Router();
 
-bookRouter.get('/books', authenticateToken, async (req, res) => {
+bookRouter.get('/books/:userId', authenticateToken, setUser, authRole('admin'), async (req, res) => {
   const books = await Book.find({});
   // const result = books.map(async (book) => {
   //   const response = await fetch(`https://openlibrary.org/isbn/${book.isbn}.json`);
@@ -28,10 +28,8 @@ bookRouter.get('/books', authenticateToken, async (req, res) => {
   } else {
     res.json(newBooks);
   }
-}).post('/book', async (req, res) => {
-  const { isbn, title, author } = req.body;
 })
-  .post('/addBook', async (req, res) => {
+  .post('/book', async (req, res) => {
     const { title, author, isbn } = req.body;
     const response = await fetch(`https://openlibrary.org/isbn/${isbn}.json`);
     const data = await response.json();
