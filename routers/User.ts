@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { ObjectId } from 'mongodb';
 import { User } from '../Schemas/User';
 import { Book } from '../Schemas/Book';
+import { authenticateToken } from './Login';
 
 const bcrypt = require('bcrypt');
 
@@ -19,13 +20,13 @@ export interface User {
     age: number,
     city: string,
 }
-userRouter.get('/users', async (req, res) => {
+userRouter.get('/users', authenticateToken, async (req, res) => {
   const users = await User.find({});
   res.json(users);
-}).get('/:userId', async (req, res) => {
+}).get('/:userId', authenticateToken, async (req, res) => {
   const user = await User.findById(req.params.userId);
   res.json(user);
-}).put('/admin/:userId', async (req, res) => {
+}).put('/admin/:userId', authenticateToken, async (req, res) => {
   const form = req.body;
   const user = await User.findById(req.params.userId);
   await User.findByIdAndDelete(req.params.userId);
@@ -37,7 +38,7 @@ userRouter.get('/users', async (req, res) => {
   });
   await newUser.save();
   res.end();
-}).post('/search/:value', async (req, res) => {
+}).post('/search/:value', authenticateToken, async (req, res) => {
   const users: User[] = await User.find({});
   const newUsers = users.filter((user) => user.username?.toLowerCase().trim().includes(req.body.value.toLowerCase()) || user.firstName?.toLowerCase().trim().includes(req.body.value) || user.lastName?.toLowerCase().trim().includes(req.body.value));
   if (!req.body.value) {
@@ -46,7 +47,7 @@ userRouter.get('/users', async (req, res) => {
     res.json(newUsers);
   }
 })
-  .put('/password', async (req, res) => {
+  .put('/password', authenticateToken, async (req, res) => {
     const user = await User.findById(`${req.body.id}`);
     const isSamePassword = await bcrypt.compare(req.body.currentPassword, user.password);
     if (isSamePassword) {
@@ -63,7 +64,7 @@ userRouter.get('/users', async (req, res) => {
       res.json('Current Password Invalid');
     }
   })
-  .put('/:userId/avatar', async (req, res) => {
+  .put('/:userId/avatar', authenticateToken, async (req, res) => {
     const user = await User.findById(req.params.userId);
     await User.findByIdAndDelete(req.params.userId);
     const obj = user.toObject();
@@ -74,10 +75,10 @@ userRouter.get('/users', async (req, res) => {
     await newUser.save();
     res.end();
   })
-  .put('/:userId', async (req, res) => {
+  .put('/:userId', authenticateToken, async (req, res) => {
     const { userId } = req.params;
     const {
-      email, password, _id, favorites, base64Avatar,
+      email, password, _id, favorites, base64Avatar, refreshTokenId,
     } = await User.findById(`${userId}`);
     const {
       firstName, gender, lastName, city, age, country, dateOfBirth, username,
@@ -97,17 +98,18 @@ userRouter.get('/users', async (req, res) => {
       lastName,
       dateOfBirth,
       base64Avatar,
+      refreshTokenId,
     });
     await newUser.save();
     res.end();
   })
-  .put('/:userId/favorite', async (req, res) => {
+  .put('/:userId/favorite', authenticateToken, async (req, res) => {
     const user = await User.findById(req.params.userId);
     user.favorites.push(req.body);
     await user.save();
     res.end();
   })
-  .delete('/:userId/favorite', async (req, res) => {
+  .delete('/:userId/favorite', authenticateToken, async (req, res) => {
     const { book } = req.body;
     const user = await User.findById(req.params.userId);
     const doc = await User.find({ favorites: req.body, id: req.params.userId }).populate('favorites');
@@ -121,17 +123,17 @@ userRouter.get('/users', async (req, res) => {
     await newUser.save();
     res.end();
   })
-  .post('/:userId/sms', async (req, res) => {
+  .post('/:userId/sms', authenticateToken, async (req, res) => {
     const user = await User.findById(req.params.userId);
     client.messages
       .create({ body: 'Hello from Twilio', from: '+16506632010', to: '+48513031628' })
       .then((message: any) => console.log(message.sid));
   })
-  .get('/:userId/favorites', async (req, res) => {
-    const user = await User.findById('63a615fe31cc812d2de9fdca').populate('favorites');
+  .get('/:userId/favorites', authenticateToken, async (req, res) => {
+    const user = await User.findById(req.params.userId).populate('favorites');
     res.json(user.favorites);
   })
-  .delete('/:userId', async (req, res) => {
+  .delete('/:userId', authenticateToken, async (req, res) => {
     await User.findByIdAndDelete(req.params.userId);
     res.end();
   });

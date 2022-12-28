@@ -3,7 +3,7 @@ import * as dotenv from 'dotenv';
 import 'express-async-errors';
 import mongoose from 'mongoose';
 import { registerRouter } from './routers/Register';
-import { loginRouter } from './routers/Login';
+import { loginRouter, setUser } from './routers/Login';
 import { authorRouter } from './routers/Author';
 import { searchRouter } from './routers/Search';
 import { userRouter } from './routers/User';
@@ -24,8 +24,10 @@ app.use(cors({
 (async function () {
   await mongoose.connect('mongodb://0.0.0.0:27017/BookWorm');
 }());
+
 app.use(cookieParser());
 app.use(json());
+app.use(setUser);
 app.use('/', registerRouter);
 app.use('/', authorRouter);
 app.use('/', loginRouter);

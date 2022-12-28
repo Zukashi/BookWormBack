@@ -5,12 +5,31 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 // eslint-disable-next-line import/prefer-default-export,no-undef
 export const loginRouter = Router();
-const refreshTokens:string[] = ['eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYzYTViMzljOTY2YTU1YzcyYjM0MTJmMiIsImlhdCI6MTY3MjE2NDE5MSwiZXhwIjoxNjcyNzY4OTkxfQ.ssWlXxRDBKLgdCPfShqubWWvcKvWdvqaEx2rqCXkec0'];
+export async function setUser(req:any, res:any, next:any) {
+  console.log(req.params, 888);
+  const { userId } = req.params;
+  if (userId) {
+    req.user = await User.findById(userId);
+  }
+  console.log(666);
+  next();
+}
+export const authRole = (role:any) => async (req:any, res:any, next:any) => {
+  const user:any = await User.findById(req.params.userId);
+  console.log(user);
+  console.log(user.role);
+  if (user.role !== role) {
+    res.status(402);
+    return res.send('Not allowed');
+  }
+  console.log(999);
+  next();
+};
 loginRouter.post('/auth/refreshToken', async (req, res) => {
   const { refreshToken } = req.cookies;
-
+  const user2 = await User.where('refreshTokenId').equals(refreshToken);
   if (refreshToken === null) return res.sendStatus(401).redirect('/');
-  if (!refreshTokens.includes(refreshToken)) return res.sendStatus(403);
+  if (!user2) return res.sendStatus(403);
 
   jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err:any, user:any) => {
     if (err) return res.sendStatus(403);
@@ -25,7 +44,7 @@ loginRouter.post('/auth/refreshToken', async (req, res) => {
       sameSite: 'none',
       secure: true,
       expires: accessCookieExpiryDate,
-    }).status(201).json({ user: user.id, token: accessToken });
+    }).status(201).json({ user: user2, token: accessToken });
   });
 });
 
@@ -43,7 +62,8 @@ loginRouter.post('/login', async (req, res) => {
     const refreshToken = jwt.sign(userJWT, process.env.REFRESH_TOKEN_SECRET, {
       expiresIn: '7d',
     });
-    refreshTokens.push(refreshToken);
+    user[0].refreshTokenId = refreshToken;
+    user[0].save();
     const accessCookieExpiryDate = new Date(Date.now() + 60 * 15 * 1000);
     const refreshCookieExpiryDate = new Date(Date.now() + 60 * 60 * 1000 * 24 * 7);
     console.log(accessCookieExpiryDate.getTime(), refreshCookieExpiryDate.getTime());
@@ -69,7 +89,6 @@ export function authenticateToken(req:any, res:any, next:any) {
   if (accessToken == null) return res.sendStatus(401);
   jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET, (err:any, user:any) => {
     if (err) return res.sendStatus(403);
-    req.user = user;
   });
   next();
 }
