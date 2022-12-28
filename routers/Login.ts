@@ -5,7 +5,26 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 // eslint-disable-next-line import/prefer-default-export,no-undef
 export const loginRouter = Router();
-
+export async function setUser(req:any, res:any, next:any) {
+  console.log(req.params, 888);
+  const { userId } = req.params;
+  if (userId) {
+    req.user = await User.findById(userId);
+  }
+  console.log(666);
+  next();
+}
+export const authRole = (role:any) => async (req:any, res:any, next:any) => {
+  const user:any = await User.findById(req.params.userId);
+  console.log(user);
+  console.log(user.role);
+  if (user.role !== role) {
+    res.status(402);
+    return res.send('Not allowed');
+  }
+  console.log(999);
+  next();
+};
 loginRouter.post('/auth/refreshToken', async (req, res) => {
   const { refreshToken } = req.cookies;
   const user2 = await User.where('refreshTokenId').equals(refreshToken);
@@ -70,7 +89,6 @@ export function authenticateToken(req:any, res:any, next:any) {
   if (accessToken == null) return res.sendStatus(401);
   jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET, (err:any, user:any) => {
     if (err) return res.sendStatus(403);
-    req.user = user;
   });
   next();
 }
