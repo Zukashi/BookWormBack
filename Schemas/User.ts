@@ -32,6 +32,7 @@ const userSchema = new mongoose.Schema({
     ref: Book,
   }],
   refreshTokenId: String,
+  role: String,
 });
 
 export const User = mongoose.model('User', userSchema);
