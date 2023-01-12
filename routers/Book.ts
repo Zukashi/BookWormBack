@@ -5,7 +5,7 @@ import { authenticateToken, authRole, setUser } from './Login';
 
 export const bookRouter = Router();
 
-bookRouter.get('/books/:userId', authenticateToken, setUser, authRole('admin'), async (req, res) => {
+bookRouter.get('/books/:userId', setUser, authenticateToken, authRole('user'), async (req, res) => {
   const books = await Book.find({});
   // const result = books.map(async (book) => {
   //   const response = await fetch(`https://openlibrary.org/isbn/${book.isbn}.json`);
