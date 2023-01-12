@@ -14,6 +14,8 @@ export async function setUser(req:any, res:any, next:any) {
 }
 export function authRole(role:string) {
   return async (req:any, res:any, next:any) => {
+    console.log(req.user);
+    console.log(role, req.user.role);
     if (req.user.role !== role) {
       res.status(401);
       return res.send('Not allowed');

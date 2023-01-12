@@ -78,13 +78,14 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
   .put('/:userId', authenticateToken, async (req, res) => {
     const { userId } = req.params;
     const {
-      email, password, _id, favorites, base64Avatar, refreshTokenId,
+      email, password, _id, favorites, base64Avatar, refreshTokenId, role,
     } = await User.findById(`${userId}`);
     const {
       firstName, gender, lastName, city, age, country, dateOfBirth, username,
     } = req.body;
     await User.deleteOne({ id: userId });
     const newUser = new User({
+      role,
       _id,
       username,
       favorites,
