@@ -8,6 +8,7 @@ import { authorRouter } from './routers/Author';
 import { searchRouter } from './routers/Search';
 import { userRouter } from './routers/User';
 import { bookRouter } from './routers/Book';
+import { handleError } from './errors';
 
 const cookieParser = require('cookie-parser');
 
@@ -34,6 +35,7 @@ app.use('/', loginRouter);
 app.use('/', searchRouter);
 app.use('/user', userRouter);
 app.use('', bookRouter);
+app.use(handleError);
 app.listen(3001, '0.0.0.0', () => {
   console.log('Listening on port http://localhost:3000');
 });
