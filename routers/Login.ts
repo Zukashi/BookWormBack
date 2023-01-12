@@ -6,29 +6,25 @@ const bcrypt = require('bcrypt');
 // eslint-disable-next-line import/prefer-default-export,no-undef
 export const loginRouter = Router();
 export async function setUser(req:any, res:any, next:any) {
-  console.log(req.params, 888);
   const { userId } = req.params;
   if (userId) {
     req.user = await User.findById(userId);
   }
-  console.log(666);
   next();
 }
-export const authRole = (role:any) => async (req:any, res:any, next:any) => {
-  const user:any = await User.findById(req.params.userId);
-  console.log(user);
-  console.log(user.role);
-  if (user.role !== role) {
-    res.status(402);
-    return res.send('Not allowed');
-  }
-  console.log(999);
-  next();
-};
+export function authRole(role:string) {
+  return async (req:any, res:any, next:any) => {
+    if (req.user.role !== role) {
+      res.status(401);
+      return res.send('Not allowed');
+    }
+    next();
+  };
+}
 loginRouter.post('/auth/refreshToken', async (req, res) => {
   const { refreshToken } = req.cookies;
-  const user2 = await User.where('refreshTokenId').equals(refreshToken);
-  if (refreshToken === null) return res.sendStatus(401).redirect('/');
+  const user2 = await User.findOne({ refreshTokenId: refreshToken });
+  if (refreshToken === null) return res.sendStatus(403).redirect('/');
   if (!user2) return res.sendStatus(403);
 
   jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err:any, user:any) => {
@@ -64,17 +60,19 @@ loginRouter.post('/login', async (req, res) => {
     });
     user[0].refreshTokenId = refreshToken;
     user[0].save();
+    console.log(user[0]);
     const accessCookieExpiryDate = new Date(Date.now() + 60 * 15 * 1000);
     const refreshCookieExpiryDate = new Date(Date.now() + 60 * 60 * 1000 * 24 * 7);
     console.log(accessCookieExpiryDate.getTime(), refreshCookieExpiryDate.getTime());
+    console.log(user[0]);
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
-      sameSite: 'none',
+      sameSite: 'strict',
       secure: true,
       expires: accessCookieExpiryDate,
     }).cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      sameSite: 'none',
+      sameSite: 'strict',
       secure: true,
       expires: refreshCookieExpiryDate,
     }).json({ user: user[0], accessToken });
