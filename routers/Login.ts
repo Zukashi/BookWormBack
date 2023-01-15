@@ -6,16 +6,19 @@ const bcrypt = require('bcrypt');
 // eslint-disable-next-line import/prefer-default-export,no-undef
 export const loginRouter = Router();
 export async function setUser(req:any, res:any, next:any) {
-  const { userId } = req.params;
-  if (userId) {
-    req.user = await User.findById(userId);
+  const user = await User.findOne({ refreshTokenId: req.cookies.refreshToken });
+  if (user) {
+    req.user = user;
   }
   next();
 }
 export function authRole(role:string) {
   return async (req:any, res:any, next:any) => {
-    console.log(req.user);
-    console.log(role, req.user.role);
+    console.log(req.user.role);
+    if (req.user.role === 'admin') {
+      next();
+      return;
+    }
     if (req.user.role !== role) {
       res.status(401);
       return res.send('Not allowed');

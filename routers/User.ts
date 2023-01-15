@@ -83,6 +83,8 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
     const {
       firstName, gender, lastName, city, age, country, dateOfBirth, username,
     } = req.body;
+    const newDateOfBirth = dateOfBirth.split('-').reverse().join(' ');
+
     await User.deleteOne({ id: userId });
     const newUser = new User({
       role,
@@ -97,7 +99,7 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
       age,
       country,
       lastName,
-      dateOfBirth,
+      dateOfBirth: newDateOfBirth,
       base64Avatar,
       refreshTokenId,
     });

@@ -5,7 +5,7 @@ import { authenticateToken, authRole, setUser } from './Login';
 
 export const bookRouter = Router();
 
-bookRouter.get('/books/:userId', setUser, authenticateToken, authRole('user'), async (req, res) => {
+bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (req, res) => {
   const books = await Book.find({});
   // const result = books.map(async (book) => {
   //   const response = await fetch(`https://openlibrary.org/isbn/${book.isbn}.json`);
@@ -21,7 +21,7 @@ bookRouter.get('/books/:userId', setUser, authenticateToken, authRole('user'), a
   const books = await Book.find({});
   const newBooks = books.filter((book) => {
     book.author = book.author?.replace(/[.]/gi, '');
-    return book.title?.toLowerCase().includes(req.body.value.toLowerCase()) || book.author?.toLowerCase().includes(req.body.value) || book.isbn?.includes(req.body.value);
+    return book.title?.toLowerCase().includes(req.body.value.toLowerCase()) || book.author?.toLowerCase().includes(req.body.value.toLowerCase()) || book.isbn?.includes(req.body.value.toLowerCase());
   });
   if (!req.body.value) {
     res.json(books);
@@ -38,7 +38,7 @@ bookRouter.get('/books/:userId', setUser, authenticateToken, authRole('user'), a
     const response3 = await fetch(`http://localhost:3001/author${data.authors[0].key}`);
     const data3 = await response3.json();
     let description;
-    if (data2.description.value) {
+    if (data2.description?.value) {
       description = data2.description.value;
     } else if (typeof data2.description === 'string') {
       description = data2.description;
@@ -55,6 +55,9 @@ bookRouter.get('/books/:userId', setUser, authenticateToken, authRole('user'), a
       isbn,
       ...data,
       authors: data.authors,
+      rating: 0,
+      amountOfRates: 0,
+      sumOfRates: 0,
     });
     await book.save();
     res.end();
