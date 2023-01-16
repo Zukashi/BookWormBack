@@ -55,7 +55,9 @@ loginRouter.post('/login', async (req, res) => {
   if (!user) return res.sendStatus(404).send('yo');
   const hash = user[0].password;
   const isSamePassword = await bcrypt.compare(password, hash);
+  console.log(isSamePassword);
   if (isSamePassword) {
+    console.log(999);
     const userJWT = { id: user[0]._id };
     const accessToken = jwt.sign(userJWT, process.env.ACCESS_TOKEN_SECRET, {
       expiresIn: '15m',
@@ -82,7 +84,8 @@ loginRouter.post('/login', async (req, res) => {
       expires: refreshCookieExpiryDate,
     }).json({ user: user[0], accessToken });
   } else {
-    res.json({ error: 'error 404' });
+    console.log(333);
+    res.status(401);
   }
 });
 
