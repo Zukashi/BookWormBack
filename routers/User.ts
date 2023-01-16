@@ -1,14 +1,16 @@
 import { Router } from 'express';
 import { ObjectId } from 'mongodb';
+import { v4 as uuidv4 } from 'uuid';
+import nodemailer from 'nodemailer';
 import { User } from '../Schemas/User';
 import { Book } from '../Schemas/Book';
 import { authenticateToken } from './Login';
 
 const bcrypt = require('bcrypt');
-
-const accountSid = 'ACb180490ec56aae49f9e66d21245e4abf';
-const authToken = 'ffcc735a9c51aab68d6a0f5f1592b9b0';
-const client = require('twilio')(accountSid, authToken);
+//
+// const accountSid = 'ACb180490ec56aae49f9e66d21245e4abf';
+// const authToken = 'ffcc735a9c51aab68d6a0f5f1592b9b0';
+// const client = require('twilio')(accountSid, authToken);
 
 export const userRouter = Router();
 
@@ -124,12 +126,12 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
     await newUser.save();
     res.end();
   })
-  .post('/:userId/sms', authenticateToken, async (req, res) => {
-    const user = await User.findById(req.params.userId);
-    client.messages
-      .create({ body: 'Hello from Twilio', from: '+16506632010', to: '+48513031628' })
-      .then((message: any) => console.log(message.sid));
-  })
+  // .post('/:userId/sms', authenticateToken, async (req, res) => {
+  //   const user = await User.findById(req.params.userId);
+  //   client.messages
+  //     .create({ body: 'Hello from Twilio', from: '+16506632010', to: '+48513031628' })
+  //     .then((message: any) => console.log(message.sid));
+  // })
   .get('/:userId/favorites', authenticateToken, async (req, res) => {
     const user = await User.findById(req.params.userId).populate('favorites');
     res.json(user.favorites);
@@ -140,4 +142,48 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
   })
   .delete('/:userId/logout', async (req, res) => {
     res.clearCookie('accessToken').clearCookie('refreshToken').sendStatus(200);
+  })
+  .post('/reset-password', async (req, res) => {
+    console.log(req.body);
+    const code = uuidv4();
+    const details = {
+      from: 'testBookWorm@gmail.com',
+      to: `${req.body.email}`,
+      subject: 'testing',
+      text: 'testing nodemail',
+      html: `${code}`,
+    };
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: 'testBookWorm@gmail.com',
+        pass: 'tyjbqihrcxkagpwc',
+      },
+    });
+
+    transporter.sendMail(details, (err) => {
+      if (err) {
+        console.log('it has an error', err);
+      } else {
+        console.log('works');
+        res.json({ code });
+      }
+    });
+  })
+  .put('/reset-password/confirm', async (req, res) => {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+    console.log(user);
+    user.password = '';
+    user.save();
+    res.json(user);
+  })
+  .put('/:userId/newPassword', async (req, res) => {
+    const saltAmount = 10;
+    const user = await User.findById(req.params.userId);
+    bcrypt.hash(req.body.newPassword, saltAmount, async (err:string, hash:string) => {
+      user.password = hash;
+      user.save();
+      res.end();
+    });
   });
