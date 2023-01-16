@@ -58,7 +58,7 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
           res.end().status(200);
         });
       } else {
-        res.json('Passwords dont match');
+        res.json("Passwords don't match");
       }
     } else {
       res.json('Current Password Invalid');
@@ -83,8 +83,6 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
     const {
       firstName, gender, lastName, city, age, country, dateOfBirth, username,
     } = req.body;
-    const newDateOfBirth = dateOfBirth.split('-').reverse().join(' ');
-
     await User.deleteOne({ id: userId });
     const newUser = new User({
       role,
@@ -99,7 +97,7 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
       age,
       country,
       lastName,
-      dateOfBirth: newDateOfBirth,
+      dateOfBirth,
       base64Avatar,
       refreshTokenId,
     });
@@ -139,4 +137,7 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
   .delete('/:userId', authenticateToken, async (req, res) => {
     await User.findByIdAndDelete(req.params.userId);
     res.end();
+  })
+  .delete('/:userId/logout', async (req, res) => {
+    res.clearCookie('accessToken').clearCookie('refreshToken').sendStatus(200);
   });
