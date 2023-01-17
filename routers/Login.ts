@@ -51,27 +51,28 @@ loginRouter.post('/auth/refreshToken', async (req, res) => {
 
 loginRouter.post('/login', async (req, res) => {
   const { username, password } = req.body;
-  const user = await User.find({ username });
-  if (!user) return res.sendStatus(404).send('yo');
-  const hash = user[0].password;
+  const user = await User.findOne({ username });
+  console.log(user);
+  if (!user) return res.sendStatus(401);
+  console.log(123);
+  const hash = user.password;
   const isSamePassword = await bcrypt.compare(password, hash);
   console.log(isSamePassword);
   if (isSamePassword) {
     console.log(999);
-    const userJWT = { id: user[0]._id };
+    const userJWT = { id: user._id };
     const accessToken = jwt.sign(userJWT, process.env.ACCESS_TOKEN_SECRET, {
       expiresIn: '15m',
     });
     const refreshToken = jwt.sign(userJWT, process.env.REFRESH_TOKEN_SECRET, {
       expiresIn: '7d',
     });
-    user[0].refreshTokenId = refreshToken;
-    user[0].save();
-    console.log(user[0]);
+    user.refreshTokenId = refreshToken;
+    user.save();
+
     const accessCookieExpiryDate = new Date(Date.now() + 60 * 15 * 1000);
     const refreshCookieExpiryDate = new Date(Date.now() + 60 * 60 * 1000 * 24 * 7);
     console.log(accessCookieExpiryDate.getTime(), refreshCookieExpiryDate.getTime());
-    console.log(user[0]);
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
       sameSite: 'strict',
@@ -82,7 +83,7 @@ loginRouter.post('/login', async (req, res) => {
       sameSite: 'strict',
       secure: true,
       expires: refreshCookieExpiryDate,
-    }).json({ user: user[0], accessToken });
+    }).json({ user, accessToken });
   } else {
     console.log(333);
     res.status(401);
