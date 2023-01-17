@@ -19,7 +19,7 @@ bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (re
   res.json(book);
 }).post('/bookAdmin/search/:value', async (req, res) => {
   const books = await Book.find({});
-  const newBooks = books.filter((book) => {
+  const newBooks = books.filter((book:any) => {
     book.author = book.author?.replace(/[.]/gi, '');
     return book.title?.toLowerCase().includes(req.body.value.toLowerCase()) || book.author?.toLowerCase().includes(req.body.value.toLowerCase()) || book.isbn?.includes(req.body.value.toLowerCase());
   });
@@ -90,7 +90,7 @@ bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (re
     const book = await Book.findById(req.params.bookId);
 
     await Book.findByIdAndDelete(req.params.bookId);
-    const obj = book.toObject();
+    const obj:any = book.toObject();
     const newBook = new Book({
       ...obj,
       sumOfRates: obj.sumOfRates + parseInt(req.params.rating, 10),
