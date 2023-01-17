@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { User } from './User';
 
 const bookSchema = new mongoose.Schema({
   title: {
@@ -36,5 +37,11 @@ const bookSchema = new mongoose.Schema({
   rating: Number,
   amountOfRates: Number,
   sumOfRates: Number,
+  reviews: [{
+    user: { type: mongoose.SchemaTypes.ObjectId, ref: 'User' },
+    description: String,
+    rating: Number,
+    status: String,
+  }],
 });
 export const Book = mongoose.model('Book', bookSchema);
