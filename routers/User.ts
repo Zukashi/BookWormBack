@@ -186,4 +186,25 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
       user.save();
       res.end();
     });
+  })
+  .get('/:userId/book/:bookId', async (req, res) => {
+    const booksPopulated = await Book.findById(req.params.bookId)
+      .populate({
+        path: 'reviews.user',
+      });
+    console.log(booksPopulated);
+    let reviewFound;
+
+    booksPopulated.reviews.forEach((review) => {
+      if (review.user.id === req.params.userId) {
+        reviewFound = {
+          userId: review.user.id,
+          desc: review.description,
+          rating: review.rating,
+          status: review.rating,
+        };
+      }
+    });
+
+    res.status(200).json(reviewFound);
   });
