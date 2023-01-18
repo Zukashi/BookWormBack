@@ -46,6 +46,7 @@ const bookSchema = new mongoose.Schema({
       type: Date,
       default: Date.now(),
     },
+    spoilers: Boolean,
   }],
 });
 export const Book = mongoose.model('Book', bookSchema);

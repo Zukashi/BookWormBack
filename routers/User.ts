@@ -202,6 +202,7 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
           rating: review.rating,
           status: review.status,
           date: review.date,
+          spoilers: review.spoilers,
         };
       }
     });
@@ -216,12 +217,12 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
       .populate({
         path: 'reviews.user',
       });
-    console.log(book);
     book.reviews.push({
       user: req.params.userId,
       description: req.body.description,
       rating: req.body.rating,
       status: req.body.status,
+      spoilers: req.body.spoilers,
     });
     book.save();
     res.sendStatus(201);
@@ -236,11 +237,13 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
         book.reviews.splice(i, 1);
       }
     });
+    console.log(req.body);
     book.reviews.push({
       user: req.params.userId,
       description: req.body.description,
       rating: req.body.rating,
       status: req.body.status,
+      spoilers: req.body.spoilers,
       date: Date.now(),
     });
     book.save();
