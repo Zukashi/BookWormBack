@@ -205,6 +205,9 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
         };
       }
     });
-
-    res.status(200).json(reviewFound);
+    if (!reviewFound) {
+      res.sendStatus(404).end();
+    } else {
+      res.status(200).json(reviewFound);
+    }
   });
