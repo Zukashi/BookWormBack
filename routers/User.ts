@@ -192,7 +192,6 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
       .populate({
         path: 'reviews.user',
       });
-    console.log(booksPopulated);
     let reviewFound;
 
     booksPopulated.reviews.forEach((review) => {
@@ -211,4 +210,39 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
     } else {
       res.status(200).json(reviewFound);
     }
+  })
+  .post('/:userId/book/:bookId', async (req, res) => {
+    const book = await Book.findById(req.params.bookId)
+      .populate({
+        path: 'reviews.user',
+      });
+    console.log(book);
+    book.reviews.push({
+      user: req.params.userId,
+      description: req.body.description,
+      rating: req.body.rating,
+      status: req.body.status,
+    });
+    book.save();
+    res.sendStatus(201);
+  })
+  .put('/:userId/book/:bookId', async (req, res) => {
+    const book = await Book.findById(req.params.bookId)
+      .populate({
+        path: 'reviews.user',
+      });
+    book.reviews.forEach((review, i) => {
+      if (review.user.id === req.params.userId) {
+        book.reviews.splice(i, 1);
+      }
+    });
+    book.reviews.push({
+      user: req.params.userId,
+      description: req.body.description,
+      rating: req.body.rating,
+      status: req.body.status,
+      date: Date.now(),
+    });
+    book.save();
+    res.sendStatus(201);
   });
