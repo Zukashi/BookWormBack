@@ -42,6 +42,10 @@ const bookSchema = new mongoose.Schema({
     description: String,
     rating: Number,
     status: String,
+    date: {
+      type: Date,
+      default: Date.now(),
+    },
   }],
 });
 export const Book = mongoose.model('Book', bookSchema);

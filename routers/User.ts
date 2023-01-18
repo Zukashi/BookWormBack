@@ -201,7 +201,8 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
           userId: review.user.id,
           desc: review.description,
           rating: review.rating,
-          status: review.rating,
+          status: review.status,
+          date: review.date,
         };
       }
     });
