@@ -19,7 +19,7 @@ bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (re
   res.json(book);
 }).post('/bookAdmin/search/:value', async (req, res) => {
   const books = await Book.find({});
-  const newBooks = books.filter((book) => {
+  const newBooks = books.filter((book:any) => {
     book.author = book.author?.replace(/[.]/gi, '');
     return book.title?.toLowerCase().includes(req.body.value.toLowerCase()) || book.author?.toLowerCase().includes(req.body.value.toLowerCase()) || book.isbn?.includes(req.body.value.toLowerCase());
   });
@@ -56,6 +56,7 @@ bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (re
       ...data,
       authors: data.authors,
       rating: 0,
+      ratingTypeAmount: Array(5).fill(0),
       amountOfRates: 0,
       sumOfRates: 0,
     });
@@ -90,7 +91,10 @@ bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (re
     const book = await Book.findById(req.params.bookId);
 
     await Book.findByIdAndDelete(req.params.bookId);
-    const obj = book.toObject();
+    const obj:any = book.toObject();
+    obj.ratingTypeAmount[(parseInt(req.params.rating, 10)) - 1] += 1;
+    console.log(obj);
+
     const newBook = new Book({
       ...obj,
       sumOfRates: obj.sumOfRates + parseInt(req.params.rating, 10),
@@ -99,4 +103,12 @@ bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (re
     });
     await newBook.save();
     res.json(newBook);
+  })
+  .delete('/book/:bookId/:rating', async (req, res) => {
+    const book: any = await Book.findById(req.params.bookId);
+    book.ratingTypeAmount[(parseInt(req.params.rating, 10)) - 1] -= 1;
+    book.sumOfRates -= parseInt(req.params.rating, 10);
+    book.amountOfRates -= 1;
+    book.save();
+    res.sendStatus(200);
   });

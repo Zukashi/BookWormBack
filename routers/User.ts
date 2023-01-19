@@ -186,4 +186,67 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
       user.save();
       res.end();
     });
+  })
+  .get('/:userId/book/:bookId', async (req, res) => {
+    const booksPopulated = await Book.findById(req.params.bookId)
+      .populate({
+        path: 'reviews.user',
+      });
+    let reviewFound;
+
+    booksPopulated.reviews.forEach((review) => {
+      if (review.user.id === req.params.userId) {
+        reviewFound = {
+          userId: review.user.id,
+          desc: review.description,
+          rating: review.rating,
+          status: review.status,
+          date: review.date,
+          spoilers: review.spoilers,
+        };
+      }
+    });
+    if (!reviewFound) {
+      res.sendStatus(404).end();
+    } else {
+      res.status(200).json(reviewFound);
+    }
+  })
+  .post('/:userId/book/:bookId', async (req, res) => {
+    const book = await Book.findById(req.params.bookId)
+      .populate({
+        path: 'reviews.user',
+      });
+    book.reviews.push({
+      user: req.params.userId,
+      description: req.body.description,
+      rating: req.body.rating,
+      status: req.body.status,
+      spoilers: req.body.spoilers,
+    });
+    book.save();
+    res.sendStatus(201);
+  })
+  .put('/:userId/book/:bookId', async (req, res) => {
+    const book = await Book.findById(req.params.bookId)
+      .populate({
+        path: 'reviews.user',
+      });
+    book.reviews.forEach((review, i) => {
+      if (review.user.id === req.params.userId) {
+        book.reviews.splice(i, 1);
+      }
+    });
+
+    book.reviews.push({
+      user: req.params.userId,
+      description: req.body.description,
+      rating: req.body.rating,
+      status: req.body.status,
+      spoilers: req.body.spoilers,
+      date: Date.now(),
+    });
+    book.save();
+
+    res.sendStatus(201);
   });
