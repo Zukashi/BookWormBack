@@ -56,6 +56,7 @@ bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (re
       ...data,
       authors: data.authors,
       rating: 0,
+      ratingTypeAmount: Array(5).fill(0),
       amountOfRates: 0,
       sumOfRates: 0,
     });
@@ -91,6 +92,9 @@ bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (re
 
     await Book.findByIdAndDelete(req.params.bookId);
     const obj:any = book.toObject();
+    obj.ratingTypeAmount[(parseInt(req.params.rating, 10)) - 1] += 1;
+    console.log(obj);
+
     const newBook = new Book({
       ...obj,
       sumOfRates: obj.sumOfRates + parseInt(req.params.rating, 10),
@@ -102,6 +106,7 @@ bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (re
   })
   .delete('/book/:bookId/:rating', async (req, res) => {
     const book: any = await Book.findById(req.params.bookId);
+    book.ratingTypeAmount[(parseInt(req.params.rating, 10)) - 1] -= 1;
     book.sumOfRates -= parseInt(req.params.rating, 10);
     book.amountOfRates -= 1;
     book.save();

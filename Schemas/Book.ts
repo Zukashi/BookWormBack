@@ -34,6 +34,7 @@ export const bookSchema = new mongoose.Schema({
     type: [String],
   },
   description: String,
+  ratingTypeAmount: [Number],
   rating: Number,
   amountOfRates: Number,
   sumOfRates: Number,
