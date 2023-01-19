@@ -237,7 +237,7 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
         book.reviews.splice(i, 1);
       }
     });
-    console.log(req.body);
+
     book.reviews.push({
       user: req.params.userId,
       description: req.body.description,
@@ -247,5 +247,6 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
       date: Date.now(),
     });
     book.save();
+
     res.sendStatus(201);
   });

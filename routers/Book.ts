@@ -99,4 +99,11 @@ bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (re
     });
     await newBook.save();
     res.json(newBook);
+  })
+  .delete('/book/:bookId/:rating', async (req, res) => {
+    const book: any = await Book.findById(req.params.bookId);
+    book.sumOfRates -= parseInt(req.params.rating, 10);
+    book.amountOfRates -= 1;
+    book.save();
+    res.sendStatus(200);
   });

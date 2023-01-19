@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import { User } from './User';
 
-const bookSchema = new mongoose.Schema({
+export const bookSchema = new mongoose.Schema({
   title: {
     type: String,
     required: true,
