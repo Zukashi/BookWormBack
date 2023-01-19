@@ -26,7 +26,7 @@ const userSchema = new mongoose.Schema({
   country: String,
   favorites: [{
     type: mongoose.SchemaTypes.ObjectId,
-    ref: Book,
+    ref: 'Book',
   }],
   refreshTokenId: String,
   role: String,

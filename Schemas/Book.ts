@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
+import { User } from './User';
 
-const bookSchema = new mongoose.Schema({
+export const bookSchema = new mongoose.Schema({
   title: {
     type: String,
     required: true,
@@ -33,8 +34,20 @@ const bookSchema = new mongoose.Schema({
     type: [String],
   },
   description: String,
+  ratingTypeAmount: [Number],
   rating: Number,
   amountOfRates: Number,
   sumOfRates: Number,
+  reviews: [{
+    user: { type: mongoose.SchemaTypes.ObjectId, ref: 'User' },
+    description: String,
+    rating: Number,
+    status: String,
+    date: {
+      type: Date,
+      default: Date.now(),
+    },
+    spoilers: Boolean,
+  }],
 });
 export const Book = mongoose.model('Book', bookSchema);
