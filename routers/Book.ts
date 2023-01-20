@@ -87,6 +87,15 @@ bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (re
     await Book.deleteOne({ _id: bookId });
     res.end();
   })
+  .post('/book/:bookId/:rating', async (req, res) => {
+    const book:any = await Book.findById(req.params.bookId);
+    book.ratingTypeAmount[(parseInt(req.params.rating, 10)) - 1] += 1;
+    book.rating = (book.sumOfRates + parseInt(req.params.rating, 10)) / (book.amountOfRates + 1);
+    book.sumOfRates += parseInt(req.params.rating, 10);
+    book.amountOfRates += 1;
+    await book.save();
+    res.status(201).json(book);
+  })
   .put('/book/:bookId/:rating', async (req, res) => {
     const book = await Book.findById(req.params.bookId);
 
@@ -117,6 +126,9 @@ bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (re
     const book: any = await Book.findById(req.params.bookId).populate({
       path: 'reviews.user',
     });
+    if (!book) {
+      res.sendStatus(404);
+    }
     book.ratingTypeAmount[(parseInt(req.params.previousRating, 10)) - 1] -= 1;
     book.sumOfRates -= parseInt(req.params.previousRating, 10);
     book.amountOfRates -= 1;
@@ -131,5 +143,6 @@ bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (re
       }
     });
     book.reviews = [...result];
-    book.save();
+    await book.save();
+    res.end();
   });
