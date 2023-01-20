@@ -198,7 +198,7 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
       if (review.user.id === req.params.userId) {
         reviewFound = {
           userId: review.user.id,
-          desc: review.description,
+          description: review.description,
           rating: review.rating,
           status: review.status,
           date: review.date,
@@ -225,7 +225,7 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
       spoilers: req.body.spoilers,
     });
     book.save();
-    res.sendStatus(201);
+    res.status(201).json(book);
   })
   .put('/:userId/book/:bookId', async (req, res) => {
     const book = await Book.findById(req.params.bookId)
