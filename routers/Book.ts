@@ -145,4 +145,10 @@ bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (re
     book.reviews = [...result];
     await book.save();
     res.end();
+  })
+  .get('/book/:bookId/reviews', async (req, res) => {
+    const book: any = await Book.findById(req.params.bookId).populate({
+      path: 'reviews.user',
+    });
+    res.json(book.reviews);
   });
