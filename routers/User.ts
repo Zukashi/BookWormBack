@@ -68,42 +68,26 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
   })
   .put('/:userId/avatar', authenticateToken, async (req, res) => {
     const user = await User.findById(req.params.userId);
-    await User.findByIdAndDelete(req.params.userId);
-    const obj = user.toObject();
-    const newUser = new User({
-      ...obj,
-      base64Avatar: req.body.preview,
-    });
-    await newUser.save();
+    user.base64Avatar = req.body.preview;
+
+    await user.save();
     res.end();
   })
   .put('/:userId', authenticateToken, async (req, res) => {
     const { userId } = req.params;
-    const {
-      email, password, _id, favorites, base64Avatar, refreshTokenId, role,
-    } = await User.findById(`${userId}`);
+    const user = await User.findById(userId);
     const {
       firstName, gender, lastName, city, age, country, dateOfBirth, username,
     } = req.body;
-    await User.deleteOne({ id: userId });
-    const newUser = new User({
-      role,
-      _id,
-      username,
-      favorites,
-      email,
-      password,
-      firstName,
-      gender,
-      city,
-      age,
-      country,
-      lastName,
-      dateOfBirth,
-      base64Avatar,
-      refreshTokenId,
-    });
-    await newUser.save();
+    user.firstName = firstName;
+    user.gender = gender;
+    user.lastName = lastName;
+    user.city = city;
+    user.age = age;
+    user.country = country;
+    user.dateOfBirth = dateOfBirth;
+    user.username = username;
+    await user.save();
     res.end();
   })
   .put('/:userId/favorite', authenticateToken, async (req, res) => {
@@ -198,7 +182,7 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
       if (review.user.id === req.params.userId) {
         reviewFound = {
           userId: review.user.id,
-          desc: review.description,
+          description: review.description,
           rating: review.rating,
           status: review.status,
           date: review.date,
@@ -225,7 +209,7 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
       spoilers: req.body.spoilers,
     });
     book.save();
-    res.sendStatus(201);
+    res.status(201).json(book);
   })
   .put('/:userId/book/:bookId', async (req, res) => {
     const book = await Book.findById(req.params.bookId)
