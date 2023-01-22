@@ -15,6 +15,7 @@ export const bookSchema = new mongoose.Schema({
     min: 10,
     max: 13,
   },
+  imageSrc: String,
   publish_date: {
     type: String,
   },
