@@ -199,6 +199,9 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
       .populate({
         path: 'reviews.user',
       });
+    const user:any = await User.findById(req.params.userId);
+    user.shelves[req.body.status].push(req.params.bookId);
+    await user.save();
     book.reviews.push({
       user: req.params.userId,
       description: req.body.description,
@@ -206,7 +209,7 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
       status: req.body.status,
       spoilers: req.body.spoilers,
     });
-    book.save();
+    await book.save();
     res.status(201).json(book);
   })
   .put('/:userId/book/:bookId', async (req, res) => {
