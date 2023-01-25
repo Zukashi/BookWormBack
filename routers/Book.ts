@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import axios from 'axios';
 import { User } from '../Schemas/User';
 import { Book } from '../Schemas/Book';
 import { authenticateToken, authRole, setUser } from './Login';
@@ -31,30 +32,28 @@ bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (re
 })
   .post('/book', async (req, res) => {
     const { title, author, isbn } = req.body;
-    const response = await fetch(`https://openlibrary.org/isbn/${isbn}.json`);
-    const data = await response.json();
-    const response2 = await fetch(`https://openlibrary.org${data.works[0].key}.json`);
-    const data2 = await response2.json();
-    const response3 = await fetch(`http://localhost:3001/author${data.authors[0].key}`);
-    const data3 = await response3.json();
+    const response = await axios.get(`https://openlibrary.org/isbn/${isbn}.json`);
+    const response2 = await axios.get(`https://openlibrary.org${response.data.works[0].key}.json`);
+    const response3 = await axios.get(`http://localhost:3001/author${response.data.authors[0].key}`);
+
     let description;
-    if (data2.description?.value) {
-      description = data2.description.value;
-    } else if (typeof data2.description === 'string') {
-      description = data2.description;
+    if (response2.data.description?.value) {
+      description = response2.data.description.value;
+    } else if (typeof response2.data.description === 'string') {
+      description = response2.data.description;
     } else {
       description = '';
     }
     const book = new Book({
 
-      title: data.title,
+      title: response.data.title,
       description,
-      subjects: data2.subjects,
-      subject_people: data2.subject_people,
-      author: data3.personal_name ? data3.personal_name : data3.name,
+      subjects: response2.data.subjects,
+      subject_people: response2.data.subject_people,
+      author: response3.data.personal_name ? response3.data.personal_name : response3.data.name,
       isbn,
-      ...data,
-      authors: data.authors,
+      ...response.data,
+      authors: response.data.authors,
       rating: 0,
       ratingTypeAmount: Array(5).fill(0),
       amountOfRates: 0,
@@ -126,6 +125,7 @@ bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (re
     const book: any = await Book.findById(req.params.bookId).populate({
       path: 'reviews.user',
     });
+
     if (!book) {
       res.sendStatus(404);
     }
@@ -137,13 +137,31 @@ bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (re
     } else {
       book.rating = 0;
     }
-    const result = book.reviews.filter((review:any) => {
+    const result = book.reviews.filter((review:any):any => review.user.id !== req.params.userId);
+    book.reviews.forEach(async (review:any) => {
       if (review.user.id !== req.params.userId) {
-        return review;
+        return;
       }
+      const user: any = await User.findById(req.params.userId).populate({
+        path: `shelves.${review.status}`,
+      });
+      if (!user) {
+        res.sendStatus(404);
+      }
+      console.log(user.shelves.read);
+      const newShelf = user.shelves[review.status].filter((shelf:any) => {
+        console.log(req.params.bookId === shelf);
+        console.log(shelf);
+        return req.params.bookId !== shelf;
+      });
+      user.shelves[review.status] = [...newShelf];
+      await user.save();
+      console.log(user.shelves.read);
     });
+    console.log(result);
     book.reviews = [...result];
     await book.save();
+    console.log('end');
     res.end();
   })
   .get('/book/:bookId/reviews', async (req, res) => {

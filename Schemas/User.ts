@@ -30,6 +30,11 @@ const userSchema = new mongoose.Schema({
   }],
   refreshTokenId: String,
   role: String,
+  shelves: {
+    read: [String],
+    wantToRead: [String],
+    currentlyReading: [String],
+  },
 });
 
 export const User = mongoose.model('User', userSchema);

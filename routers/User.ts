@@ -96,18 +96,16 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
     await user.save();
     res.end();
   })
-  .delete('/:userId/favorite', authenticateToken, async (req, res) => {
-    const { book } = req.body;
+  .delete('/:userId/book/:bookId/favorite', authenticateToken, async (req, res) => {
+    console.log(1234);
+    const book = await Book.findById(req.params.bookId);
     const user = await User.findById(req.params.userId);
-    const doc = await User.find({ favorites: req.body, id: req.params.userId }).populate('favorites');
-    await User.findByIdAndDelete(req.params.userId);
-    const filtered = doc[0].favorites.filter((value: any) => value.isbn !== req.body.isbn);
-    const obj = user.toObject();
-    const newUser = new User({
-      ...obj,
-      favorites: filtered,
-    });
-    await newUser.save();
+    const doc = await User.find({ favorites: book, id: req.params.userId }).populate('favorites');
+
+    const filtered = doc[0].favorites.filter((value: any) => value.isbn !== book.isbn);
+    user.favorites = filtered;
+
+    await user.save();
     res.end();
   })
   // .post('/:userId/sms', authenticateToken, async (req, res) => {
@@ -201,6 +199,9 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
       .populate({
         path: 'reviews.user',
       });
+    const user:any = await User.findById(req.params.userId);
+    user.shelves[req.body.status].push(req.params.bookId);
+    await user.save();
     book.reviews.push({
       user: req.params.userId,
       description: req.body.description,
@@ -208,7 +209,7 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
       status: req.body.status,
       spoilers: req.body.spoilers,
     });
-    book.save();
+    await book.save();
     res.status(201).json(book);
   })
   .put('/:userId/book/:bookId', async (req, res) => {
