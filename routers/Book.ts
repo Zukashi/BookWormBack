@@ -125,6 +125,7 @@ bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (re
     const book: any = await Book.findById(req.params.bookId).populate({
       path: 'reviews.user',
     });
+
     if (!book) {
       res.sendStatus(404);
     }
@@ -136,13 +137,31 @@ bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (re
     } else {
       book.rating = 0;
     }
-    const result = book.reviews.filter((review:any) => {
+    const result = book.reviews.filter((review:any):any => review.user.id !== req.params.userId);
+    book.reviews.forEach(async (review:any) => {
       if (review.user.id !== req.params.userId) {
-        return review;
+        return;
       }
+      const user: any = await User.findById(req.params.userId).populate({
+        path: `shelves.${review.status}`,
+      });
+      if (!user) {
+        res.sendStatus(404);
+      }
+      console.log(user.shelves.read);
+      const newShelf = user.shelves[review.status].filter((shelf:any) => {
+        console.log(req.params.bookId === shelf);
+        console.log(shelf);
+        return req.params.bookId !== shelf;
+      });
+      user.shelves[review.status] = [...newShelf];
+      await user.save();
+      console.log(user.shelves.read);
     });
+    console.log(result);
     book.reviews = [...result];
     await book.save();
+    console.log('end');
     res.end();
   })
   .get('/book/:bookId/reviews', async (req, res) => {
