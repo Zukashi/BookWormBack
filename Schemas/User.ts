@@ -31,18 +31,9 @@ const userSchema = new mongoose.Schema({
   refreshTokenId: String,
   role: String,
   shelves: {
-    read: [{
-      type: mongoose.SchemaTypes.ObjectId,
-      ref: 'Book',
-    }],
-    wantToRead: [{
-      type: mongoose.SchemaTypes.ObjectId,
-      ref: 'Book',
-    }],
-    currentlyReading: [{
-      type: mongoose.SchemaTypes.ObjectId,
-      ref: 'Book',
-    }],
+    read: [String],
+    wantToRead: [String],
+    currentlyReading: [String],
   },
 });
 
