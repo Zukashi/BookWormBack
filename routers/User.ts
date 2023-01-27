@@ -208,6 +208,7 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
       rating: req.body.rating,
       status: req.body.status,
       spoilers: req.body.spoilers,
+      comments: req.body.comments,
     });
     await book.save();
     res.status(201).json(book);
@@ -230,6 +231,7 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
       status: req.body.status,
       spoilers: req.body.spoilers,
       date: Date.now(),
+      comments: [],
     });
     book.save();
 
