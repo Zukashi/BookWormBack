@@ -40,7 +40,10 @@ export const bookSchema = new mongoose.Schema({
   amountOfRates: Number,
   sumOfRates: Number,
   reviews: [{
-    user: { type: mongoose.SchemaTypes.ObjectId, ref: 'User' },
+    user: {
+      type: mongoose.SchemaTypes.ObjectId,
+      ref: 'User',
+    },
     description: String,
     rating: Number,
     status: String,
@@ -49,6 +52,19 @@ export const bookSchema = new mongoose.Schema({
       default: Date.now(),
     },
     spoilers: Boolean,
+    comments: [
+      {
+        user: {
+          type: mongoose.SchemaTypes.ObjectId,
+          ref: 'User',
+        },
+        commentMsg: String,
+        date: {
+          type: Date,
+          default: Date.now(),
+        },
+      },
+    ],
   }],
 });
 export const Book = mongoose.model('Book', bookSchema);
