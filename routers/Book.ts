@@ -189,4 +189,12 @@ bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (re
     });
     await book.save();
     res.sendStatus(201);
+  })
+  .get('/book/:bookId/user/:userId/review/:reviewId', async (req, res) => {
+    const book :any = await Book.findById(req.params.bookId).populate({
+      path: 'reviews.comments.user',
+    });
+    const foundReview = book.reviews.find((review:any) => review._id.toString() === req.params.reviewId);
+    console.log(foundReview);
+    res.json(foundReview.comments).status(200);
   });
