@@ -201,4 +201,14 @@ bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (re
     const foundReview = book.reviews.find((review:any) => review._id.toString() === req.params.reviewId);
     console.log(foundReview);
     res.json(foundReview.comments).status(200);
+  })
+  .delete('/book/:bookId/user/:userId/review/:reviewId/comment/:commentId', async (req, res) => {
+    const book :any = await Book.findById(req.params.bookId).populate({
+      path: 'reviews.comments.user',
+    });
+    const foundReview = book.reviews.find((review:any) => review._id.toString() === req.params.reviewId);
+    const filteredComments = foundReview.comments.filter((comment:any) => comment._id.toString() !== req.params.commentId);
+    foundReview.comments = filteredComments;
+    await book.save();
+    res.sendStatus(200);
   });
