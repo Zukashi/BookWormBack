@@ -2,6 +2,7 @@ import { Router } from 'express';
 import axios from 'axios';
 import * as mongoose from 'mongoose';
 import { ObjectId } from 'mongodb';
+import { v4 as uuidv4 } from 'uuid';
 import { User } from '../Schemas/User';
 import { Book } from '../Schemas/Book';
 import { authenticateToken, authRole, setUser } from './Login';
@@ -176,12 +177,14 @@ bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (re
     const book:any = await Book.findById(req.params.bookId).populate({
       path: 'reviews.user',
     });
+    const newId = new mongoose.Types.ObjectId();
     book.reviews.forEach((review:any) => {
       const objectId = new ObjectId(req.params.reviewId);
       console.log(objectId);
       if (review._id.toString() === objectId.toString()) {
         console.log(1234);
         review.comments.push({
+          _id: newId,
           user: req.params.userId,
           commentMsg: req.body.comment,
           date: Date.now(),
@@ -189,7 +192,7 @@ bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (re
       }
     });
     await book.save();
-    res.sendStatus(201);
+    res.json(newId).status(201);
   })
   .get('/book/:bookId/user/:userId/review/:reviewId', async (req, res) => {
     const book :any = await Book.findById(req.params.bookId).populate({
