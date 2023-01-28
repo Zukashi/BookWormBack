@@ -184,6 +184,7 @@ bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (re
         review.comments.push({
           user: req.params.userId,
           commentMsg: req.body.comment,
+          date: Date.now(),
         });
       }
     });
