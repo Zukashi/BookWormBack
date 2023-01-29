@@ -209,9 +209,13 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
       status: req.body.status,
       spoilers: req.body.spoilers,
       comments: req.body.comments,
+      likes: {
+        usersThatLiked: [],
+        amount: 0,
+      },
     });
     await book.save();
-    res.status(201).json(book);
+    res.json(book).status(201);
   })
   .put('/:userId/book/:bookId', async (req, res) => {
     const book = await Book.findById(req.params.bookId)
