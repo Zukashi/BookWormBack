@@ -124,7 +124,6 @@ bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (re
     res.sendStatus(200);
   })
   .delete('/book/:bookId/user/:userId/review/:previousRating', async (req, res) => {
-    console.log(req.params);
     const book: any = await Book.findById(req.params.bookId).populate({
       path: 'reviews.user',
     });
@@ -141,9 +140,9 @@ bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (re
       book.rating = 0;
     }
     const result = book.reviews.filter((review:any):any => review.user.id !== req.params.userId);
-    book.reviews.forEach(async (review:any) => {
+    book.reviews.forEach(async (review:any):Promise<null> => {
       if (review.user.id !== req.params.userId) {
-        return;
+        return null;
       }
       const user: any = await User.findById(req.params.userId).populate({
         path: `shelves.${review.status}`,
@@ -152,11 +151,7 @@ bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (re
         res.sendStatus(404);
       }
       console.log(user.shelves.read);
-      const newShelf = user.shelves[review.status].filter((shelf:any) => {
-        console.log(req.params.bookId === shelf);
-        console.log(shelf);
-        return req.params.bookId !== shelf;
-      });
+      const newShelf = user.shelves[review.status].filter((shelf:any) => req.params.bookId !== shelf);
       user.shelves[review.status] = [...newShelf];
       await user.save();
       console.log(user.shelves.read);
@@ -200,7 +195,7 @@ bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (re
     });
     const foundReview = book.reviews.find((review:any) => review._id.toString() === req.params.reviewId);
     console.log(foundReview);
-    res.json(foundReview.comments).status(200);
+    res.json(foundReview).status(200);
   })
   .delete('/book/:bookId/user/:userId/review/:reviewId/comment/:commentId', async (req, res) => {
     const book :any = await Book.findById(req.params.bookId).populate({
@@ -209,6 +204,62 @@ bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (re
     const foundReview = book.reviews.find((review:any) => review._id.toString() === req.params.reviewId);
     const filteredComments = foundReview.comments.filter((comment:any) => comment._id.toString() !== req.params.commentId);
     foundReview.comments = filteredComments;
+    await book.save();
+    res.sendStatus(200);
+  })
+  .put('/book/:bookId/user/:reviewUserId/review/:reviewId/user/:currentUser', async (req, res) => {
+    const book: any = await Book.findById(req.params.bookId).populate({
+      path: 'reviews.likes.usersThatLiked.user',
+    });
+    book.reviews.forEach((review: any) => {
+      const objectId = new ObjectId(req.params.reviewId);
+      if (review._id.toString() === objectId.toString()) {
+        review.likes.usersThatLiked.push({
+          user: req.params.currentUser,
+        });
+        review.likes.amount = review.likes.amount + 1;
+      }
+    });
+    await book.save();
+    res.sendStatus(200);
+  })
+  .get('/book/:bookId/user/:reviewUserId/review/:reviewId/user/:currentUser', async (req, res) => {
+    const book: any = await Book.findById(req.params.bookId).populate({
+      path: 'reviews.likes.usersThatLiked.user',
+    });
+    let foundUser = {};
+    book.reviews.forEach((review: any) => {
+      const objectId = new ObjectId(req.params.reviewId);
+      console.log(objectId);
+      if (review._id.toString() === objectId.toString()) {
+        console.log(1234);
+        foundUser = review.likes.usersThatLiked.find((user:any, i:number) => {
+          console.log(user);
+          if (user.user._id.toString() === req.params.currentUser) {
+            return true;
+          }
+          return false;
+        });
+        console.log(foundUser, 12345);
+      }
+    });
+    res.json(foundUser);
+  })
+  .delete('/book/:bookId/user/:reviewUserId/review/:reviewId/user/:currentUser', async (req, res) => {
+    const book: any = await Book.findById(req.params.bookId).populate({
+      path: 'reviews.likes.usersThatLiked.user',
+    });
+    let newUsersThatLiked = [];
+    book.reviews.forEach((review: any) => {
+      const objectId = new ObjectId(req.params.reviewId);
+      console.log(objectId);
+      if (review._id.toString() === objectId.toString()) {
+        console.log(1234);
+        newUsersThatLiked = review.likes.usersThatLiked.filter((user:any, i:number) => user.user._id.toString() !== req.params.currentUser);
+        review.likes.usersThatLiked = [...newUsersThatLiked];
+        review.likes.amount = review.likes.amount - 1;
+      }
+    });
     await book.save();
     res.sendStatus(200);
   });
