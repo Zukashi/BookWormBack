@@ -208,9 +208,14 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
       rating: req.body.rating,
       status: req.body.status,
       spoilers: req.body.spoilers,
+      comments: req.body.comments,
+      likes: {
+        usersThatLiked: [],
+        amount: 0,
+      },
     });
     await book.save();
-    res.status(201).json(book);
+    res.json(book).status(201);
   })
   .put('/:userId/book/:bookId', async (req, res) => {
     const book = await Book.findById(req.params.bookId)
@@ -230,8 +235,13 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
       status: req.body.status,
       spoilers: req.body.spoilers,
       date: Date.now(),
+      comments: [],
     });
     book.save();
 
     res.sendStatus(201);
+  })
+  .get('/:userId/books', async (req, res) => {
+    const user:any = await User.findById(req.params.userId);
+    res.json(user.shelves).status(200);
   });
