@@ -51,6 +51,16 @@ export const bookSchema = new mongoose.Schema({
       type: Date,
       default: Date.now(),
     },
+    likes: {
+      usersThatLiked: [{
+        user: {
+          type: mongoose.SchemaTypes.ObjectId,
+          ref: 'User',
+        },
+      }],
+      amount: Number,
+    },
+
     spoilers: Boolean,
     comments: [
       {
