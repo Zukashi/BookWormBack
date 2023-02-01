@@ -36,6 +36,6 @@ app.use('/', searchRouter);
 app.use('/user', userRouter);
 app.use('', bookRouter);
 app.use(handleError);
-app.listen(3001, '0.0.0.0', () => {
+app.listen(3001, 'localhost', () => {
   console.log('Listening on port http://localhost:3000');
 });
