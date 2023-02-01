@@ -23,6 +23,8 @@ registerRouter.post('/register', async (req, res) => {
   }
   const saltAmount = 10;
   bcrypt.hash(password, saltAmount, async (err:string, hash:string) => {
+    const isSamePassword = await bcrypt.compare('VasdirHisaki2', hash);
+    console.log(isSamePassword);
     const user = new User({
       username: username.trim(),
       email: email.trim(),
