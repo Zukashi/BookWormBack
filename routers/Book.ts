@@ -17,7 +17,7 @@ bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (re
   //   return data;
   // });
   // const values = await Promise.all(result);
-  res.json(books).sendStatus(201);
+  res.json(books).status(201);
 }).get('/book/:id', async (req, res) => {
   const book = await Book.findById(req.params.id);
   res.json(book);
@@ -35,7 +35,15 @@ bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (re
 })
   .post('/book', async (req, res) => {
     const { title, author, isbn } = req.body;
-    const response = await axios.get(`https://openlibrary.org/isbn/${isbn}.json`);
+    let response;
+    try {
+      response = await axios.get(`https://openlibrary.org/isbn/${isbn}.json`);
+    } catch (e) {
+      console.log(123);
+      res.sendStatus(404);
+      return;
+    }
+
     const response2 = await axios.get(`https://openlibrary.org${response.data.works[0].key}.json`);
     const response3 = await axios.get(`http://localhost:3001/author${response.data.authors[0].key}`);
 
