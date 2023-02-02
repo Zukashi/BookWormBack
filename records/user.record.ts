@@ -1,5 +1,5 @@
 import { Types } from 'mongoose';
-import { Response } from 'express';
+import { Response, Request } from 'express';
 import { BookEntity, NewUserEntity, UserEntity } from '../types';
 import { User } from '../Schemas/User';
 import { ValidationError } from '../utils/errors';
@@ -80,8 +80,9 @@ export class UserRecord implements UserEntity {
     return user;
   }
 
-  async updateUser(newUser:UserEntity):Promise<void> {
+  async updateUser(newUser:UserEntity, res:Response):Promise<void> {
     const oldUser = User.findById(this._id);
+    if (!oldUser) { res.status(500); throw new Error('We are sorry something went wrong'); }
     await User.findByIdAndDelete(this._id);
     const userNew = new User({
       ...oldUser,
@@ -89,5 +90,15 @@ export class UserRecord implements UserEntity {
 
     });
     await userNew.save();
+  }
+
+  static async getSearchedUsers(req:Request, res:Response) {
+    const users: UserRecord[] = await User.find({});
+    const newUsers = users.filter((user) => user.username?.toLowerCase().trim().includes(req.body.value.toLowerCase()) || user.firstName?.toLowerCase().trim().includes(req.body.value) || user.lastName?.toLowerCase().trim().includes(req.body.value));
+    if (!req.body.value) {
+      res.status(200).json(users);
+    } else {
+      res.status(200).json(newUsers);
+    }
   }
 }

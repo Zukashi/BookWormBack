@@ -31,17 +31,10 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
   res.json(user);
 }).put('/admin/:userId', authenticateToken, async (req, res) => {
   const user = new UserRecord(req.body);
-  await user.updateUser(user);
-
+  await user.updateUser(user, res);
   res.end();
 }).post('/search/:value', authenticateToken, async (req, res) => {
-  const users: User[] = await User.find({});
-  const newUsers = users.filter((user) => user.username?.toLowerCase().trim().includes(req.body.value.toLowerCase()) || user.firstName?.toLowerCase().trim().includes(req.body.value) || user.lastName?.toLowerCase().trim().includes(req.body.value));
-  if (!req.body.value) {
-    res.json(users);
-  } else {
-    res.json(newUsers);
-  }
+  await UserRecord.getSearchedUsers(req, res);
 })
   .put('/password', authenticateToken, async (req, res) => {
     const user = await User.findById(`${req.body.id}`);
