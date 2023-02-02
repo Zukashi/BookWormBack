@@ -79,4 +79,15 @@ export class UserRecord implements UserEntity {
     const user:UserEntity = await User.findById(id);
     return user;
   }
+
+  async updateUser(newUser:UserEntity):Promise<void> {
+    const oldUser = User.findById(this._id);
+    await User.findByIdAndDelete(this._id);
+    const userNew = new User({
+      ...oldUser,
+      ...newUser,
+
+    });
+    await userNew.save();
+  }
 }

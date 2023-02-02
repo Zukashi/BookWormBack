@@ -30,16 +30,9 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
   const user = await UserRecord.getUser(req.params.userId);
   res.json(user);
 }).put('/admin/:userId', authenticateToken, async (req, res) => {
-  const form = req.body;
-  const user = await User.findById(req.params.userId);
-  await User.findByIdAndDelete(req.params.userId);
+  const user = new UserRecord(req.body);
+  await user.updateUser(user);
 
-  const newUser = new User({
-    ...user,
-    ...form,
-
-  });
-  await newUser.save();
   res.end();
 }).post('/search/:value', authenticateToken, async (req, res) => {
   const users: User[] = await User.find({});
