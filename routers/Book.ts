@@ -11,7 +11,7 @@ import { BookRecord } from '../records/book.record';
 export const bookRouter = Router();
 
 bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (req, res) => {
-  const books = await Book.find({});
+  const books = await BookRecord.getAllBooks();
   // const result = books.map(async (book) => {
   //   const response = await fetch(`https://openlibrary.org/isbn/${book.isbn}.json`);
   //   const data = await response.json();
@@ -20,19 +20,11 @@ bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (re
   // const values = await Promise.all(result);
   res.json(books).status(201);
 }).get('/book/:id', async (req, res) => {
-  const book = await Book.findById(req.params.id);
+  const book = await BookRecord.getOneBook(req.params.id);
   res.json(book);
 }).post('/bookAdmin/search/:value', async (req, res) => {
-  const books = await Book.find({});
-  const newBooks = books.filter((book:any) => {
-    book.author = book.author?.replace(/[.]/gi, '');
-    return book.title?.toLowerCase().includes(req.body.value.toLowerCase()) || book.author?.toLowerCase().includes(req.body.value.toLowerCase()) || book.isbn?.includes(req.body.value.toLowerCase());
-  });
-  if (!req.body.value) {
-    res.json(books);
-  } else {
-    res.json(newBooks);
-  }
+  const searchedBooks = await BookRecord.filterBooks(req.body.value);
+  res.json(searchedBooks);
 })
   .post('/book', async (req, res) => {
     const { title, author, isbn } = req.body;
