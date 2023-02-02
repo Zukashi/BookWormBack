@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { User } from '../Schemas/User';
 import { Book } from '../Schemas/Book';
 import { authenticateToken, authRole, setUser } from './Login';
+import { BookRecord } from '../records/book.record';
 
 export const bookRouter = Router();
 
@@ -35,42 +36,8 @@ bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (re
 })
   .post('/book', async (req, res) => {
     const { title, author, isbn } = req.body;
-    let response;
-    try {
-      response = await axios.get(`https://openlibrary.org/isbn/${isbn}.json`);
-    } catch (e) {
-      console.log(123);
-      res.sendStatus(404);
-      return;
-    }
-
-    const response2 = await axios.get(`https://openlibrary.org${response.data.works[0].key}.json`);
-    const response3 = await axios.get(`http://localhost:3001/author${response.data.authors[0].key}`);
-
-    let description;
-    if (response2.data.description?.value) {
-      description = response2.data.description.value;
-    } else if (typeof response2.data.description === 'string') {
-      description = response2.data.description;
-    } else {
-      description = '';
-    }
-    const book = new Book({
-
-      title: response.data.title,
-      description,
-      subjects: response2.data.subjects,
-      subject_people: response2.data.subject_people,
-      author: response3.data.personal_name ? response3.data.personal_name : response3.data.name,
-      isbn,
-      ...response.data,
-      authors: response.data.authors,
-      rating: 0,
-      ratingTypeAmount: Array(5).fill(0),
-      amountOfRates: 0,
-      sumOfRates: 0,
-    });
-    await book.save();
+    const book = new BookRecord(req.body);
+    await book.insert(res);
     res.end();
   })
   .put('/book/:bookId', async (req, res) => {
