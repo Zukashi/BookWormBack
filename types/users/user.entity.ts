@@ -1,7 +1,11 @@
+import { Types } from 'mongoose';
 import { BookEntity } from '../book/book-entity';
 
+export interface NewUserEntity extends Omit<UserEntity, 'id'> {
+    id?: string;
+}
 export interface UserEntity {
-    _id:string,
+    _id:Types.ObjectId,
     username:string,
     email:string,
     password:string,
