@@ -3,6 +3,8 @@ import { Response, Request } from 'express';
 import { BookEntity, NewUserEntity, UserEntity } from '../types';
 import { User } from '../Schemas/User';
 import { ValidationError } from '../utils/errors';
+import { Book } from '../Schemas/Book';
+import { RequestEntityWithUser } from '../types/request';
 
 const bcrypt = require('bcrypt');
 
@@ -90,6 +92,7 @@ export class UserRecord implements UserEntity {
 
     });
     await userNew.save();
+    res.sendStatus(204);
   }
 
   static async getSearchedUsers(req:Request, res:Response) {
@@ -118,5 +121,17 @@ export class UserRecord implements UserEntity {
     } else {
       res.status(400).json('Current Password Invalid');
     }
+  }
+
+  async deleteBookFromFavorites(req:RequestEntityWithUser, res:Response) {
+    const book:BookEntity = await Book.findById(req.params.bookId);
+    const user = await User.findById(this._id);
+    const doc:BookEntity = await User.findOne({ favorites: book, id: this._id }).populate('favorites');
+
+    const filtered:BookEntity[] = doc.favorites.filter((value: BookEntity) => value.isbn !== book.isbn);
+    user.favorites = filtered;
+
+    await user.save();
+    res.sendStatus(204);
   }
 }

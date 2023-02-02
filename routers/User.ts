@@ -4,8 +4,9 @@ import { v4 as uuidv4 } from 'uuid';
 import nodemailer from 'nodemailer';
 import { User } from '../Schemas/User';
 import { Book } from '../Schemas/Book';
-import { authenticateToken } from './Login';
+import { authenticateToken, setUser } from './Login';
 import { UserRecord } from '../records/user.record';
+import { RequestEntityWithUser } from '../types/request';
 
 const bcrypt = require('bcrypt');
 //
@@ -26,60 +27,35 @@ export interface User {
 userRouter.get('/users', authenticateToken, async (req, res) => {
   const users = await UserRecord.getAllUsers();
   res.json(users);
-}).get('/:userId', authenticateToken, async (req, res) => {
-  const user = await UserRecord.getUser(req.params.userId);
-  res.json(user);
+}).get('/:userId', setUser, authenticateToken, async (req:RequestEntityWithUser, res) => {
+  res.json(req.user);
 }).put('/admin/:userId', authenticateToken, async (req, res) => {
   const user = new UserRecord(req.body);
   await user.updateUser(user, res);
-  res.end();
 }).post('/search/:value', authenticateToken, async (req, res) => {
   await UserRecord.getSearchedUsers(req, res);
 })
   .put('/password', authenticateToken, async (req, res) => {
     await UserRecord.updatePassword(req, res);
   })
-  .put('/:userId/avatar', authenticateToken, async (req, res) => {
-    const user = await User.findById(req.params.userId);
+  .put('/:userId/avatar', setUser, authenticateToken, async (req:RequestEntityWithUser, res) => {
+    const user = await new UserRecord(req.user);
     user.base64Avatar = req.body.preview;
-
-    await user.save();
-    res.end();
+    await user.updateUser(user, res);
   })
-  .put('/:userId', authenticateToken, async (req, res) => {
-    const { userId } = req.params;
-    const user = await User.findById(userId);
-    const {
-      firstName, gender, lastName, city, age, country, dateOfBirth, username,
-    } = req.body;
-    user.firstName = firstName;
-    user.gender = gender;
-    user.lastName = lastName;
-    user.city = city;
-    user.age = age;
-    user.country = country;
-    user.dateOfBirth = dateOfBirth;
-    user.username = username;
-    await user.save();
-    res.end();
+  .put('/:userId', setUser, authenticateToken, async (req:RequestEntityWithUser, res) => {
+    const user = new UserRecord(req.user);
+    await user.updateUser(req.body, res);
   })
   .put('/:userId/favorite', authenticateToken, async (req, res) => {
     const user = await User.findById(req.params.userId);
     user.favorites.push(req.body);
     await user.save();
-    res.end();
+    res.sendStatus(201);
   })
-  .delete('/:userId/book/:bookId/favorite', authenticateToken, async (req, res) => {
-    console.log(1234);
-    const book = await Book.findById(req.params.bookId);
-    const user = await User.findById(req.params.userId);
-    const doc = await User.find({ favorites: book, id: req.params.userId }).populate('favorites');
-
-    const filtered = doc[0].favorites.filter((value: any) => value.isbn !== book.isbn);
-    user.favorites = filtered;
-
-    await user.save();
-    res.end();
+  .delete('/:userId/book/:bookId/favorite', authenticateToken, async (req:RequestEntityWithUser, res) => {
+    const user = new UserRecord(req.user);
+    await user.deleteBookFromFavorites(req, res);
   })
   // .post('/:userId/sms', authenticateToken, async (req, res) => {
   //   const user = await User.findById(req.params.userId);
