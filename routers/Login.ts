@@ -18,7 +18,6 @@ export async function setUser(req:any, res:any, next:any) {
 }
 export function authRole(role:string) {
   return async (req:any, res:any, next:any) => {
-    console.log(req.user.role);
     if (req.user.role === 'admin') {
       next();
       return;
@@ -32,11 +31,10 @@ export function authRole(role:string) {
 }
 loginRouter.post('/auth/refreshToken', setUser, async (req, res) => {
   const { refreshToken } = req.cookies;
-  console.log(refreshToken);
   const user2 = await User.findOne({ refreshTokenId: refreshToken });
   if (refreshToken === null) return res.sendStatus(403).redirect('/');
   if (!user2) return res.sendStatus(403);
-
+  console.log(process.env.TWILIO_ACCOUNT_SID, 39);
   jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err:any, user:any) => {
     if (err) return res.sendStatus(403);
 
@@ -59,11 +57,9 @@ loginRouter.post('/login', async (req, res) => {
   const user = await User.findOne({ username });
   if (!user) return res.sendStatus(401);
   const hash = user.password;
-  console.log(typeof hash);
   const isSamePassword = await bcrypt.compare('VasdirHisaki2', hash);
-  console.log(isSamePassword);
+
   if (isSamePassword) {
-    console.log(999);
     const userJWT = { id: user._id };
     const accessToken = jwt.sign(userJWT, process.env.ACCESS_TOKEN_SECRET, {
       expiresIn: '15m',

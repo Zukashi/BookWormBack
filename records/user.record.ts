@@ -7,6 +7,7 @@ import { User } from '../Schemas/User';
 import { ValidationError } from '../utils/errors';
 import { Book } from '../Schemas/Book';
 import { RequestEntityWithUser } from '../types/request';
+import { client } from '../index';
 
 const bcrypt = require('bcrypt');
 
@@ -257,5 +258,12 @@ export class UserRecord implements UserEntity {
   static async getAllBooksFromShelves(req:Request, res:Response) {
     const user = await User.findById(req.params.userId);
     res.json(user.shelves).status(200);
+  }
+
+  static async sendSmsForPinForPasswordReset(req:Request, res:Response) {
+    client.messages
+      .create({ body: 'Hello from Twilio', from: '+16506632010', to: '+48513031628' })
+      .then((message: any) => console.log(message.sid));
+    res.end();
   }
 }

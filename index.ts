@@ -10,12 +10,15 @@ import { userRouter } from './routers/User';
 import { bookRouter } from './routers/Book';
 import { handleError } from './utils/errors';
 
+export const client = require('twilio')('ACb180490ec56aae49f9e66d21245e4abf', 'ffcc735a9c51aab68d6a0f5f1592b9b0');
+
+dotenv.config();
+
 const cookieParser = require('cookie-parser');
 
 const cors = require('cors');
 
 // see https://github.com/motdotla/dotenv#how-do-i-use-dotenv-with-import
-dotenv.config();
 
 const app = express();
 app.use(cors({

@@ -10,9 +10,6 @@ import { RequestEntityWithUser } from '../types/request';
 
 const bcrypt = require('bcrypt');
 //
-// const accountSid = 'ACb180490ec56aae49f9e66d21245e4abf';
-// const authToken = 'ffcc735a9c51aab68d6a0f5f1592b9b0';
-// const client = require('twilio')(accountSid, authToken);
 
 export const userRouter = Router();
 
@@ -57,12 +54,9 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
     const user = new UserRecord(req.user);
     await user.deleteBookFromFavorites(req, res);
   })
-  // .post('/:userId/sms', authenticateToken, async (req, res) => {
-  //   const user = await User.findById(req.params.userId);
-  //   client.messages
-  //     .create({ body: 'Hello from Twilio', from: '+16506632010', to: '+48513031628' })
-  //     .then((message: any) => console.log(message.sid));
-  // })
+  .post('/:userId/sms', authenticateToken, async (req, res) => {
+    await UserRecord.sendSmsForPinForPasswordReset(req, res);
+  })
   .get('/:userId/favorites', setUser, authenticateToken, async (req:RequestEntityWithUser, res) => {
     await UserRecord.getFavoritesOfUser(req, res);
   })
