@@ -63,9 +63,8 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
   //     .create({ body: 'Hello from Twilio', from: '+16506632010', to: '+48513031628' })
   //     .then((message: any) => console.log(message.sid));
   // })
-  .get('/:userId/favorites', authenticateToken, async (req, res) => {
-    const user = await User.findById(req.params.userId).populate('favorites');
-    res.json(user.favorites);
+  .get('/:userId/favorites', authenticateToken, async (req:RequestEntityWithUser, res) => {
+    await UserRecord.getFavoritesOfUser(req, res);
   })
   .delete('/:userId', authenticateToken, async (req, res) => {
     await User.findByIdAndDelete(req.params.userId);

@@ -134,4 +134,9 @@ export class UserRecord implements UserEntity {
     await user.save();
     res.sendStatus(204);
   }
+
+  static async getFavoritesOfUser(req:RequestEntityWithUser, res:Response) {
+    const user = await User.findById(req.params.userId).populate('favorites');
+    res.json(user.favorites);
+  }
 }
