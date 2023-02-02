@@ -5,6 +5,7 @@ import nodemailer from 'nodemailer';
 import { User } from '../Schemas/User';
 import { Book } from '../Schemas/Book';
 import { authenticateToken } from './Login';
+import { UserRecord } from '../records/user.record';
 
 const bcrypt = require('bcrypt');
 //
@@ -23,10 +24,10 @@ export interface User {
     city: string,
 }
 userRouter.get('/users', authenticateToken, async (req, res) => {
-  const users = await User.find({});
+  const users = await UserRecord.getAllUsers();
   res.json(users);
 }).get('/:userId', authenticateToken, async (req, res) => {
-  const user = await User.findById(req.params.userId);
+  const user = await UserRecord.getUser(req.params.userId);
   res.json(user);
 }).put('/admin/:userId', authenticateToken, async (req, res) => {
   const form = req.body;

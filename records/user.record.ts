@@ -69,4 +69,14 @@ export class UserRecord implements UserEntity {
       await user.save();
     });
   }
+
+  static async getAllUsers():Promise<UserEntity[]> {
+    const users:UserEntity[] = await User.find({});
+    return users;
+  }
+
+  static async getUser(id:string):Promise<UserEntity> {
+    const user:UserEntity = await User.findById(id);
+    return user;
+  }
 }
