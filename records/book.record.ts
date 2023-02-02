@@ -20,11 +20,11 @@ export class BookRecord implements BookEntity {
     this.title = obj.title;
   }
 
-  private async insert(res:any):Promise<void> {
-    if (this._id) {
-      this._id = new mongoose.Types.ObjectId();
-      throw new Error('Book with this id already inserted');
+  async insert(res:any):Promise<void> {
+    if (Book.findOne({ isbn: this.isbn })) {
+      res.status(409).json({ status: false, result: 'Isbn is already in the database' });
     } else {
+      this._id = new mongoose.Types.ObjectId();
       let response;
       try {
         response = await axios.get(`https://openlibrary.org/isbn/${this.isbn}.json`);
@@ -62,7 +62,27 @@ export class BookRecord implements BookEntity {
       await book.save();
     }
   }
-}
 
-const newBook:NewBookEntity = new BookRecord('9781975345631');
-console.log(newBook.isbn);
+  static async getAllBooks():Promise<BookEntity[]> {
+    const books = await Book.find({});
+    return books;
+  }
+
+  static async getOneBook(paramsId:string):Promise<BookEntity> {
+    const book:BookEntity = await Book.findById(paramsId);
+    return book;
+  }
+
+  static async filterBooks(value:string):Promise<BookEntity[]> {
+    const books = await BookRecord.getAllBooks();
+    console.log(value);
+    if (value) {
+      const newBooks = books.filter((book:BookEntity) => {
+        book.author = book.author?.replace(/[.]/gi, '');
+        return book.title?.toLowerCase().includes(value.toLowerCase()) || book.author?.toLowerCase().includes(value.toLowerCase()) || book.isbn?.includes(value.toLowerCase());
+      });
+      return newBooks;
+    }
+    return books;
+  }
+}
