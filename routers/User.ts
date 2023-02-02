@@ -68,7 +68,7 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
   })
   .delete('/:userId', authenticateToken, async (req, res) => {
     await User.findByIdAndDelete(req.params.userId);
-    res.end();
+    res.sendStatus(204);
   })
   .delete('/:userId/logout', async (req, res) => {
     res.clearCookie('accessToken').clearCookie('refreshToken').sendStatus(200);
