@@ -101,4 +101,22 @@ export class UserRecord implements UserEntity {
       res.status(200).json(newUsers);
     }
   }
+
+  static async updatePassword(req:Request, res:Response) {
+    const user = await User.findById(`${req.body.id}`);
+    const isSamePassword = await bcrypt.compare(req.body.currentPassword, user.password);
+    if (isSamePassword) {
+      if (req.body.newPassword === req.body.verifyPassword) {
+        bcrypt.hash(req.body.verifyPassword, 10, async (err: string, hash: string) => {
+          user.password = hash;
+          await user.save();
+          res.end().status(200);
+        });
+      } else {
+        res.status(400).json("Passwords don't match");
+      }
+    } else {
+      res.status(400).json('Current Password Invalid');
+    }
+  }
 }

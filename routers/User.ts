@@ -37,21 +37,7 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
   await UserRecord.getSearchedUsers(req, res);
 })
   .put('/password', authenticateToken, async (req, res) => {
-    const user = await User.findById(`${req.body.id}`);
-    const isSamePassword = await bcrypt.compare(req.body.currentPassword, user.password);
-    if (isSamePassword) {
-      if (req.body.newPassword === req.body.verifyPassword) {
-        bcrypt.hash(req.body.verifyPassword, 10, async (err: string, hash: string) => {
-          user.password = hash;
-          await user.save();
-          res.end().status(200);
-        });
-      } else {
-        res.json("Passwords don't match");
-      }
-    } else {
-      res.json('Current Password Invalid');
-    }
+    await UserRecord.updatePassword(req, res);
   })
   .put('/:userId/avatar', authenticateToken, async (req, res) => {
     const user = await User.findById(req.params.userId);
