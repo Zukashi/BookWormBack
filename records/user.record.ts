@@ -253,4 +253,9 @@ export class UserRecord implements UserEntity {
 
     res.sendStatus(201);
   }
+
+  static async getAllBooksFromShelves(req:Request, res:Response) {
+    const user = await User.findById(req.params.userId);
+    res.json(user.shelves).status(200);
+  }
 }

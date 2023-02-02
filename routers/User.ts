@@ -97,6 +97,5 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
     await UserRecord.updateBookReview(req, res);
   })
   .get('/:userId/books', async (req, res) => {
-    const user:any = await User.findById(req.params.userId);
-    res.json(user.shelves).status(200);
+    await UserRecord.getAllBooksFromShelves(req, res);
   });
