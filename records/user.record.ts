@@ -41,10 +41,12 @@ export class UserRecord implements UserEntity {
     Object.assign(this, obj);
   }
 
-  async insert(res:Response):Promise<void | Response> {
+  async insert(res:Response):Promise<void> {
     const saltAmount = 10;
 
-    if (User.findOne({ email: this.email })) return res.status(400).json({ status: 'false', result: 'Email is taken' });
+    if (await User.findOne({ email: this.email })) res.status(400).json({ status: 'false', result: 'Email is taken', type: 'email' });
+    if (await User.findOne({ username: this.username })) res.status(400).json({ status: 'false', result: 'Username is taken', type: 'username' });
+
     if (this._id) {
       return;
     }

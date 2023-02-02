@@ -1,10 +1,11 @@
 import axios from 'axios';
+import { Response } from 'express';
 import mongoose, { Types } from 'mongoose';
 import { BookEntity, NewBookEntity, UserEntity } from '../types';
 import { Book } from '../Schemas/Book';
 
 export class BookRecord implements BookEntity {
-  private isbn: string;
+  private readonly isbn: string;
 
   private _id:Types.ObjectId;
 
@@ -20,9 +21,10 @@ export class BookRecord implements BookEntity {
     this.title = obj.title;
   }
 
-  async insert(res:any):Promise<void> {
-    if (Book.findOne({ isbn: this.isbn })) {
-      res.status(409).json({ status: false, result: 'Isbn is already in the database' });
+  async insert(res:Response):Promise<void> {
+    if (await Book.findOne({ isbn: this.isbn })) {
+      res.status(409);
+      throw new Error('Book is already in the database');
     } else {
       this._id = new mongoose.Types.ObjectId();
       let response;
@@ -64,7 +66,7 @@ export class BookRecord implements BookEntity {
   }
 
   static async getAllBooks():Promise<BookEntity[]> {
-    const books = await Book.find({});
+    const books:BookEntity[] = await Book.find({});
     return books;
   }
 
@@ -75,7 +77,6 @@ export class BookRecord implements BookEntity {
 
   static async filterBooks(value:string):Promise<BookEntity[]> {
     const books = await BookRecord.getAllBooks();
-    console.log(value);
     if (value) {
       const newBooks = books.filter((book:BookEntity) => {
         book.author = book.author?.replace(/[.]/gi, '');
