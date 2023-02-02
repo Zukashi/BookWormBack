@@ -12,7 +12,7 @@ export class BookRecord implements BookEntity {
 
   private title?:string;
 
-  constructor(public obj:NewBookEntity) {
+  constructor(obj:NewBookEntity) {
     this._id = obj._id;
 
     this.isbn = obj.isbn;
@@ -20,9 +20,7 @@ export class BookRecord implements BookEntity {
     this.title = obj.title;
   }
 
-  async insert(res:any):Promise<void> {
-    // console.log(res);
-    console.log(this._id);
+  private async insert(res:any):Promise<void> {
     if (this._id) {
       this._id = new mongoose.Types.ObjectId();
       throw new Error('Book with this id already inserted');
@@ -31,7 +29,6 @@ export class BookRecord implements BookEntity {
       try {
         response = await axios.get(`https://openlibrary.org/isbn/${this.isbn}.json`);
       } catch (e) {
-        console.log(123);
         res.sendStatus(404);
         return;
       }
@@ -67,5 +64,5 @@ export class BookRecord implements BookEntity {
   }
 }
 
-const newBook = new BookRecord('9781975345631');
-console.log(newBook);
+const newBook:NewBookEntity = new BookRecord('9781975345631');
+console.log(newBook.isbn);
