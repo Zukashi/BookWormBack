@@ -1,5 +1,7 @@
 import { Types } from 'mongoose';
 import { Response, Request } from 'express';
+import { v4 as uuidv4 } from 'uuid';
+import nodemailer from 'nodemailer';
 import { BookEntity, NewUserEntity, UserEntity } from '../types';
 import { User } from '../Schemas/User';
 import { ValidationError } from '../utils/errors';
@@ -138,5 +140,32 @@ export class UserRecord implements UserEntity {
   static async getFavoritesOfUser(req:RequestEntityWithUser, res:Response) {
     const user = await User.findById(req.params.userId).populate('favorites');
     res.json(user.favorites);
+  }
+
+  static async resetPassword(req:Request, res:Response) {
+    const code = uuidv4();
+    const details = {
+      from: 'testBookWorm@gmail.com',
+      to: `${req.body.email}`,
+      subject: 'testing',
+      text: 'testing nodemail',
+      html: `${code}`,
+    };
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: 'testBookWorm@gmail.com',
+        pass: 'tyjbqihrcxkagpwc',
+      },
+    });
+
+    transporter.sendMail(details, (err) => {
+      if (err) {
+        console.log('it has an error', err);
+      } else {
+        console.log('works');
+        res.json({ code });
+      }
+    });
   }
 }

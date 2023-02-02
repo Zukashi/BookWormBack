@@ -53,7 +53,7 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
     await user.save();
     res.sendStatus(201);
   })
-  .delete('/:userId/book/:bookId/favorite', authenticateToken, async (req:RequestEntityWithUser, res) => {
+  .delete('/:userId/book/:bookId/favorite', setUser, authenticateToken, async (req:RequestEntityWithUser, res) => {
     const user = new UserRecord(req.user);
     await user.deleteBookFromFavorites(req, res);
   })
@@ -63,7 +63,7 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
   //     .create({ body: 'Hello from Twilio', from: '+16506632010', to: '+48513031628' })
   //     .then((message: any) => console.log(message.sid));
   // })
-  .get('/:userId/favorites', authenticateToken, async (req:RequestEntityWithUser, res) => {
+  .get('/:userId/favorites', setUser, authenticateToken, async (req:RequestEntityWithUser, res) => {
     await UserRecord.getFavoritesOfUser(req, res);
   })
   .delete('/:userId', authenticateToken, async (req, res) => {
@@ -74,31 +74,7 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
     res.clearCookie('accessToken').clearCookie('refreshToken').sendStatus(200);
   })
   .post('/reset-password', async (req, res) => {
-    console.log(req.body);
-    const code = uuidv4();
-    const details = {
-      from: 'testBookWorm@gmail.com',
-      to: `${req.body.email}`,
-      subject: 'testing',
-      text: 'testing nodemail',
-      html: `${code}`,
-    };
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: 'testBookWorm@gmail.com',
-        pass: 'tyjbqihrcxkagpwc',
-      },
-    });
-
-    transporter.sendMail(details, (err) => {
-      if (err) {
-        console.log('it has an error', err);
-      } else {
-        console.log('works');
-        res.json({ code });
-      }
-    });
+    await UserRecord.resetPassword(req, res);
   })
   .put('/reset-password/confirm', async (req, res) => {
     const { email } = req.body;
