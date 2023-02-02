@@ -178,4 +178,30 @@ export class UserRecord implements UserEntity {
       res.sendStatus(204);
     });
   }
+
+  static async getReview(req:Request, res:Response) {
+    const booksPopulated = await Book.findById(req.params.bookId)
+      .populate({
+        path: 'reviews.user',
+      });
+    let reviewFound;
+
+    booksPopulated.reviews.forEach((review) => {
+      if (review.user.id === req.params.userId) {
+        reviewFound = {
+          userId: review.user.id,
+          description: review.description,
+          rating: review.rating,
+          status: review.status,
+          date: review.date,
+          spoilers: review.spoilers,
+        };
+      }
+    });
+    if (!reviewFound) {
+      res.sendStatus(404).end();
+    } else {
+      res.status(200).json(reviewFound);
+    }
+  }
 }

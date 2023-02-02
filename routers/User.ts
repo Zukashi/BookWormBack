@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Request, Router } from 'express';
 import { ObjectId } from 'mongodb';
 import { v4 as uuidv4 } from 'uuid';
 import nodemailer from 'nodemailer';
@@ -87,30 +87,8 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
   .put('/:userId/newPassword', async (req, res) => {
     await UserRecord.newPassword(req, res);
   })
-  .get('/:userId/book/:bookId', async (req, res) => {
-    const booksPopulated = await Book.findById(req.params.bookId)
-      .populate({
-        path: 'reviews.user',
-      });
-    let reviewFound;
-
-    booksPopulated.reviews.forEach((review) => {
-      if (review.user.id === req.params.userId) {
-        reviewFound = {
-          userId: review.user.id,
-          description: review.description,
-          rating: review.rating,
-          status: review.status,
-          date: review.date,
-          spoilers: review.spoilers,
-        };
-      }
-    });
-    if (!reviewFound) {
-      res.sendStatus(404).end();
-    } else {
-      res.status(200).json(reviewFound);
-    }
+  .get('/:userId/book/:bookId', setUser, async (req:Request, res) => {
+    await UserRecord.getReview(req, res);
   })
   .post('/:userId/book/:bookId', async (req, res) => {
     const book = await Book.findById(req.params.bookId)
