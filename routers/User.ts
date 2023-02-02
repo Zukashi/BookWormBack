@@ -94,28 +94,7 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
     await UserRecord.addBookReview(req, res);
   })
   .put('/:userId/book/:bookId', async (req, res) => {
-    const book = await Book.findById(req.params.bookId)
-      .populate({
-        path: 'reviews.user',
-      });
-    book.reviews.forEach((review, i) => {
-      if (review.user.id === req.params.userId) {
-        book.reviews.splice(i, 1);
-      }
-    });
-
-    book.reviews.push({
-      user: req.params.userId,
-      description: req.body.description,
-      rating: req.body.rating,
-      status: req.body.status,
-      spoilers: req.body.spoilers,
-      date: Date.now(),
-      comments: [],
-    });
-    book.save();
-
-    res.sendStatus(201);
+    await UserRecord.updateBookReview(req, res);
   })
   .get('/:userId/books', async (req, res) => {
     const user:any = await User.findById(req.params.userId);

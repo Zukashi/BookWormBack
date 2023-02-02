@@ -228,4 +228,29 @@ export class UserRecord implements UserEntity {
     await book.save();
     res.json(book).status(201);
   }
+
+  static async updateBookReview(req:Request, res:Response) {
+    const book = await Book.findById(req.params.bookId)
+      .populate({
+        path: 'reviews.user',
+      });
+    book.reviews.forEach((review, i) => {
+      if (review.user.id === req.params.userId) {
+        book.reviews.splice(i, 1);
+      }
+    });
+
+    book.reviews.push({
+      user: req.params.userId,
+      description: req.body.description,
+      rating: req.body.rating,
+      status: req.body.status,
+      spoilers: req.body.spoilers,
+      date: Date.now(),
+      comments: [],
+    });
+    book.save();
+
+    res.sendStatus(201);
+  }
 }
