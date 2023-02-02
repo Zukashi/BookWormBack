@@ -168,4 +168,14 @@ export class UserRecord implements UserEntity {
       }
     });
   }
+
+  static async newPassword(req:Request, res:Response) {
+    const saltAmount = 10;
+    const user = await User.findById(req.params.userId);
+    bcrypt.hash(req.body.newPassword, saltAmount, async (err:string, hash:string) => {
+      user.password = hash;
+      user.save();
+      res.sendStatus(204);
+    });
+  }
 }

@@ -78,20 +78,14 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
   })
   .put('/reset-password/confirm', async (req, res) => {
     const { email } = req.body;
+    if (!email) return res.sendStatus(404);
     const user = await User.findOne({ email });
-    console.log(user);
     user.password = '';
     user.save();
     res.json(user);
   })
   .put('/:userId/newPassword', async (req, res) => {
-    const saltAmount = 10;
-    const user = await User.findById(req.params.userId);
-    bcrypt.hash(req.body.newPassword, saltAmount, async (err:string, hash:string) => {
-      user.password = hash;
-      user.save();
-      res.end();
-    });
+    await UserRecord.newPassword(req, res);
   })
   .get('/:userId/book/:bookId', async (req, res) => {
     const booksPopulated = await Book.findById(req.params.bookId)
