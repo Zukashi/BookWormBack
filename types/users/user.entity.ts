@@ -15,13 +15,14 @@ export interface UserEntity {
     lastName?:string,
     city?:string,
     age:number,
+    country:string,
     dateOfBirth?:string,
     favorites?: BookEntity[],
     role:string,
     shelves?:{
-        read:string[]
-        wantToRead:string[]
-        currentlyReading:string[]
+        read:Types.ObjectId[]
+        wantToRead:Types.ObjectId[]
+        currentlyReading:Types.ObjectId[]
     },
     refreshTokenId?:string,
 }

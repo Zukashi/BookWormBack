@@ -1,8 +1,9 @@
 import mongoose from 'mongoose';
 import { ObjectId } from 'mongodb';
 import { Book } from './Book';
+import { UserEntity } from '../types';
 
-const userSchema = new mongoose.Schema({
+const userSchema = new mongoose.Schema<UserEntity>({
   username: {
     type: String,
     unique: true,

@@ -3,6 +3,7 @@ import axios from 'axios';
 import * as mongoose from 'mongoose';
 import { ObjectId } from 'mongodb';
 import { v4 as uuidv4 } from 'uuid';
+import { HydratedDocument } from 'mongoose';
 import { User } from '../Schemas/User';
 import { Book } from '../Schemas/Book';
 import { authenticateToken, authRole, setUser } from './Login';
@@ -12,7 +13,7 @@ import { BookEntity } from '../types';
 export const bookRouter = Router();
 
 bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (req, res) => {
-  const books = await BookRecord.getAllBooks();
+  const books:HydratedDocument<BookEntity>[] = await BookRecord.getAllBooks();
   // const result = books.map(async (book) => {
   //   const response = await fetch(`https://openlibrary.org/isbn/${book.isbn}.json`);
   //   const data = await response.json();
@@ -21,26 +22,26 @@ bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (re
   // const values = await Promise.all(result);
   res.json(books).status(201);
 }).get('/book/:id', async (req, res) => {
-  const book = await BookRecord.getOneBook(req.params.id);
+  const book:HydratedDocument<BookEntity> = await BookRecord.getOneBook(req.params.id);
   res.json(book);
 }).post('/bookAdmin/search/:value', async (req, res) => {
   const searchedBooks = await BookRecord.filterBooks(req.body.value);
   res.json(searchedBooks);
 })
   .post('/book', async (req, res) => {
-    const book = new BookRecord(req.body);
+    const book:HydratedDocument<BookEntity> = new BookRecord(req.body);
     await book.insert(res);
     res.sendStatus(201);
   })
   .put('/book/:bookId', async (req, res) => {
-    const book = new BookRecord(req.body);
+    const book:HydratedDocument<BookEntity> = new BookRecord(req.body);
     await book.updateBook(req.body, req);
     res.sendStatus(200);
   })
   .delete('/book/:bookId', async (req, res) => {
     const { bookId } = req.params;
     await Book.deleteOne({ _id: bookId });
-    res.end();
+    res.sendStatus(204);
   })
   .post('/book/:bookId/:rating', async (req, res) => {
     const book:any = await Book.findById(req.params.bookId);

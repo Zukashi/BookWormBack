@@ -1,7 +1,8 @@
 import mongoose from 'mongoose';
 import { User } from './User';
+import { BookEntity } from '../types';
 
-export const bookSchema = new mongoose.Schema({
+export const bookSchema = new mongoose.Schema<BookEntity>({
   title: {
     type: String,
     required: true,
