@@ -30,12 +30,12 @@ bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (re
   res.json(searchedBooks);
 })
   .post('/book', async (req, res) => {
-    const book:HydratedDocument<BookEntity> = new BookRecord(req.body);
+    const book = new BookRecord(req.body);
     await book.insert(res);
     res.sendStatus(201);
   })
   .put('/book/:bookId', async (req, res) => {
-    const book:HydratedDocument<BookEntity> = new BookRecord(req.body);
+    const book = new BookRecord(req.body);
     await book.updateBook(req.body, req);
     res.sendStatus(200);
   })
@@ -53,19 +53,7 @@ bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (re
     }
   })
   .put('/book/:bookId/:rating', async (req, res) => {
-    const book:HydratedDocument<BookEntity> = await Book.findById(req.params.bookId);
-
-    await Book.findByIdAndDelete(req.params.bookId);
-    const obj:any = book.toObject();
-    obj.ratingTypeAmount[(parseInt(req.params.rating, 10)) - 1] += 1;
-
-    const newBook = new Book({
-      ...obj,
-      sumOfRates: obj.sumOfRates + parseInt(req.params.rating, 10),
-      rating: (obj.sumOfRates + parseInt(req.params.rating, 10)) / (obj.amountOfRates + 1),
-      amountOfRates: obj.amountOfRates + 1,
-    });
-    await newBook.save();
+    const newBook = await BookRecord.updateRatingOfBook(req, res);
     res.json(newBook);
   })
   .delete('/book/:bookId/:previousRating', async (req, res) => {

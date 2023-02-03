@@ -118,4 +118,25 @@ export class BookRecord implements BookEntity {
       throw new Error('Rating add failed');
     }
   }
+
+  static async updateRatingOfBook(req:Request, res:Response):Promise<HydratedDocument<BookEntity>> {
+    try {
+      const book:BookEntity = await Book.findById(req.params.bookId);
+
+      await Book.findByIdAndDelete(req.params.bookId);
+      const obj:any = book.toObject();
+      obj.ratingTypeAmount[(parseInt(req.params.rating, 10)) - 1] += 1;
+
+      const newBook:HydratedDocument<BookEntity> = new Book({
+        ...obj,
+        sumOfRates: obj.sumOfRates + parseInt(req.params.rating, 10),
+        rating: (obj.sumOfRates + parseInt(req.params.rating, 10)) / (obj.amountOfRates + 1),
+        amountOfRates: obj.amountOfRates + 1,
+      });
+      await newBook.save();
+      return newBook;
+    } catch (e) {
+      res.sendStatus(400);
+    }
+  }
 }

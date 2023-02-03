@@ -1,9 +1,6 @@
 import { Types } from 'mongoose';
 import { BookEntity } from '../book/book-entity';
 
-export interface NewUserEntity extends Omit<UserEntity, 'id'> {
-    id?: string;
-}
 export interface UserEntity {
     id:Types.ObjectId,
     username:string,
@@ -25,4 +22,7 @@ export interface UserEntity {
         currentlyReading:Types.ObjectId[]
     },
     refreshTokenId?:string,
+}
+export interface NewUserEntity extends Omit<UserEntity, 'id'> {
+    id?: string;
 }

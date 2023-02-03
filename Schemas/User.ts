@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import { ObjectId } from 'mongodb';
 import { Book } from './Book';
 import { UserEntity } from '../types';
+import { UserRecord } from '../records/user.record';
 
 const userSchema = new mongoose.Schema<UserEntity>({
   username: {
@@ -36,9 +37,15 @@ const userSchema = new mongoose.Schema<UserEntity>({
       type: mongoose.SchemaTypes.ObjectId,
       ref: 'Book',
     }],
-    wantToRead: [String],
-    currentlyReading: [String],
+    wantToRead: [{
+      type: mongoose.SchemaTypes.ObjectId,
+      ref: 'Book',
+    }],
+    currentlyReading: [{
+      type: mongoose.SchemaTypes.ObjectId,
+      ref: 'Book',
+    }],
   },
 });
 
-export const User = mongoose.model('User', userSchema);
+export const User = mongoose.model<UserEntity>('User', userSchema);

@@ -8,6 +8,7 @@ import { ValidationError } from '../utils/errors';
 import { Book } from '../Schemas/Book';
 import { RequestEntityWithUser } from '../types/request';
 import { client } from '../index';
+import { BookRecord } from './book.record';
 
 const bcrypt = require('bcrypt');
 
@@ -183,7 +184,7 @@ export class UserRecord implements UserEntity {
   }
 
   static async getReview(req:Request, res:Response) {
-    const booksPopulated = await Book.findById(req.params.bookId)
+    const booksPopulated:any = await Book.findById(req.params.bookId)
       .populate({
         path: 'reviews.user',
       });
@@ -209,7 +210,7 @@ export class UserRecord implements UserEntity {
   }
 
   static async addBookReview(req: Request, res: Response) {
-    const book = await Book.findById(req.params.bookId)
+    const book:any = await Book.findById(req.params.bookId)
       .populate({
         path: 'reviews.user',
       });
@@ -236,7 +237,7 @@ export class UserRecord implements UserEntity {
     const book = await Book.findById(req.params.bookId)
       .populate({
         path: 'reviews.user',
-      });
+      })as HydratedDocument<BookEntity>;
     book.reviews.forEach((review:BookEntity, i:number) => {
       if (review.user.id === req.params.userId) {
         book.reviews.splice(i, 1);
