@@ -1,4 +1,4 @@
-import { Types } from 'mongoose';
+import { HydratedDocument, Types } from 'mongoose';
 import { Response, Request } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import nodemailer from 'nodemailer';
@@ -28,6 +28,8 @@ export class UserRecord implements UserEntity {
 
   firstName: string;
 
+  country:string;
+
   gender: string;
 
   lastName: string;
@@ -38,7 +40,7 @@ export class UserRecord implements UserEntity {
 
   role: string;
 
-  shelves: { read: string[]; wantToRead: string[]; currentlyReading: string[] };
+  shelves: { read: Types.ObjectId[]; wantToRead: Types.ObjectId[]; currentlyReading: Types.ObjectId[] };
 
   username: string;
 
@@ -76,7 +78,7 @@ export class UserRecord implements UserEntity {
   }
 
   static async getAllUsers():Promise<UserEntity[]> {
-    const users:UserEntity[] = await User.find({});
+    const users:HydratedDocument<UserEntity>[] = await User.find({});
     return users;
   }
 
@@ -187,7 +189,7 @@ export class UserRecord implements UserEntity {
       });
     let reviewFound;
 
-    booksPopulated.reviews.forEach((review) => {
+    booksPopulated.reviews.forEach((review:BookEntity) => {
       if (review.user.id === req.params.userId) {
         reviewFound = {
           userId: review.user.id,
@@ -235,7 +237,7 @@ export class UserRecord implements UserEntity {
       .populate({
         path: 'reviews.user',
       });
-    book.reviews.forEach((review, i) => {
+    book.reviews.forEach((review:BookEntity, i:number) => {
       if (review.user.id === req.params.userId) {
         book.reviews.splice(i, 1);
       }

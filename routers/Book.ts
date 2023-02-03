@@ -13,7 +13,7 @@ import { BookEntity } from '../types';
 export const bookRouter = Router();
 
 bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (req, res) => {
-  const books:HydratedDocument<BookEntity>[] = await BookRecord.getAllBooks();
+  const books: HydratedDocument<BookEntity>[] = await BookRecord.getAllBooks();
   // const result = books.map(async (book) => {
   //   const response = await fetch(`https://openlibrary.org/isbn/${book.isbn}.json`);
   //   const data = await response.json();
@@ -44,13 +44,12 @@ bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (re
     res.sendStatus(204);
   })
   .post('/book/:bookId/:rating', async (req, res) => {
-    const book:any = await Book.findById(req.params.bookId);
-    book.ratingTypeAmount[(parseInt(req.params.rating, 10)) - 1] += 1;
-    book.rating = (book.sumOfRates + parseInt(req.params.rating, 10)) / (book.amountOfRates + 1);
-    book.sumOfRates += parseInt(req.params.rating, 10);
-    book.amountOfRates += 1;
-    await book.save();
-    res.status(201).json(book);
+    try {
+      const book = await BookRecord.addRatingOfBook(req.params) as HydratedDocument<BookEntity>;
+      res.status(201).json(book);
+    } catch (e) {
+      res.sendStatus(400);
+    }
   })
   .put('/book/:bookId/:rating', async (req, res) => {
     const book = await Book.findById(req.params.bookId);

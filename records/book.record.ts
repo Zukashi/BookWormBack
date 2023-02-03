@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { Response, Request } from 'express';
-import mongoose, { Types } from 'mongoose';
+import mongoose, { HydratedDocument, Types } from 'mongoose';
 import { BookEntity, NewBookEntity, UserEntity } from '../types';
 import { Book } from '../Schemas/Book';
 
@@ -65,8 +65,8 @@ export class BookRecord implements BookEntity {
     }
   }
 
-  static async getAllBooks():Promise<BookEntity[]> {
-    const books:BookEntity[] = await Book.find({});
+  static async getAllBooks():Promise<HydratedDocument<BookEntity>[]> {
+    const books:HydratedDocument<BookEntity>[] = await Book.find({});
     return books;
   }
 
@@ -103,5 +103,19 @@ export class BookRecord implements BookEntity {
       subjects: newSubjects,
     });
     await newBook.save();
+  }
+
+  static async addRatingOfBook(reqParams: {rating:string, bookId:string}):Promise<HydratedDocument<BookEntity>> {
+    try {
+      const book:HydratedDocument<BookEntity> = await Book.findById(reqParams.bookId);
+      book.ratingTypeAmount[(parseInt(reqParams.rating, 10)) - 1] += 1;
+      book.rating = (book.sumOfRates + parseInt(reqParams.rating, 10)) / (book.amountOfRates + 1);
+      book.sumOfRates += parseInt(reqParams.rating, 10);
+      book.amountOfRates += 1;
+      await book.save();
+      return book;
+    } catch (e) {
+      throw new Error('Rating add failed');
+    }
   }
 }

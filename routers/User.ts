@@ -2,11 +2,13 @@ import { Request, Router } from 'express';
 import { ObjectId } from 'mongodb';
 import { v4 as uuidv4 } from 'uuid';
 import nodemailer from 'nodemailer';
+import { HydratedDocument, Types, Document } from 'mongoose';
 import { User } from '../Schemas/User';
 import { Book } from '../Schemas/Book';
 import { authenticateToken, setUser } from './Login';
 import { UserRecord } from '../records/user.record';
 import { RequestEntityWithUser } from '../types/request';
+import { UserEntity } from '../types';
 
 const bcrypt = require('bcrypt');
 //
@@ -14,7 +16,7 @@ const bcrypt = require('bcrypt');
 export const userRouter = Router();
 
 userRouter.get('/users', authenticateToken, async (req, res) => {
-  const users = await UserRecord.getAllUsers();
+  const users = await UserRecord.getAllUsers() as HydratedDocument<UserEntity>[];
   res.json(users);
 }).get('/:userId', setUser, authenticateToken, async (req:RequestEntityWithUser, res) => {
   res.json(req.user);
