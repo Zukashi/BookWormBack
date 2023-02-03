@@ -24,5 +24,5 @@ export interface UserEntity {
     refreshTokenId?:string,
 }
 export interface NewUserEntity extends Omit<UserEntity, 'id'> {
-    id?: string;
+    id?: Types.ObjectId;
 }

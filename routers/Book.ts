@@ -60,41 +60,7 @@ bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (re
     await BookRecord.deleteRating(req, res);
   })
   .delete('/book/:bookId/user/:userId/review/:previousRating', async (req, res) => {
-    const book: any = await Book.findById(req.params.bookId).populate({
-      path: 'reviews.user',
-    });
-
-    if (!book) {
-      res.sendStatus(404);
-    }
-    book.ratingTypeAmount[(parseInt(req.params.previousRating, 10)) - 1] -= 1;
-    book.sumOfRates -= parseInt(req.params.previousRating, 10);
-    book.amountOfRates -= 1;
-    if (book.amountOfRates > 0 && book.sumOfRates > 0) {
-      book.rating = book.sumOfRates / book.amountOfRates;
-    } else {
-      book.rating = 0;
-    }
-    const result = book.reviews.filter((review:any):any => review.user.id !== req.params.userId);
-    book.reviews.forEach(async (review:any):Promise<null> => {
-      if (review.user.id !== req.params.userId) {
-        return null;
-      }
-      const user: any = await User.findById(req.params.userId).populate({
-        path: `shelves.${review.status}`,
-      });
-      if (!user) {
-        res.sendStatus(404);
-      }
-      console.log(user.shelves.read);
-      const newShelf = user.shelves[review.status].filter((book:BookEntity) => req.params.bookId !== book.id.toString());
-      user.shelves[review.status] = [...newShelf];
-      await user.save();
-    });
-    console.log(result);
-    book.reviews = [...result];
-    await book.save();
-    res.end();
+    await BookRecord.deleteRating2(req, res);
   })
   .get('/book/:bookId/reviews', async (req, res) => {
     const book: any = await Book.findById(req.params.bookId).populate({
@@ -103,59 +69,16 @@ bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (re
     res.json(book.reviews);
   })
   .put('/book/:bookId/user/:userId/review/:reviewId/comment', async (req, res) => {
-    const book:any = await Book.findById(req.params.bookId).populate({
-      path: 'reviews.user',
-    });
-    const newId = new mongoose.Types.ObjectId();
-    book.reviews.forEach((review:any) => {
-      const objectId = new ObjectId(req.params.reviewId);
-      console.log(objectId);
-      if (review._id.toString() === objectId.toString()) {
-        console.log(1234);
-        review.comments.push({
-          _id: newId,
-          user: req.params.userId,
-          commentMsg: req.body.comment,
-          date: Date.now(),
-        });
-      }
-    });
-    await book.save();
-    res.json(newId).status(201);
+    await BookRecord.addCommentToReview(req, res);
   })
   .get('/book/:bookId/user/:userId/review/:reviewId', async (req, res) => {
-    const book :any = await Book.findById(req.params.bookId).populate({
-      path: 'reviews.comments.user',
-    });
-    const foundReview = book.reviews.find((review:any) => review._id.toString() === req.params.reviewId);
-    console.log(foundReview);
-    res.json(foundReview).status(200);
+    await BookRecord.getReview(req, res);
   })
   .delete('/book/:bookId/user/:userId/review/:reviewId/comment/:commentId', async (req, res) => {
-    const book :any = await Book.findById(req.params.bookId).populate({
-      path: 'reviews.comments.user',
-    });
-    const foundReview = book.reviews.find((review:any) => review._id.toString() === req.params.reviewId);
-    const filteredComments = foundReview.comments.filter((comment:any) => comment._id.toString() !== req.params.commentId);
-    foundReview.comments = filteredComments;
-    await book.save();
-    res.sendStatus(200);
+    await BookRecord.deleteComment(req, res);
   })
   .put('/book/:bookId/user/:reviewUserId/review/:reviewId/user/:currentUser', async (req, res) => {
-    const book: any = await Book.findById(req.params.bookId).populate({
-      path: 'reviews.likes.usersThatLiked.user',
-    });
-    book.reviews.forEach((review: any) => {
-      const objectId = new ObjectId(req.params.reviewId);
-      if (review._id.toString() === objectId.toString()) {
-        review.likes.usersThatLiked.push({
-          user: req.params.currentUser,
-        });
-        review.likes.amount = review.likes.amount + 1;
-      }
-    });
-    await book.save();
-    res.sendStatus(200);
+    await BookRecord.addUserThatLikedReview(req, res);
   })
   .get('/book/:bookId/user/:reviewUserId/review/:reviewId/user/:currentUser', async (req, res) => {
     const book: any = await Book.findById(req.params.bookId).populate({

@@ -1,15 +1,10 @@
 import { Types } from 'mongoose';
 import { UserEntity } from '../users/user.entity';
 
-export interface NewBookEntity {
-    isbn:string,
+export interface BookEntity {
+    id:Types.ObjectId,
     author?:string,
     title?:string
-    id?:Types.ObjectId,
-}
-
-export interface BookEntity extends NewBookEntity {
-    author?:string,
     isbn:string,
     publish_date?:string,
     publishers?:string[],
@@ -45,4 +40,7 @@ export interface BookEntity extends NewBookEntity {
 
         }
     }[]
+}
+export interface NewBookEntity extends Omit<BookEntity, 'id'>{
+    id?:Types.ObjectId,
 }

@@ -1,8 +1,10 @@
 import axios from 'axios';
 import { Response, Request } from 'express';
 import mongoose, { HydratedDocument, Types } from 'mongoose';
+import { ObjectId } from 'mongodb';
 import { BookEntity, NewBookEntity, UserEntity } from '../types';
 import { Book } from '../Schemas/Book';
+import { User } from '../Schemas/User';
 
 export class BookRecord implements BookEntity {
   private readonly isbn: string;
@@ -120,7 +122,7 @@ export class BookRecord implements BookEntity {
   }
 
   static async updateRatingOfBook(req: Request, res: Response): Promise<HydratedDocument<BookEntity>> {
-    const book: BookEntity = await Book.findById(req.params.bookId);
+    const book: HydratedDocument<BookEntity> = await Book.findById(req.params.bookId);
 
     await Book.findByIdAndDelete(req.params.bookId);
     const obj: any = book.toObject();
@@ -138,16 +140,121 @@ export class BookRecord implements BookEntity {
 
   static async deleteRating(req:Request, res:Response) {
     try {
-      const book: any = await Book.findById(req.params.bookId);
+      const book: HydratedDocument<BookEntity> = await Book.findById(req.params.bookId);
       book.ratingTypeAmount[(parseInt(req.params.previousRating, 10)) - 1] -= 1;
       book.sumOfRates -= parseInt(req.params.previousRating, 10);
       book.amountOfRates -= 1;
       book.rating = (book.sumOfRates + parseInt(req.params.previousRating, 10)) / book.amountOfRates;
-      book.save();
+      await book.save();
       res.sendStatus(200);
     } catch (e) {
       res.status(400);
       throw new Error('Deletion of rating unsuccessful');
     }
+  }
+
+  // @TODO SEARCH FOR DELETE RATING AND MAKE ONE FUNCTION INSTEAD OF 2
+  static async deleteRating2(req:Request, res:Response) {
+    const book: HydratedDocument<BookEntity> = await Book.findById(req.params.bookId).populate({
+      path: 'reviews.user',
+    });
+
+    if (!book) {
+      res.sendStatus(404);
+    }
+    book.ratingTypeAmount[(parseInt(req.params.previousRating, 10)) - 1] -= 1;
+    book.sumOfRates -= parseInt(req.params.previousRating, 10);
+    book.amountOfRates -= 1;
+    if (book.amountOfRates > 0 && book.sumOfRates > 0) {
+      book.rating = book.sumOfRates / book.amountOfRates;
+    } else {
+      book.rating = 0;
+    }
+    const result = book.reviews.filter((review:any):any => review.user.id !== req.params.userId);
+    book.reviews.forEach(async (review:any):Promise<null> => {
+      if (review.user.id !== req.params.userId) {
+        return null;
+      }
+      const user: any = await User.findById(req.params.userId).populate({
+        path: `shelves.${review.status}`,
+      });
+      if (!user) {
+        res.sendStatus(404);
+      }
+      console.log(user.shelves.read);
+      const newShelf = user.shelves[review.status].filter((book:BookEntity) => req.params.bookId !== book.id.toString());
+      user.shelves[review.status] = [...newShelf];
+      await user.save();
+    });
+    console.log(result);
+    book.reviews = [...result];
+    await book.save();
+    res.end();
+  }
+
+  static async addCommentToReview(req:Request, res:Response) {
+    const book:HydratedDocument<BookEntity> = await Book.findById(req.params.bookId).populate({
+      path: 'reviews.user',
+    });
+    const newId = new mongoose.Types.ObjectId();
+    book.reviews.forEach((review:any) => {
+      const objectId = new ObjectId(req.params.reviewId);
+      console.log(objectId);
+      if (review._id.toString() === objectId.toString()) {
+        console.log(1234);
+        review.comments.push({
+          _id: newId,
+          user: req.params.userId,
+          commentMsg: req.body.comment,
+          date: Date.now(),
+        });
+      }
+    });
+    await book.save();
+    res.json(newId).status(201);
+  }
+
+  static async getReview(req: Request, res: Response) {
+    try {
+      const book :BookEntity = await Book.findById(req.params.bookId).populate({
+        path: 'reviews.comments.user',
+      });
+      const foundReview = book.reviews
+        .find((review:any) => review._id.toString() === req.params.reviewId);
+      res.json(foundReview).status(200);
+    } catch (e) {
+      res.status(400);
+      throw new Error('Not found Review');
+    }
+  }
+
+  static async deleteComment(req:Request, res:Response) {
+    const book :HydratedDocument<BookEntity> = await Book.findById(req.params.bookId).populate({
+      path: 'reviews.comments.user',
+    });
+    const foundReview = book.reviews
+      .find((review:any) => review._id.toString() === req.params.reviewId);
+    const filteredComments = foundReview.comments
+      .filter((comment:any) => comment._id.toString() !== req.params.commentId);
+    foundReview.comments = filteredComments;
+    await book.save();
+    res.sendStatus(200);
+  }
+
+  static async addUserThatLikedReview(req:Request, res:Response) {
+    const book: HydratedDocument<BookEntity> = await Book.findById(req.params.bookId).populate({
+      path: 'reviews.likes.usersThatLiked.user',
+    });
+    book.reviews.forEach((review: any) => {
+      const objectId = new ObjectId(req.params.reviewId);
+      if (review._id.toString() === objectId.toString()) {
+        review.likes.usersThatLiked.push({
+          user: req.params.currentUser,
+        });
+        review.likes.amount = review.likes.amount + 1;
+      }
+    });
+    await book.save();
+    res.sendStatus(200);
   }
 }
