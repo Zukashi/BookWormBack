@@ -81,56 +81,11 @@ bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (re
     await BookRecord.addUserThatLikedReview(req, res);
   })
   .get('/book/:bookId/user/:reviewUserId/review/:reviewId/user/:currentUser', async (req, res) => {
-    const book: any = await Book.findById(req.params.bookId).populate({
-      path: 'reviews.likes.usersThatLiked.user',
-    });
-    let foundUser = {};
-    book.reviews.forEach((review: any) => {
-      const objectId = new ObjectId(req.params.reviewId);
-      console.log(objectId);
-      if (review._id.toString() === objectId.toString()) {
-        console.log(1234);
-        foundUser = review.likes.usersThatLiked.find((user:any, i:number) => {
-          console.log(user);
-          if (user.user._id.toString() === req.params.currentUser) {
-            return true;
-          }
-          return false;
-        });
-        console.log(foundUser, 12345);
-      }
-    });
-    res.json(foundUser);
+    await BookRecord.getUserThatLikedReview(req, res);
   })
   .delete('/book/:bookId/user/:reviewUserId/review/:reviewId/user/:currentUser', async (req, res) => {
-    const book: any = await Book.findById(req.params.bookId).populate({
-      path: 'reviews.likes.usersThatLiked.user',
-    });
-    let newUsersThatLiked = [];
-    book.reviews.forEach((review: any) => {
-      const objectId = new ObjectId(req.params.reviewId);
-      console.log(objectId);
-      if (review._id.toString() === objectId.toString()) {
-        newUsersThatLiked = review.likes.usersThatLiked
-          .filter((user:any, i:number) => user.user._id.toString() !== req.params.currentUser);
-        review.likes.usersThatLiked = [...newUsersThatLiked];
-        review.likes.amount = review.likes.amount - 1;
-      }
-    });
-    await book.save();
-    res.sendStatus(200);
+    await BookRecord.deleteUserThatLikedFromLikedUsers(req, res);
   })
   .put('/book/:bookId/user/:userId/changeStatus', authenticateToken, async (req, res) => {
-    try {
-      const user:any = await User.findById(req.params.userId).populate(`shelves.${req.body.statuses.oldStatus}`);
-      console.log(user.shelves);
-      const filteredShelves = user.shelves[req.body.statuses.oldStatus]
-        .filter((oneBook:BookEntity) => oneBook._id.toString() !== req.params.bookId);
-      user.shelves[req.body.statuses.oldStatus] = filteredShelves;
-      user.shelves[req.body.statuses.newStatus].push(req.params.bookId);
-      user.save();
-      res.sendStatus(200);
-    } catch (e) {
-      res.sendStatus(404);
-    }
+    await BookRecord.changeStatusOfBookFromUserBooks(req, res);
   });

@@ -257,4 +257,57 @@ export class BookRecord implements BookEntity {
     await book.save();
     res.sendStatus(200);
   }
+
+  static async getUserThatLikedReview(req:Request, res:Response) {
+    const book: HydratedDocument<BookEntity> = await Book.findById(req.params.bookId).populate({
+      path: 'reviews.likes.usersThatLiked.user',
+    });
+    let foundUser = {};
+    book.reviews.forEach((review: any) => {
+      const objectId = new ObjectId(req.params.reviewId);
+      if (review._id.toString() === objectId.toString()) {
+        foundUser = review.likes.usersThatLiked.find((user:any, i:number) => {
+          if (user.user._id.toString() === req.params.currentUser) {
+            return true;
+          }
+          return false;
+        });
+      }
+    });
+    res.status(200).json(foundUser);
+  }
+
+  static async deleteUserThatLikedFromLikedUsers(req:Request, res:Response) {
+    const book: any = await Book.findById(req.params.bookId).populate({
+      path: 'reviews.likes.usersThatLiked.user',
+    });
+    let newUsersThatLiked = [];
+    book.reviews.forEach((review: any) => {
+      const objectId = new ObjectId(req.params.reviewId);
+      console.log(objectId);
+      if (review._id.toString() === objectId.toString()) {
+        newUsersThatLiked = review.likes.usersThatLiked
+          .filter((user:any, i:number) => user.user._id.toString() !== req.params.currentUser);
+        review.likes.usersThatLiked = [...newUsersThatLiked];
+        review.likes.amount = review.likes.amount - 1;
+      }
+    });
+    await book.save();
+    res.sendStatus(200);
+  }
+
+  static async changeStatusOfBookFromUserBooks(req:Request, res:Response) {
+    try {
+      const user:any = await User.findById(req.params.userId).populate(`shelves.${req.body.statuses.oldStatus}`);
+      console.log(user.shelves);
+      const filteredShelves = user.shelves[req.body.statuses.oldStatus]
+        .filter((oneBook:BookEntity) => oneBook._id.toString() !== req.params.bookId);
+      user.shelves[req.body.statuses.oldStatus] = filteredShelves;
+      user.shelves[req.body.statuses.newStatus].push(req.params.bookId);
+      user.save();
+      res.sendStatus(200);
+    } catch (e) {
+      res.sendStatus(404);
+    }
+  }
 }
