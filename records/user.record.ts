@@ -240,16 +240,17 @@ export class UserRecord implements UserEntity {
         book.reviews.splice(i, 1);
       }
     });
-
-    book.reviews.push({
-      user: req.params.userId,
-      description: req.body.description,
-      rating: req.body.rating,
-      status: req.body.status,
-      spoilers: req.body.spoilers,
-      date: Date.now(),
-      comments: [],
-    });
+    const user:any = await User.findById(req.params.userId);
+    user.shelves
+      .book.reviews.push({
+        user: req.params.userId,
+        description: req.body.description,
+        rating: req.body.rating,
+        status: req.body.status,
+        spoilers: req.body.spoilers,
+        date: Date.now(),
+        comments: [],
+      });
     book.save();
 
     res.sendStatus(201);

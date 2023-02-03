@@ -13,14 +13,6 @@ const bcrypt = require('bcrypt');
 
 export const userRouter = Router();
 
-export interface User {
-    _id: string,
-    username: string,
-    firstName: string,
-    lastName: string,
-    age: number,
-    city: string,
-}
 userRouter.get('/users', authenticateToken, async (req, res) => {
   const users = await UserRecord.getAllUsers();
   res.json(users);

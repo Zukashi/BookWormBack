@@ -221,12 +221,25 @@ bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (re
       const objectId = new ObjectId(req.params.reviewId);
       console.log(objectId);
       if (review._id.toString() === objectId.toString()) {
-        console.log(1234);
-        newUsersThatLiked = review.likes.usersThatLiked.filter((user:any, i:number) => user.user._id.toString() !== req.params.currentUser);
+        newUsersThatLiked = review.likes.usersThatLiked
+          .filter((user:any, i:number) => user.user._id.toString() !== req.params.currentUser);
         review.likes.usersThatLiked = [...newUsersThatLiked];
         review.likes.amount = review.likes.amount - 1;
       }
     });
     await book.save();
     res.sendStatus(200);
+  })
+  .put('/book/:bookId/user/:userId/changeStatus', authenticateToken, async (req, res) => {
+    try {
+      const user:any = await User.findById(req.params.userId);
+      const filteredShelves = user.shelves[req.body.statuses.oldStatus]
+        .filter((bookId:string) => bookId !== req.params.bookId);
+      user.shelves[req.body.statuses.oldStatus] = filteredShelves;
+      user.shelves[req.body.statuses.newStatus].push(req.params.bookId);
+      user.save();
+      res.sendStatus(200);
+    } catch (e) {
+      res.sendStatus(404);
+    }
   });
