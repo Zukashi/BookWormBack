@@ -5,7 +5,7 @@ export interface NewBookEntity {
     isbn:string,
     author?:string,
     title?:string
-    _id?:Types.ObjectId,
+    id?:Types.ObjectId,
 }
 
 export interface BookEntity extends NewBookEntity {

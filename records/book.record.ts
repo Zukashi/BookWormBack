@@ -7,14 +7,14 @@ import { Book } from '../Schemas/Book';
 export class BookRecord implements BookEntity {
   private readonly isbn: string;
 
-  private _id:Types.ObjectId;
+  private id:Types.ObjectId;
 
   private author?:string;
 
   private title?:string;
 
   constructor(obj:NewBookEntity) {
-    this._id = obj._id;
+    this.id = obj.id;
 
     this.isbn = obj.isbn;
     this.author = obj.author;
@@ -26,7 +26,7 @@ export class BookRecord implements BookEntity {
       res.status(409);
       throw new Error('Book is already in the database');
     } else {
-      this._id = new mongoose.Types.ObjectId();
+      this.id = new mongoose.Types.ObjectId();
       let response;
       try {
         response = await axios.get(`https://openlibrary.org/isbn/${this.isbn}.json`);

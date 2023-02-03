@@ -20,6 +20,7 @@ bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (re
   //   return data;
   // });
   // const values = await Promise.all(result);
+  console.log(books[0].id);
   res.json(books).status(201);
 }).get('/book/:id', async (req, res) => {
   const book:HydratedDocument<BookEntity> = await BookRecord.getOneBook(req.params.id);
@@ -52,7 +53,7 @@ bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (re
     }
   })
   .put('/book/:bookId/:rating', async (req, res) => {
-    const book = await Book.findById(req.params.bookId);
+    const book:HydratedDocument<BookEntity> = await Book.findById(req.params.bookId);
 
     await Book.findByIdAndDelete(req.params.bookId);
     const obj:any = book.toObject();
@@ -104,7 +105,7 @@ bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (re
         res.sendStatus(404);
       }
       console.log(user.shelves.read);
-      const newShelf = user.shelves[review.status].filter((book:BookEntity) => req.params.bookId !== book._id.toString());
+      const newShelf = user.shelves[review.status].filter((book:BookEntity) => req.params.bookId !== book.id.toString());
       user.shelves[review.status] = [...newShelf];
       await user.save();
     });

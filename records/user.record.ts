@@ -12,7 +12,7 @@ import { client } from '../index';
 const bcrypt = require('bcrypt');
 
 export class UserRecord implements UserEntity {
-  _id: Types.ObjectId;
+  id: Types.ObjectId;
 
   age: number;
 
@@ -54,7 +54,7 @@ export class UserRecord implements UserEntity {
     if (await User.findOne({ email: this.email })) res.status(400).json({ status: 'false', result: 'Email is taken', type: 'email' });
     if (await User.findOne({ username: this.username })) res.status(400).json({ status: 'false', result: 'Username is taken', type: 'username' });
 
-    if (this._id) {
+    if (this.id) {
       return;
     }
     bcrypt.hash(this.password, saltAmount, async (err:string, hash:string) => {
@@ -77,20 +77,20 @@ export class UserRecord implements UserEntity {
     });
   }
 
-  static async getAllUsers():Promise<UserEntity[]> {
+  static async getAllUsers():Promise<HydratedDocument<UserEntity>[]> {
     const users:HydratedDocument<UserEntity>[] = await User.find({});
     return users;
   }
 
   static async getUser(id:string):Promise<UserEntity> {
-    const user:UserEntity = await User.findById(id);
+    const user:HydratedDocument<UserEntity> = await User.findById(id);
     return user;
   }
 
   async updateUser(newUser:UserEntity, res:Response):Promise<void> {
-    const oldUser = User.findById(this._id);
+    const oldUser = User.findById(this.id);
     if (!oldUser) { res.status(500); throw new Error('We are sorry something went wrong'); }
-    await User.findByIdAndDelete(this._id);
+    await User.findByIdAndDelete(this.id);
     const userNew = new User({
       ...oldUser,
       ...newUser,
@@ -130,8 +130,8 @@ export class UserRecord implements UserEntity {
 
   async deleteBookFromFavorites(req:RequestEntityWithUser, res:Response) {
     const book:BookEntity = await Book.findById(req.params.bookId);
-    const user = await User.findById(this._id);
-    const doc:BookEntity = await User.findOne({ favorites: book, id: this._id }).populate('favorites');
+    const user = await User.findById(this.id);
+    const doc:BookEntity = await User.findOne({ favorites: book, id: this.id }).populate('favorites');
 
     const filtered:BookEntity[] = doc.favorites.filter((value: BookEntity) => value.isbn !== book.isbn);
     user.favorites = filtered;
