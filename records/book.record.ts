@@ -7,13 +7,13 @@ import { Book } from '../Schemas/Book';
 export class BookRecord implements BookEntity {
   private readonly isbn: string;
 
-  private id:Types.ObjectId;
+  private id: Types.ObjectId;
 
-  private author?:string;
+  private author?: string;
 
-  private title?:string;
+  private title?: string;
 
-  constructor(obj:NewBookEntity) {
+  constructor(obj: NewBookEntity) {
     this.id = obj.id;
 
     this.isbn = obj.isbn;
@@ -21,7 +21,7 @@ export class BookRecord implements BookEntity {
     this.title = obj.title;
   }
 
-  async insert(res:Response):Promise<void> {
+  async insert(res: Response): Promise<void> {
     if (await Book.findOne({ isbn: this.isbn })) {
       res.status(409);
       throw new Error('Book is already in the database');
@@ -65,20 +65,20 @@ export class BookRecord implements BookEntity {
     }
   }
 
-  static async getAllBooks():Promise<HydratedDocument<BookEntity>[]> {
-    const books:HydratedDocument<BookEntity>[] = await Book.find({});
+  static async getAllBooks(): Promise<HydratedDocument<BookEntity>[]> {
+    const books: HydratedDocument<BookEntity>[] = await Book.find({});
     return books;
   }
 
-  static async getOneBook(paramsId:string):Promise<BookEntity> {
-    const book:BookEntity = await Book.findById(paramsId);
+  static async getOneBook(paramsId: string): Promise<BookEntity> {
+    const book: BookEntity = await Book.findById(paramsId);
     return book;
   }
 
-  static async filterBooks(value:string):Promise<BookEntity[]> {
+  static async filterBooks(value: string): Promise<BookEntity[]> {
     const books = await BookRecord.getAllBooks();
     if (value) {
-      const newBooks = books.filter((book:BookEntity) => {
+      const newBooks = books.filter((book: BookEntity) => {
         book.author = book.author?.replace(/[.]/gi, '');
         return book.title?.toLowerCase().includes(value.toLowerCase()) || book.author?.toLowerCase().includes(value.toLowerCase()) || book.isbn?.includes(value.toLowerCase());
       });
@@ -87,7 +87,7 @@ export class BookRecord implements BookEntity {
     return books;
   }
 
-  async updateBook(form:BookEntity, req:Request) {
+  async updateBook(form: BookEntity, req: Request) {
     const bookDb = await Book.findById(req.params.bookId);
     await Book.findByIdAndDelete(req.params.bookId);
     const { subjects } = req.body;
@@ -105,9 +105,9 @@ export class BookRecord implements BookEntity {
     await newBook.save();
   }
 
-  static async addRatingOfBook(reqParams: {rating:string, bookId:string}):Promise<HydratedDocument<BookEntity>> {
+  static async addRatingOfBook(reqParams: { rating: string, bookId: string }): Promise<HydratedDocument<BookEntity>> {
     try {
-      const book:HydratedDocument<BookEntity> = await Book.findById(reqParams.bookId);
+      const book: HydratedDocument<BookEntity> = await Book.findById(reqParams.bookId);
       book.ratingTypeAmount[(parseInt(reqParams.rating, 10)) - 1] += 1;
       book.rating = (book.sumOfRates + parseInt(reqParams.rating, 10)) / (book.amountOfRates + 1);
       book.sumOfRates += parseInt(reqParams.rating, 10);
@@ -119,24 +119,35 @@ export class BookRecord implements BookEntity {
     }
   }
 
-  static async updateRatingOfBook(req:Request, res:Response):Promise<HydratedDocument<BookEntity>> {
+  static async updateRatingOfBook(req: Request, res: Response): Promise<HydratedDocument<BookEntity>> {
+    const book: BookEntity = await Book.findById(req.params.bookId);
+
+    await Book.findByIdAndDelete(req.params.bookId);
+    const obj: any = book.toObject();
+    obj.ratingTypeAmount[(parseInt(req.params.rating, 10)) - 1] += 1;
+
+    const newBook: HydratedDocument<BookEntity> = new Book({
+      ...obj,
+      sumOfRates: obj.sumOfRates + parseInt(req.params.rating, 10),
+      rating: (obj.sumOfRates + parseInt(req.params.rating, 10)) / (obj.amountOfRates + 1),
+      amountOfRates: obj.amountOfRates + 1,
+    });
+    await newBook.save();
+    return newBook;
+  }
+
+  static async deleteRating(req:Request, res:Response) {
     try {
-      const book:BookEntity = await Book.findById(req.params.bookId);
-
-      await Book.findByIdAndDelete(req.params.bookId);
-      const obj:any = book.toObject();
-      obj.ratingTypeAmount[(parseInt(req.params.rating, 10)) - 1] += 1;
-
-      const newBook:HydratedDocument<BookEntity> = new Book({
-        ...obj,
-        sumOfRates: obj.sumOfRates + parseInt(req.params.rating, 10),
-        rating: (obj.sumOfRates + parseInt(req.params.rating, 10)) / (obj.amountOfRates + 1),
-        amountOfRates: obj.amountOfRates + 1,
-      });
-      await newBook.save();
-      return newBook;
+      const book: any = await Book.findById(req.params.bookId);
+      book.ratingTypeAmount[(parseInt(req.params.previousRating, 10)) - 1] -= 1;
+      book.sumOfRates -= parseInt(req.params.previousRating, 10);
+      book.amountOfRates -= 1;
+      book.rating = (book.sumOfRates + parseInt(req.params.previousRating, 10)) / book.amountOfRates;
+      book.save();
+      res.sendStatus(200);
     } catch (e) {
-      res.sendStatus(400);
+      res.status(400);
+      throw new Error('Deletion of rating unsuccessful');
     }
   }
 }
