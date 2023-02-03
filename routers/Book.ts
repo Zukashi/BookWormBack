@@ -7,6 +7,7 @@ import { User } from '../Schemas/User';
 import { Book } from '../Schemas/Book';
 import { authenticateToken, authRole, setUser } from './Login';
 import { BookRecord } from '../records/book.record';
+import { BookEntity } from '../types';
 
 export const bookRouter = Router();
 
@@ -27,29 +28,14 @@ bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (re
   res.json(searchedBooks);
 })
   .post('/book', async (req, res) => {
-    const { title, author, isbn } = req.body;
     const book = new BookRecord(req.body);
     await book.insert(res);
-    res.end();
+    res.sendStatus(201);
   })
   .put('/book/:bookId', async (req, res) => {
-    const form = req.body;
-    const book = await Book.findById(req.params.bookId);
-    await Book.findByIdAndDelete(req.params.bookId);
-    const { subjects } = form;
-    let newSubjects = [];
-    if (!Array.isArray(subjects)) {
-      newSubjects = subjects.split(' ');
-    } else {
-      newSubjects = [...subjects];
-    }
-    const newBook = new Book({
-      ...book,
-      ...form,
-      subjects: newSubjects,
-    });
-    await newBook.save();
-    res.end();
+    const book = new BookRecord(req.body);
+    await book.updateBook(req.body, req);
+    res.sendStatus(200);
   })
   .delete('/book/:bookId', async (req, res) => {
     const { bookId } = req.params;
@@ -118,15 +104,13 @@ bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (re
         res.sendStatus(404);
       }
       console.log(user.shelves.read);
-      const newShelf = user.shelves[review.status].filter((shelf:any) => req.params.bookId !== shelf);
+      const newShelf = user.shelves[review.status].filter((book:BookEntity) => req.params.bookId !== book._id.toString());
       user.shelves[review.status] = [...newShelf];
       await user.save();
-      console.log(user.shelves.read);
     });
     console.log(result);
     book.reviews = [...result];
     await book.save();
-    console.log('end');
     res.end();
   })
   .get('/book/:bookId/reviews', async (req, res) => {
@@ -232,9 +216,10 @@ bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (re
   })
   .put('/book/:bookId/user/:userId/changeStatus', authenticateToken, async (req, res) => {
     try {
-      const user:any = await User.findById(req.params.userId);
+      const user:any = await User.findById(req.params.userId).populate(`shelves.${req.body.statuses.oldStatus}`);
+      console.log(user.shelves);
       const filteredShelves = user.shelves[req.body.statuses.oldStatus]
-        .filter((bookId:string) => bookId !== req.params.bookId);
+        .filter((oneBook:BookEntity) => oneBook._id.toString() !== req.params.bookId);
       user.shelves[req.body.statuses.oldStatus] = filteredShelves;
       user.shelves[req.body.statuses.newStatus].push(req.params.bookId);
       user.save();

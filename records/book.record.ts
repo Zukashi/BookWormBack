@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Response } from 'express';
+import { Response, Request } from 'express';
 import mongoose, { Types } from 'mongoose';
 import { BookEntity, NewBookEntity, UserEntity } from '../types';
 import { Book } from '../Schemas/Book';
@@ -85,5 +85,23 @@ export class BookRecord implements BookEntity {
       return newBooks;
     }
     return books;
+  }
+
+  async updateBook(form:BookEntity, req:Request) {
+    const bookDb = await Book.findById(req.params.bookId);
+    await Book.findByIdAndDelete(req.params.bookId);
+    const { subjects } = req.body;
+    let newSubjects = [];
+    if (!Array.isArray(subjects)) {
+      newSubjects = subjects.split(' ');
+    } else {
+      newSubjects = [...subjects];
+    }
+    const newBook = new Book({
+      ...bookDb,
+      ...req.body,
+      subjects: newSubjects,
+    });
+    await newBook.save();
   }
 }
