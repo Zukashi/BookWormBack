@@ -145,7 +145,7 @@ export class UserRecord implements UserEntity {
   }
 
   static async resetPassword(req:Request, res:Response) {
-    const code = uuidv4();
+    const code = (Math.floor(Math.random() * 10000) + 10000).toString().substring(1);
     const details = {
       from: 'testBookWorm@gmail.com',
       to: `${req.body.email}`,
@@ -208,7 +208,7 @@ export class UserRecord implements UserEntity {
   }
 
   static async addBookReview(req: Request, res: Response) {
-    const book:any = await Book.findById(req.params.bookId)
+    const book:HydratedDocument<BookEntity> = await Book.findById(req.params.bookId)
       .populate({
         path: 'reviews.user',
       });
@@ -252,7 +252,7 @@ export class UserRecord implements UserEntity {
         date: Date.now(),
         comments: [],
       });
-    book.save();
+    await book.save();
 
     res.sendStatus(201);
   }
