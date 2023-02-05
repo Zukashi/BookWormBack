@@ -67,9 +67,11 @@ export class BookRecord implements BookEntity {
           }
         });
       });
+      details.publish_date && genre[0].years.push(details.publish_date);
+      response3.data.personal_name ? genre[0].authors.push(response3.data.personal_name) : genre[0].authors.push(response3.data.name);
       await genre[0].save();
       const book = new Book({
-        publish_date: details?.publish_date ? details.publish_date : Date.now(),
+        publish_date: details?.publish_date ? details.publish_date : null,
         subjects: details.subjects ? details.subjects : [],
         title: response.data.title,
         description,
@@ -334,6 +336,6 @@ export class BookRecord implements BookEntity {
 
   static async getAllGenres(req:Request, res:Response) {
     const genres:any = await Genre.find({});
-    res.json(genres[0].genres);
+    res.json(genres[0]);
   }
 }
