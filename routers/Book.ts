@@ -79,4 +79,8 @@ bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (re
   })
   .get('/genres', authenticateToken, async (req, res) => {
     await BookRecord.getAllGenres(req, res);
+  })
+
+  .post('/filterBooks', authenticateToken, async (req, res) => {
+    await BookRecord.filterBooksByYearAuthorOrSubject(req, res);
   });

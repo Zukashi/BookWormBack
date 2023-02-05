@@ -72,7 +72,7 @@ export class BookRecord implements BookEntity {
       await genre[0].save();
       const book = new Book({
         publish_date: details?.publish_date ? details.publish_date : null,
-        subjects: details.subjects ? details.subjects : [],
+        subjects: genre[0].genres,
         title: response.data.title,
         description,
         subject_people: response2.data.subject_people,
@@ -336,6 +336,12 @@ export class BookRecord implements BookEntity {
 
   static async getAllGenres(req:Request, res:Response) {
     const genres:any = await Genre.find({});
-    res.json(genres[0]);
+    res.status(200).json(genres[0]);
+  }
+
+  static async filterBooksByYearAuthorOrSubject(req:Request, res:Response) {
+    const books: HydratedDocument<BookEntity> = await Book.find({});
+    const newBooks = books.filter((book:BookEntity) => (book.author !== '' && book.author.includes(req.body.author) && req.body.year ? book.publish_date === req.body.year : true && req.body.genres ? book.subjects.includes(req.body.genres) : true));
+    res.status(200).json(newBooks);
   }
 }
