@@ -13,14 +13,7 @@ import { BookEntity } from '../types';
 export const bookRouter = Router();
 
 bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (req, res) => {
-  const books: HydratedDocument<BookEntity>[] = await BookRecord.getAllBooks();
-  // const result = books.map(async (book) => {
-  //   const response = await fetch(`https://openlibrary.org/isbn/${book.isbn}.json`);
-  //   const data = await response.json();
-  //   return data;
-  // });
-  // const values = await Promise.all(result);
-  console.log(books[0].id);
+  const books = await Book.find({}) as HydratedDocument<BookEntity>[];
   res.json(books).status(201);
 }).get('/book/:id', async (req, res) => {
   const book:HydratedDocument<BookEntity> = await BookRecord.getOneBook(req.params.id);

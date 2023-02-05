@@ -68,7 +68,8 @@ export class BookRecord implements BookEntity {
   }
 
   static async getAllBooks(): Promise<HydratedDocument<BookEntity>[]> {
-    const books: HydratedDocument<BookEntity>[] = await Book.find({});
+    const books = await Book.find({}) as HydratedDocument<BookEntity>[];
+    console.log(books);
     return books;
   }
 

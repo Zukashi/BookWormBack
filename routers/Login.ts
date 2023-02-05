@@ -1,13 +1,15 @@
 import { Router } from 'express';
+import { HydratedDocument } from 'mongoose';
 import { User } from '../Schemas/User';
 import { UserRecord } from '../records/user.record';
+import { UserEntity } from '../types';
 
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 // eslint-disable-next-line import/prefer-default-export,no-undef
 export const loginRouter = Router();
 export async function setUser(req:any, res:any, next:any) {
-  const user:UserRecord = await User.findOne({ refreshTokenId: req.cookies.refreshToken });
+  const user = await User.findOne({ refreshTokenId: req.cookies.refreshToken });
   if (user) {
     req.user = user;
   } else {

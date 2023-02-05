@@ -45,7 +45,7 @@ export class UserRecord implements UserEntity {
 
   username: string;
 
-  constructor(obj:UserRecord) {
+  constructor(obj: HydratedDocument<UserEntity>) {
     Object.assign(this, obj);
   }
 
@@ -130,15 +130,13 @@ export class UserRecord implements UserEntity {
   }
 
   async deleteBookFromFavorites(req:RequestEntityWithUser, res:Response) {
-    const book:BookEntity = await Book.findById(req.params.bookId);
-    const user = await User.findById(this.id);
-    const doc:BookEntity = await User.findOne({ favorites: book, id: this.id }).populate('favorites');
+    const { user } = req;
+    const bookIndex = user.favorites.findIndex((bookInFavorites) => bookInFavorites.id.toString() === req.params.bookId);
+    if (bookIndex === -1) throw new ValidationError('Book not found in favorites');
 
-    const filtered:BookEntity[] = doc.favorites.filter((value: BookEntity) => value.isbn !== book.isbn);
-    user.favorites = filtered;
-
+    user.favorites.splice(bookIndex, 1);
     await user.save();
-    res.sendStatus(204);
+    res.status(200).json({ status: 'success', user });
   }
 
   static async getFavoritesOfUser(req:RequestEntityWithUser, res:Response) {
