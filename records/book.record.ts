@@ -5,6 +5,8 @@ import { ObjectId } from 'mongodb';
 import { BookEntity, NewBookEntity, UserEntity } from '../types';
 import { Book } from '../Schemas/Book';
 import { User } from '../Schemas/User';
+import { Author } from '../Schemas/Author';
+import { Genre } from '../Schemas/Genre';
 
 export class BookRecord implements BookEntity {
   private readonly isbn: string;
@@ -39,6 +41,9 @@ export class BookRecord implements BookEntity {
 
       const response2 = await axios.get(`https://openlibrary.org${response.data.works[0].key}.json`);
       const response3 = await axios.get(`http://localhost:3001/author${response.data.authors[0].key}`);
+      const bookDetails:HydratedDocument<BookEntity> = await axios.get(`https://openlibrary.org/api/books?bibkeys=ISBN:${this.isbn}&jscmd=details&format=json`);
+      const newAuthor = new Author(response3.data);
+      await newAuthor.save();
 
       let description;
       if (response2.data.description?.value) {
@@ -48,11 +53,26 @@ export class BookRecord implements BookEntity {
       } else {
         description = '';
       }
+      const { details } = bookDetails.data[`ISBN:${this.isbn}`];
+      const genre:any = await Genre.find({});
+      console.log(genre);
+      details.subjects?.forEach((subject:string) => {
+        if (genre[0].genres.length === 0) {
+          genre[0].genres = details.subjects;
+          return;
+        }
+        genre[0].genres.forEach((oneGenre:any) => {
+          if (oneGenre !== subject) {
+            genre[0].genres.push(subject);
+          }
+        });
+      });
+      await genre[0].save();
       const book = new Book({
-
+        publish_date: details?.publish_date ? details.publish_date : Date.now(),
+        subjects: details.subjects ? details.subjects : [],
         title: response.data.title,
         description,
-        subjects: response2.data.subjects,
         subject_people: response2.data.subject_people,
         author: response3.data.personal_name ? response3.data.personal_name : response3.data.name,
         isbn: this.isbn,
@@ -310,5 +330,10 @@ export class BookRecord implements BookEntity {
     } catch (e) {
       res.sendStatus(404);
     }
+  }
+
+  static async getAllGenres(req:Request, res:Response) {
+    const genres:any = await Genre.find({});
+    res.json(genres[0].genres);
   }
 }
