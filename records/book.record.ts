@@ -72,6 +72,7 @@ export class BookRecord implements BookEntity {
           }
         });
       });
+      console.log(shelvesResponseGet.data.counts);
       details.publish_date && genre[0].years.push(details.publish_date);
       response3.data.personal_name ? genre[0].authors.push(response3.data.personal_name) : genre[0].authors.push(response3.data.name);
       function getSum(counts: { [key: string]: number }): number {
@@ -97,10 +98,10 @@ export class BookRecord implements BookEntity {
         number_of_pages: response.data.number_of_pages,
         works: response.data.works[0].key,
         ...response.data,
-        status: shelvesResponseGet.data.counts,
         authors: response.data.authors,
         rating: ratingsResponseGet.data.summary.average ? ratingsResponseGet.data.summary.average : 0,
         ratingTypeAmount: newRatingCounts,
+        shelves: shelvesResponseGet.data.counts,
         amountOfRates: ratingsResponseGet.data.summary.count ? ratingsResponseGet.data.summary.count : 0,
         sumOfRates: getSum(ratingsResponseGet.data.counts),
       });

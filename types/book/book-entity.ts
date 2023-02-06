@@ -18,7 +18,7 @@ export interface BookEntity {
     ratingTypeAmount?:number[],
     rating?:number,
     amountOfRates?:number,
-    status:{
+    shelves:{
         want_to_read:number,
         currently_reading:number,
         already_read:number,

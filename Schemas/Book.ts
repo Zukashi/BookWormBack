@@ -41,6 +41,11 @@ export const bookSchema = new mongoose.Schema<BookEntity>({
   ratingTypeAmount: [Number],
   rating: Number,
   amountOfRates: Number,
+  shelves: {
+    want_to_read: Number,
+    currently_reading: Number,
+    already_read: Number,
+  },
   sumOfRates: Number,
   reviews: [{
     user: {
@@ -49,11 +54,6 @@ export const bookSchema = new mongoose.Schema<BookEntity>({
     },
     description: String,
     rating: Number,
-    status: {
-      want_to_read: Number,
-      currently_reading: Number,
-      already_read: Number,
-    },
     date: {
       type: Date,
       default: Date.now(),
