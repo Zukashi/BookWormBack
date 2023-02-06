@@ -54,11 +54,17 @@ export class BookRecord implements BookEntity {
         description = '';
       }
       const { details } = bookDetails.data[`ISBN:${this.isbn}`];
+      console.log(details);
+      const oldSubjects = [...new Set(details.subjects)] as string[];
+      function removeDuplicateWords(arr: string[]): string[] {
+        return arr.filter((word) => !arr.some((existingWord) => existingWord.includes(word) && existingWord !== word));
+      }
+      const subjects = removeDuplicateWords(oldSubjects);
       const genre:any = await Genre.find({});
       console.log(genre);
-      details.subjects?.forEach((subject:string) => {
+      subjects?.forEach((subject:string) => {
         if (genre[0].genres.length === 0) {
-          genre[0].genres = details.subjects;
+          genre[0].genres = subjects;
           return;
         }
         genre[0].genres.forEach((oneGenre:any) => {
@@ -74,7 +80,7 @@ export class BookRecord implements BookEntity {
         publish_date: details?.publish_date ? details.publish_date : null,
         subjects: genre[0].genres,
         title: response.data.title,
-        description,
+        description: typeof description === 'string' ? description : description.value,
         subject_people: response2.data.subject_people,
         author: response3.data.personal_name ? response3.data.personal_name : response3.data.name,
         isbn: this.isbn,
@@ -350,7 +356,6 @@ export class BookRecord implements BookEntity {
       if (req.body.genres) {
         result = result && (book.subjects.includes(req.body.genres));
       }
-
       if (req.body.year) {
         result = result && (req.body.year === book.publish_date);
       }

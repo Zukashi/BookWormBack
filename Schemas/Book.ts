@@ -1,4 +1,4 @@
-import mongoose, { Types } from 'mongoose';
+import mongoose, { Schema, Types } from 'mongoose';
 import { User } from './User';
 import { BookEntity } from '../types';
 
@@ -35,7 +35,7 @@ export const bookSchema = new mongoose.Schema<BookEntity>({
   subject_people: {
     type: [String],
   },
-  description: String,
+  description: Schema.Types.Mixed,
   ratingTypeAmount: [Number],
   rating: Number,
   amountOfRates: Number,
