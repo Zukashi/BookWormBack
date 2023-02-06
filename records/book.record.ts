@@ -42,6 +42,7 @@ export class BookRecord implements BookEntity {
       const response2 = await axios.get(`https://openlibrary.org${response.data.works[0].key}.json`);
       const response3 = await axios.get(`http://localhost:3001/author${response.data.authors[0].key}`);
       const ratingsResponseGet = await axios.get(`https://openlibrary.org${response.data.works[0].key}/ratings.json`);
+      const shelvesResponseGet = await axios.get(`https://openlibrary.org${response.data.works[0].key}/bookshelves.json`);
       const bookDetails:HydratedDocument<BookEntity> = await axios.get(`https://openlibrary.org/api/books?bibkeys=ISBN:${this.isbn}&jscmd=details&format=json`);
       const newAuthor = new Author(response3.data);
       await newAuthor.save();
@@ -56,13 +57,10 @@ export class BookRecord implements BookEntity {
       }
       const { details } = bookDetails.data[`ISBN:${this.isbn}`];
 
-      const oldSubjects = [...new Set(details.subjects)] as string[];
-      function removeDuplicateWords(arr: string[]): string[] {
-        return arr.filter((word) => !arr.some((existingWord) => existingWord.includes(word) && existingWord !== word));
-      }
-      const subjects = removeDuplicateWords(oldSubjects);
+      const subjects = [...new Set(details.subjects)] as string[];
+
+      console.log(subjects);
       const genre:any = await Genre.find({});
-      console.log(response.data.works[0].key[0].key);
       subjects?.forEach((subject:string) => {
         if (genre[0].genres.length === 0) {
           genre[0].genres = subjects;
@@ -90,7 +88,7 @@ export class BookRecord implements BookEntity {
       await genre[0].save();
       const book:HydratedDocument<BookEntity> = new Book({
         publish_date: details?.publish_date ? details.publish_date : null,
-        subjects: genre[0].genres,
+        subjects,
         title: response.data.title,
         description: typeof description === 'string' ? description : description.value,
         subject_people: response2.data.subject_people,
@@ -99,6 +97,7 @@ export class BookRecord implements BookEntity {
         number_of_pages: response.data.number_of_pages,
         works: response.data.works[0].key,
         ...response.data,
+        status: shelvesResponseGet.data.counts,
         authors: response.data.authors,
         rating: ratingsResponseGet.data.summary.average ? ratingsResponseGet.data.summary.average : 0,
         ratingTypeAmount: newRatingCounts,
