@@ -13,6 +13,8 @@ export interface BookEntity {
     subjects?:string[],
     subject_people?:string[],
     description?:string,
+    works:{key:string}[],
+    number_of_pages:number,
     ratingTypeAmount?:number[],
     rating?:number,
     amountOfRates?:number,
