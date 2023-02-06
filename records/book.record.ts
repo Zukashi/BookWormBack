@@ -41,6 +41,7 @@ export class BookRecord implements BookEntity {
 
       const response2 = await axios.get(`https://openlibrary.org${response.data.works[0].key}.json`);
       const response3 = await axios.get(`http://localhost:3001/author${response.data.authors[0].key}`);
+      const ratingsResponseGet = await axios.get(`https://openlibrary.org${response.data.works[0].key}/ratings.json`);
       const bookDetails:HydratedDocument<BookEntity> = await axios.get(`https://openlibrary.org/api/books?bibkeys=ISBN:${this.isbn}&jscmd=details&format=json`);
       const newAuthor = new Author(response3.data);
       await newAuthor.save();
@@ -75,8 +76,19 @@ export class BookRecord implements BookEntity {
       });
       details.publish_date && genre[0].years.push(details.publish_date);
       response3.data.personal_name ? genre[0].authors.push(response3.data.personal_name) : genre[0].authors.push(response3.data.name);
+      function getSum(counts: { [key: string]: number }): number {
+        let sum = 0;
+        for (const key in counts) {
+          sum += parseInt(key) * counts[key];
+        }
+        return sum;
+      }
+      const newRatingCounts = Array(5).fill(0);
+      for (let i = 0; i < 5; i++) {
+        newRatingCounts[i] = parseInt(ratingsResponseGet.data.counts[`${i + 1}`], 10);
+      }
       await genre[0].save();
-      const book = new Book({
+      const book:HydratedDocument<BookEntity> = new Book({
         publish_date: details?.publish_date ? details.publish_date : null,
         subjects: genre[0].genres,
         title: response.data.title,
@@ -88,10 +100,10 @@ export class BookRecord implements BookEntity {
         works: response.data.works[0].key,
         ...response.data,
         authors: response.data.authors,
-        rating: 0,
-        ratingTypeAmount: Array(5).fill(0),
-        amountOfRates: 0,
-        sumOfRates: 0,
+        rating: ratingsResponseGet.data.summary.average ? ratingsResponseGet.data.summary.average : 0,
+        ratingTypeAmount: newRatingCounts,
+        amountOfRates: ratingsResponseGet.data.summary.count ? ratingsResponseGet.data.summary.count : 0,
+        sumOfRates: getSum(ratingsResponseGet.data.counts),
       });
       await book.save();
     }
