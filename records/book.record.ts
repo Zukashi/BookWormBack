@@ -54,14 +54,14 @@ export class BookRecord implements BookEntity {
         description = '';
       }
       const { details } = bookDetails.data[`ISBN:${this.isbn}`];
-      console.log(details);
+
       const oldSubjects = [...new Set(details.subjects)] as string[];
       function removeDuplicateWords(arr: string[]): string[] {
         return arr.filter((word) => !arr.some((existingWord) => existingWord.includes(word) && existingWord !== word));
       }
       const subjects = removeDuplicateWords(oldSubjects);
       const genre:any = await Genre.find({});
-      console.log(genre);
+      console.log(response.data.works[0].key[0].key);
       subjects?.forEach((subject:string) => {
         if (genre[0].genres.length === 0) {
           genre[0].genres = subjects;
@@ -84,6 +84,8 @@ export class BookRecord implements BookEntity {
         subject_people: response2.data.subject_people,
         author: response3.data.personal_name ? response3.data.personal_name : response3.data.name,
         isbn: this.isbn,
+        number_of_pages: response.data.number_of_pages,
+        works: response.data.works[0].key,
         ...response.data,
         authors: response.data.authors,
         rating: 0,
