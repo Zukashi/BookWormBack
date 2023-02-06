@@ -341,7 +341,21 @@ export class BookRecord implements BookEntity {
 
   static async filterBooksByYearAuthorOrSubject(req:Request, res:Response) {
     const books: HydratedDocument<BookEntity> = await Book.find({});
-    const newBooks = books.filter((book:BookEntity) => (book.author !== '' && book.author.includes(req.body.author) && req.body.year ? book.publish_date === req.body.year : true && req.body.genres ? book.subjects.includes(req.body.genres) : true));
+    const newBooks = books.filter((book:BookEntity) => {
+      let result = true;
+      if (req.body.author) {
+        result = result && (book.author === req.body.author);
+      }
+
+      if (req.body.genres) {
+        result = result && (book.subjects.includes(req.body.genres));
+      }
+
+      if (req.body.year) {
+        result = result && (req.body.year === book.publish_date);
+      }
+      return result;
+    });
     res.status(200).json(newBooks);
   }
 }
