@@ -129,14 +129,14 @@ export class UserRecord implements UserEntity {
     }
   }
 
-  async deleteBookFromFavorites(req:RequestEntityWithUser, res:Response) {
-    const { user } = req;
-    const bookIndex = user.favorites.findIndex((bookInFavorites) => bookInFavorites.id.toString() === req.params.bookId);
+  async deleteBookFromFavorites(req:Request, res:Response) {
+    const userPopulated = await User.findById(req.params.userId).populate('favorites');
+    const bookIndex = userPopulated.favorites.findIndex((bookInFavorites) => bookInFavorites.id.toString() === req.params.bookId);
     if (bookIndex === -1) throw new ValidationError('Book not found in favorites');
 
-    user.favorites.splice(bookIndex, 1);
-    await user.save();
-    res.status(200).json({ status: 'success', user });
+    userPopulated.favorites.splice(bookIndex, 1);
+    await userPopulated.save();
+    res.status(200).json({ status: 'success', userPopulated });
   }
 
   static async getFavoritesOfUser(req:RequestEntityWithUser, res:Response) {

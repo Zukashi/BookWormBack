@@ -44,8 +44,8 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
     await user.save();
     res.sendStatus(201);
   })
-  .delete('/:userId/book/:bookId/favorite', setUser, authenticateToken, async (req:RequestEntityWithUser, res) => {
-    const user = new UserRecord(req.user);
+  .delete('/:userId/book/:bookId/favorite', setUser, authenticateToken, async (req, res) => {
+    const user = new UserRecord(req.body);
     await user.deleteBookFromFavorites(req, res);
   })
   .post('/:userId/sms', authenticateToken, async (req, res) => {
