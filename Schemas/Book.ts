@@ -7,6 +7,8 @@ export const bookSchema = new mongoose.Schema<BookEntity>({
     type: String,
     required: true,
   },
+  number_of_pages: Number,
+  works: [{ key: String }],
   author: {
     type: String,
   },
