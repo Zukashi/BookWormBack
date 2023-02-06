@@ -49,7 +49,11 @@ export const bookSchema = new mongoose.Schema<BookEntity>({
     },
     description: String,
     rating: Number,
-    status: String,
+    status: {
+      want_to_read: Number,
+      currently_reading: Number,
+      already_read: Number,
+    },
     date: {
       type: Date,
       default: Date.now(),

@@ -18,6 +18,11 @@ export interface BookEntity {
     ratingTypeAmount?:number[],
     rating?:number,
     amountOfRates?:number,
+    status:{
+        want_to_read:number,
+        currently_reading:number,
+        already_read:number,
+    }
     sumOfRates?:number,
     reviews?: {
         readonly _id:string,
