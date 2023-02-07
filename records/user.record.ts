@@ -215,6 +215,7 @@ export class UserRecord implements UserEntity {
     const user:any = await User.findById(req.params.userId);
     user.shelves[req.body.status].push(req.params.bookId);
     await user.save();
+    console.log(req.body.status);
     book.reviews.push({
       user: req.params.userId,
       description: req.body.description,

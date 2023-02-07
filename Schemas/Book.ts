@@ -52,6 +52,7 @@ export const bookSchema = new mongoose.Schema<BookEntity>({
       type: mongoose.SchemaTypes.ObjectId,
       ref: 'User',
     },
+    status: String,
     description: String,
     rating: Number,
     date: {

@@ -218,6 +218,7 @@ export class BookRecord implements BookEntity {
       if (review.user.id !== req.params.userId) {
         return null;
       }
+      console.log(review);
       const user: any = await User.findById(req.params.userId).populate({
         path: `shelves.${review.status}`,
       });
