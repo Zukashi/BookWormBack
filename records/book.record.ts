@@ -348,7 +348,7 @@ export class BookRecord implements BookEntity {
         .filter((oneBook:BookEntity) => oneBook._id.toString() !== req.params.bookId);
       user.shelves[req.body.statuses.oldStatus] = filteredShelves;
       user.shelves[req.body.statuses.newStatus].push(req.params.bookId);
-      user.save();
+      await user.save();
       res.sendStatus(200);
     } catch (e) {
       res.sendStatus(404);

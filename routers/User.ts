@@ -86,4 +86,7 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
   })
   .get('/:userId/books', async (req, res) => {
     await UserRecord.getAllBooksFromShelves(req, res);
+  })
+  .get('/:userId/:bookId/status', async (req, res) => {
+    await UserRecord.getStatusOfBook(req, res);
   });
