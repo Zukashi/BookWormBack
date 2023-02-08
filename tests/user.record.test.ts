@@ -1,10 +1,12 @@
-import mongoose from 'mongoose';
+import mongoose, { HydratedDocument } from 'mongoose';
 import { UserRecord } from '../records/user.record';
 import { server } from '../index';
+import { UserEntity } from '../types';
 
-let user:UserRecord;
+let userNew:UserRecord;
 beforeAll(() => {
-  user = new UserRecord({
+  userNew = new UserRecord({
+    id: undefined,
     firstName: 'Test',
     age: 16,
     base64Avatar: '',
@@ -14,7 +16,6 @@ beforeAll(() => {
     role: '',
     username: '',
   });
-  user.insert();
 });
 
 afterAll(async () => {
@@ -22,10 +23,15 @@ afterAll(async () => {
   await server.close();
 });
 test('user password should exist', () => {
-  expect(user.password).toBeTruthy();
+  expect(userNew.password).toBeTruthy();
 });
 
-test('is user inserted correctly', () => {
-
+test('is  instance of userRecord', async () => {
+  const users = await UserRecord.getAllUsers();
+  expect(users[0]).toBeInstanceOf(UserRecord);
+  expect(users[0]).toBeDefined();
 });
-test('user should be exist');
+test('user should be exist', async () => {
+  const user = await UserRecord.getUser('63dac1e49dcd4c2de18bdf5d');
+  expect(user).toBeDefined();
+});
