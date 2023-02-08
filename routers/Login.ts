@@ -1,14 +1,17 @@
-import { Router } from 'express';
+import {
+  NextFunction, Request, Router, Response,
+} from 'express';
 import { HydratedDocument } from 'mongoose';
 import { User } from '../Schemas/User';
 import { UserRecord } from '../records/user.record';
 import { UserEntity } from '../types';
+import { RequestEntityWithUser } from '../types/request';
 
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 // eslint-disable-next-line import/prefer-default-export,no-undef
 export const loginRouter = Router();
-export async function setUser(req:any, res:any, next:any) {
+export async function setUser(req:RequestEntityWithUser, res:Response, next:NextFunction) {
   const user = await User.findOne({ refreshTokenId: req.cookies.refreshToken });
   if (user) {
     req.user = user;
