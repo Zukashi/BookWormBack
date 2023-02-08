@@ -287,7 +287,9 @@ export class UserRecord implements UserEntity {
     const { userId, bookId, status } = req.params;
     console.log(status);
     const user:any = await User.findById(userId);
-
-    user.shelves[req.params.status] = [...user.shelves[req.params.status], req.params.bookId];
+    console.log(1234);
+    user.shelves[req.params.status] = [...user.shelves[req.params.status], bookId];
+    await user.save();
+    res.end();
   }
 }

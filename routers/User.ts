@@ -89,4 +89,7 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
   })
   .get('/:userId/:bookId/status', async (req, res) => {
     await UserRecord.getStatusOfBook(req, res);
+  })
+  .patch('/:userId/:bookId/status', authenticateToken, async (req, res) => {
+    await UserRecord.setStatusOfBook(req, res);
   });
