@@ -17,9 +17,10 @@ export interface UserEntity {
     favorites?: BookEntity[],
     role:string,
     shelves?:{
-        read:Types.ObjectId[]
-        wantToRead:Types.ObjectId[]
-        currentlyReading:Types.ObjectId[]
+        [key:string]: Types.ObjectId[],
+        read:Types.ObjectId[],
+        wantToRead:Types.ObjectId[],
+        currentlyReading:Types.ObjectId[],
     },
     refreshTokenId?:string,
 }
