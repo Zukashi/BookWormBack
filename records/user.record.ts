@@ -1,19 +1,18 @@
-import { HydratedDocument, Types } from 'mongoose';
+import { HydratedDocument, ObjectId, Types } from 'mongoose';
 import { Response, Request } from 'express';
-import { v4 as uuidv4 } from 'uuid';
 import nodemailer from 'nodemailer';
+import Joi from 'joi';
 import { BookEntity, NewUserEntity, UserEntity } from '../types';
 import { User } from '../Schemas/User';
 import { ValidationError } from '../utils/errors';
 import { Book } from '../Schemas/Book';
 import { RequestEntityWithUser } from '../types/request';
 import { client } from '../index';
-import { BookRecord } from './book.record';
 
 const bcrypt = require('bcrypt');
 
 export class UserRecord implements UserEntity {
-  id: Types.ObjectId;
+  id:Types.ObjectId;
 
   age: number;
 
@@ -45,16 +44,12 @@ export class UserRecord implements UserEntity {
 
   username: string;
 
-  constructor(obj: HydratedDocument<UserEntity>) {
+  constructor(obj: UserEntity) {
     Object.assign(this, obj);
   }
 
-  async insert(res:Response):Promise<void> {
+  async insert():Promise<void> {
     const saltAmount = 10;
-
-    if (await User.findOne({ email: this.email })) res.status(400).json({ status: 'false', result: 'Email is taken', type: 'email' });
-    if (await User.findOne({ username: this.username })) res.status(400).json({ status: 'false', result: 'Username is taken', type: 'username' });
-
     if (this.id) {
       return;
     }
@@ -78,14 +73,14 @@ export class UserRecord implements UserEntity {
     });
   }
 
-  static async getAllUsers():Promise<HydratedDocument<UserEntity>[]> {
+  static async getAllUsers():Promise<UserRecord[]> {
     const users:HydratedDocument<UserEntity>[] = await User.find({});
-    return users;
+    return users.map((user:HydratedDocument<UserEntity>) => new UserRecord(user));
   }
 
-  static async getUser(id:string):Promise<UserEntity> {
+  static async getUser(id:string):Promise<UserRecord> {
     const user:HydratedDocument<UserEntity> = await User.findById(id);
-    return user;
+    return new UserRecord(user);
   }
 
   async updateUser(newUser:UserEntity, res:Response):Promise<void> {
@@ -272,19 +267,25 @@ export class UserRecord implements UserEntity {
 
   static async getStatusOfBook(req:Request, res:Response) {
     const user:HydratedDocument<UserEntity> = await User.findById(req.params.userId);
-    let foundBookIdInShelves = '';
     let typeOfShelf = '';
     for (const [key, valueBookIdArr] of Object.entries(user.shelves)) {
       const foundId = valueBookIdArr.find((id) => id.toString() === req.params.bookId);
       if (foundId) {
         typeOfShelf = key;
-        foundBookIdInShelves = foundId.toString();
       }
     }
-    if (foundBookIdInShelves) {
-      res.status(200).json({ typeOfShelf, foundBookIdInShelves });
+    if (typeOfShelf) {
+      res.status(200).json({ typeOfShelf });
     } else {
       res.status(500);
     }
+  }
+
+  static async setStatusOfBook(req:Request, res:Response) {
+    const { userId, bookId, status } = req.params;
+    console.log(status);
+    const user:any = await User.findById(userId);
+
+    user.shelves[req.params.status] = [...user.shelves[req.params.status], req.params.bookId];
   }
 }

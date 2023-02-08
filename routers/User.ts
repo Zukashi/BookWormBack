@@ -16,7 +16,7 @@ const bcrypt = require('bcrypt');
 export const userRouter = Router();
 
 userRouter.get('/users', authenticateToken, async (req, res) => {
-  const users = await UserRecord.getAllUsers() as HydratedDocument<UserEntity>[];
+  const users = await UserRecord.getAllUsers();
   res.json(users);
 }).get('/:userId', setUser, authenticateToken, async (req:RequestEntityWithUser, res) => {
   res.json(req.user);
