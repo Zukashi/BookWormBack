@@ -8,6 +8,7 @@ import { ValidationError } from '../utils/errors';
 import { Book } from '../Schemas/Book';
 import { RequestEntityWithUser } from '../types/request';
 import { client } from '../index';
+import { filterUsersByValue } from '../functions/users/getFilteredUsersByValue';
 
 const bcrypt = require('bcrypt');
 
@@ -74,8 +75,8 @@ export class UserRecord implements UserEntity {
   }
 
   static async getAllUsers():Promise<UserRecord[]> {
-    const users:HydratedDocument<UserEntity>[] = await User.find({});
-    return users.map((user:HydratedDocument<UserEntity>) => new UserRecord(user));
+    const users:UserEntity[] = await User.find({}).lean();
+    return users.map((user:UserEntity) => new UserRecord(user));
   }
 
   static async getUser(id:string):Promise<UserRecord> {
@@ -97,8 +98,9 @@ export class UserRecord implements UserEntity {
   }
 
   static async getSearchedUsers(req:Request, res:Response) {
-    const users: UserRecord[] = await User.find({});
-    const newUsers = users.filter((user) => user.username?.toLowerCase().trim().includes(req.body.value.toLowerCase()) || user.firstName?.toLowerCase().trim().includes(req.body.value) || user.lastName?.toLowerCase().trim().includes(req.body.value));
+    const users: UserEntity[] = await User.find({});
+    const newUsers = filterUsersByValue(users, req.body.value);
+    console.log(newUsers);
     if (!req.body.value) {
       res.status(200).json(users);
     } else {
