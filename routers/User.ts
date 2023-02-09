@@ -90,7 +90,13 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
     }
   })
   .put('/:userId/book/:bookId', async (req, res) => {
-    await UserRecord.updateBookReview(req, res);
+    try {
+      await UserRecord.updateBookReview(req);
+    } catch (e) {
+      res.status(400);
+      throw new Error(e);
+    }
+    res.sendStatus(201);
   })
   .get('/:userId/books', async (req, res) => {
     await UserRecord.getAllBooksFromShelves(req, res);
