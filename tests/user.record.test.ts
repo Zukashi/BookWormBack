@@ -10,6 +10,7 @@ import { User } from '../Schemas/User';
 import { Book } from '../Schemas/Book';
 import { getOneReview } from '../functions/users/getOneReview';
 import { OneReview } from '../types/book/book-entity';
+import { BookRecord } from '../records/book.record';
 
 let userNew:UserRecord;
 
@@ -94,7 +95,20 @@ test('add review', async () => {
   await UserRecord.addBookReview(reqReview);
 });
 
+test('remove one review', async () => {
+  const reqParams:any = {
+    params: {
+      userId: '63dac1e49dcd4c2de18bdf5d',
+      bookId: '63e18520707b083af13c97c7',
+      previousRating: 3,
+    },
+  };
+  await BookRecord.deleteRating2(reqParams);
+  const review:OneReview = await getOneReview(req);
+  expect(review).toBeUndefined();
+});
+
 test('get one review ', async () => {
   const review:OneReview = await getOneReview(req);
-  expect(review).toBeDefined();
+  expect(review).toBeUndefined();
 });

@@ -48,7 +48,7 @@ bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (re
     await BookRecord.deleteRating(req, res);
   })
   .delete('/book/:bookId/user/:userId/review/:previousRating', authenticateToken, async (req, res) => {
-    await BookRecord.deleteRating2(req, res);
+    await BookRecord.deleteRating2(req);
   })
   .get('/book/:bookId/reviews', authenticateToken, async (req, res) => {
     const book: any = await Book.findById(req.params.bookId).populate({

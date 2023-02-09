@@ -7,6 +7,8 @@ import { Book } from '../Schemas/Book';
 import { User } from '../Schemas/User';
 import { Author } from '../Schemas/Author';
 import { Genre } from '../Schemas/Genre';
+import { OneReview } from '../types/book/book-entity';
+import { UserRecord } from './user.record';
 
 export class BookRecord implements BookEntity {
   private readonly isbn: string;
@@ -197,13 +199,13 @@ export class BookRecord implements BookEntity {
   }
 
   // @TODO SEARCH FOR DELETE RATING AND MAKE ONE FUNCTION INSTEAD OF 2
-  static async deleteRating2(req:Request, res:Response) {
+  static async deleteRating2(req:Request) {
     const book: HydratedDocument<BookEntity> = await Book.findById(req.params.bookId).populate({
       path: 'reviews.user',
     });
 
     if (!book) {
-      res.sendStatus(404);
+      throw new Error('Book not found');
     }
     book.ratingTypeAmount[(parseInt(req.params.previousRating, 10)) - 1] -= 1;
     book.sumOfRates -= parseInt(req.params.previousRating, 10);
@@ -213,17 +215,17 @@ export class BookRecord implements BookEntity {
     } else {
       book.rating = 0;
     }
-    const result = book.reviews.filter((review:any):any => review.user.id !== req.params.userId);
-    book.reviews.forEach(async (review:any):Promise<null> => {
-      if (review.user.id !== req.params.userId) {
+    const result:OneReview[] = book.reviews.filter((review:OneReview):boolean => review.user.id.toString() !== req.params.userId);
+    book.reviews.forEach(async (review:OneReview):Promise<void> => {
+      if (review.user.id.toString() !== req.params.userId) {
         return null;
       }
       console.log(review);
-      const user: any = await User.findById(req.params.userId).populate({
+      const user: HydratedDocument<UserEntity> = await User.findById(req.params.userId).populate({
         path: `shelves.${review.status}`,
       });
       if (!user) {
-        res.sendStatus(404);
+        throw new Error('User not found');
       }
       console.log(user.shelves.read);
       const newShelf = user.shelves[review.status].filter((book:BookEntity) => req.params.bookId !== book.id.toString());
@@ -233,7 +235,6 @@ export class BookRecord implements BookEntity {
     console.log(result);
     book.reviews = [...result];
     await book.save();
-    res.end();
   }
 
   static async addCommentToReview(req:Request, res:Response) {
