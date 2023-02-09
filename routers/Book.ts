@@ -22,13 +22,16 @@ bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (re
   .post('/book', authenticateToken, async (req, res) => {
     const book = new BookRecord(req.body);
     try {
+      setTimeout(() => {
+        res.status(500).json('Cannot add book.');
+      }, 5000);
       await book.insert(req);
+      res.sendStatus(201);
     } catch (e) {
       if (e instanceof ValidationError) {
         res.status(e.statusCode).json(e.message);
       }
     }
-    res.sendStatus(201);
   })
   .put('/book/:bookId', authenticateToken, async (req, res) => {
     const book = new BookRecord(req.body);

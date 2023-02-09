@@ -28,7 +28,7 @@ test('insert book ', async () => {
 });
 
 test('book delete', async () => {
-  await BookRecord.deleteOneBook(bookId);
+  await BookRecord.deleteOneBook('12345');
   const book = await Book.findById(bookId);
   expect(book).toBeNull();
 });
