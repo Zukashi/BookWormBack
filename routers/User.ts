@@ -45,8 +45,12 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
     res.sendStatus(201);
   })
   .delete('/:userId/book/:bookId/favorite', setUser, authenticateToken, async (req, res) => {
-    const newUser = await UserRecord.deleteBookFromFavorites(req);
-    res.status(200).json({ status: 'success', newUser });
+    try {
+      const newUser = await UserRecord.deleteBookFromFavorites(req);
+      res.status(200).json({ status: 'success', newUser });
+    } catch (e) {
+      res.status(e.statusCode).json(e.message);
+    }
   })
   .post('/:userId/sms', authenticateToken, async (req, res) => {
     await UserRecord.sendSmsForPinForPasswordReset(req, res);
@@ -85,8 +89,7 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
       await UserRecord.addBookReview(req);
       res.sendStatus(201);
     } catch (e) {
-      console.log(e);
-      res.end();
+      res.status(e.statusCode).json(e.message);
     }
   })
   .put('/:userId/book/:bookId', async (req, res) => {
@@ -94,7 +97,7 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
       await UserRecord.updateBookReview(req);
     } catch (e) {
       res.status(400);
-      throw new Error(e);
+      res.json(e.message);
     }
     res.sendStatus(201);
   })
@@ -102,7 +105,16 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
     await UserRecord.getAllBooksFromShelves(req, res);
   })
   .get('/:userId/:bookId/status', async (req, res) => {
-    await UserRecord.getStatusOfBook(req, res);
+    try {
+      const typeOfShelf = await UserRecord.getStatusOfBook(req);
+      if (typeOfShelf) {
+        res.status(200).json({ typeOfShelf });
+      } else {
+        res.status(500);
+      }
+    } catch (e) {
+      res.status(e.statusCode).json(e.message);
+    }
   })
   .patch('/:userId/:bookId/status', authenticateToken, async (req, res) => {
     await UserRecord.setStatusOfBook(req, res);
