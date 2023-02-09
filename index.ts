@@ -20,7 +20,7 @@ const cors = require('cors');
 
 // see https://github.com/motdotla/dotenv#how-do-i-use-dotenv-with-import
 
-const app = express();
+export const app = express();
 app.use(cors({
   origin: 'http://localhost:3000',
   credentials: true,

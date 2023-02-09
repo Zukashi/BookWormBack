@@ -1,10 +1,13 @@
 import mongoose, { HydratedDocument } from 'mongoose';
+import request from 'supertest';
+
 import express from 'express';
 import { UserRecord } from '../records/user.record';
-import { server } from '../index';
-import { UserEntity } from '../types';
+import { app, server } from '../index';
+import { BookEntity, UserEntity } from '../types';
 import { filterUsersByValue } from '../functions/users/getFilteredUsersByValue';
 import { User } from '../Schemas/User';
+import { Book } from '../Schemas/Book';
 
 let userNew:UserRecord;
 
@@ -48,4 +51,22 @@ test('test if filtering users is correct', async () => {
 
   expect(filteredUsers).toHaveLength(1);
   expect(new UserRecord(user)).toStrictEqual(filteredUsers[0]);
+});
+test('is book added to favorites', async () => {
+  const req:any = {
+    params: {
+      userId: '63dac1e49dcd4c2de18bdf5d',
+      bookId: '63e18520707b083af13c97c7',
+    },
+  };
+  const formerUser:UserEntity = await User.findById(req.params.userId);
+  const book:BookEntity = await Book.findById(req.params.bookId);
+  const newUser = await UserRecord.addToFavorites(book, req.params.userId);
+  const result = newUser.favorites.find((bookFavorite) => bookFavorite.id.toString() === req.params.bookId);
+  expect(result).toBeTruthy();
+
+  // expect(formerUser.favorites.length).toEqual(0);
+  // const user = await UserRecord.deleteBookFromFavorites(req);
+  // expect(user).toBeDefined();
+  // expect(user.favorites.length).toBeLessThan(formerUser.favorites.length);
 });

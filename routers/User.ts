@@ -26,8 +26,10 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
 }).post('/search/:value', authenticateToken, async (req, res) => {
   await UserRecord.getSearchedUsers(req, res);
 })
-  .put('/password', authenticateToken, async (req, res) => {
-    await UserRecord.updatePassword(req, res);
+  .put('/password', async (req, res) => {
+    const user = await UserRecord.updatePassword(req, res);
+    console.log(12345);
+    res.status(200).json(user);
   })
   .put('/:userId/avatar', setUser, authenticateToken, async (req:RequestEntityWithUser, res) => {
     const user = await new UserRecord(req.user);
@@ -39,17 +41,16 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
     await user.updateUser(req.body, res);
   })
   .put('/:userId/favorite', authenticateToken, async (req, res) => {
-    const user = await User.findById(req.params.userId);
-    user.favorites.push(req.body);
-    await user.save();
+    await UserRecord.addToFavorites(req.body, req.params.userId);
     res.sendStatus(201);
   })
   .delete('/:userId/book/:bookId/favorite', setUser, authenticateToken, async (req, res) => {
-    const user = new UserRecord(req.body);
-    await user.deleteBookFromFavorites(req, res);
+    const newUser = await UserRecord.deleteBookFromFavorites(req);
+    res.status(200).json({ status: 'success', newUser });
   })
   .post('/:userId/sms', authenticateToken, async (req, res) => {
     await UserRecord.sendSmsForPinForPasswordReset(req, res);
+    res.sendStatus(201);
   })
   .get('/:userId/favorites', setUser, authenticateToken, async (req:RequestEntityWithUser, res) => {
     await UserRecord.getFavoritesOfUser(req, res);

@@ -108,7 +108,7 @@ export class UserRecord implements UserEntity {
     }
   }
 
-  static async updatePassword(req:Request, res:Response) {
+  static async updatePassword(req:Request, res:Response):Promise<UserEntity> {
     const user = await User.findById(`${req.body.id}`);
     const isSamePassword = await bcrypt.compare(req.body.currentPassword, user.password);
     if (isSamePassword) {
@@ -124,16 +124,17 @@ export class UserRecord implements UserEntity {
     } else {
       res.status(400).json('Current Password Invalid');
     }
+    return user;
   }
 
-  async deleteBookFromFavorites(req:Request, res:Response) {
+  static async deleteBookFromFavorites(req:Request) {
     const userPopulated = await User.findById(req.params.userId).populate('favorites');
     const bookIndex = userPopulated.favorites.findIndex((bookInFavorites) => bookInFavorites.id.toString() === req.params.bookId);
     if (bookIndex === -1) throw new ValidationError('Book not found in favorites');
 
     userPopulated.favorites.splice(bookIndex, 1);
     await userPopulated.save();
-    res.status(200).json({ status: 'success', userPopulated });
+    return userPopulated;
   }
 
   static async getFavoritesOfUser(req:RequestEntityWithUser, res:Response) {
@@ -291,5 +292,12 @@ export class UserRecord implements UserEntity {
     user.shelves[req.params.status] = [...user.shelves[req.params.status], bookId];
     await user.save();
     res.end();
+  }
+
+  static async addToFavorites(body: BookEntity, userId:string) {
+    const user = await User.findById(userId);
+    user.favorites.push(body);
+    await user.save();
+    return user;
   }
 }
