@@ -41,8 +41,12 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
     await user.updateUser(req.body, res);
   })
   .put('/:userId/favorite', authenticateToken, async (req, res) => {
-    await UserRecord.addToFavorites(req.body, req.params.userId);
-    res.sendStatus(201);
+    try {
+      await UserRecord.addToFavorites(req.body, req.params.userId);
+      res.sendStatus(201);
+    } catch (e) {
+      res.status(e.statusCode).json(e.message);
+    }
   })
   .delete('/:userId/book/:bookId/favorite', setUser, authenticateToken, async (req, res) => {
     try {
@@ -96,7 +100,7 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
     try {
       await UserRecord.updateBookReview(req);
     } catch (e) {
-      res.status(400);
+      res.status(e.statusCode);
       res.json(e.message);
     }
     res.sendStatus(201);

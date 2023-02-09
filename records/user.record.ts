@@ -132,7 +132,7 @@ export class UserRecord implements UserEntity {
   static async deleteBookFromFavorites(req:Request) {
     const userPopulated = await User.findById(req.params.userId).populate('favorites');
     const bookIndex = userPopulated.favorites.findIndex((bookInFavorites) => bookInFavorites.id.toString() === req.params.bookId);
-    if (bookIndex === -1) throw new ValidationError('Book not found in favorites');
+    if (bookIndex === -1) throw new ValidationError('Book not found in favorites', 404);
 
     userPopulated.favorites.splice(bookIndex, 1);
     await userPopulated.save();
@@ -183,7 +183,7 @@ export class UserRecord implements UserEntity {
   static async getReview(req:Request, res:Response) {
     const reviewFound = await getOneReview(req);
     if (!reviewFound) {
-      res.sendStatus(200);
+      res.sendStatus(500);
     } else {
       res.status(200).json(reviewFound);
     }
@@ -204,14 +204,13 @@ export class UserRecord implements UserEntity {
     try {
       await schemaNewReview.validateAsync(req.body);
     } catch (e) {
-      throw new Error('Incorrect data provided to review form');
+      throw new ValidationError('Incorrect data provided to review form', 400);
     }
     const user = await User.findById(req.params.userId);
     if (book.reviews.some((review:OneReview) => review.user.id === user.id)) throw new Error('Review already exists');
     user.shelves[req.body.status].push(new Types.ObjectId(req.params.bookId));
     await user.save();
 
-    console.log(req.body.status);
     book.reviews.push({
       user: req.params.userId,
       description: req.body.description,
@@ -232,6 +231,7 @@ export class UserRecord implements UserEntity {
       .populate({
         path: 'reviews.user',
       })as HydratedDocument<BookEntity>;
+    if (!book) throw new ValidationError('Book not found', 404);
     let oldReview:OneReview | undefined;
     book.reviews.forEach((review:OneReview, i:number) => {
       if (review.user.id.toString() === req.params.userId) {
@@ -263,7 +263,7 @@ export class UserRecord implements UserEntity {
     res.end();
   }
 
-  static async getStatusOfBook(req:Request, res:Response) {
+  static async getStatusOfBook(req:Request) {
     const user:HydratedDocument<UserEntity> = await User.findById(req.params.userId);
     let typeOfShelf = '';
     for (const [key, valueBookIdArr] of Object.entries(user.shelves)) {
@@ -272,25 +272,20 @@ export class UserRecord implements UserEntity {
         typeOfShelf = key;
       }
     }
-    if (typeOfShelf) {
-      res.status(200).json({ typeOfShelf });
-    } else {
-      res.status(500);
-    }
+    return typeOfShelf;
   }
 
   static async setStatusOfBook(req:Request, res:Response) {
     const { userId, bookId, status } = req.params;
-    console.log(status);
-    const user:any = await User.findById(userId);
-    console.log(1234);
-    user.shelves[req.params.status] = [...user.shelves[req.params.status], bookId];
+    const user:HydratedDocument<UserEntity> = await User.findById(userId);
+    user.shelves[status] = [...user.shelves[status], new Types.ObjectId(bookId)];
     await user.save();
-    res.end();
+    res.sendStatus(201);
   }
 
   static async addToFavorites(body: BookEntity, userId:string) {
     const user = await User.findById(userId);
+    if (!user) throw new ValidationError('User not found', 404);
     user.favorites.push(body);
     await user.save();
     return user;
