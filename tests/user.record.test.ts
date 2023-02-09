@@ -95,6 +95,31 @@ test('add review', async () => {
   await UserRecord.addBookReview(reqReview);
 });
 
+test('get one review ', async () => {
+  const review:OneReview = await getOneReview(req);
+  expect(review).toBeDefined();
+});
+
+test('update review ', async () => {
+  const reqReview:any = {
+    body: {
+      rating: 4,
+      description: '',
+      status: 'wantToRead',
+      spoilers: false,
+      comments: [],
+    },
+    params: {
+      userId: '63dac1e49dcd4c2de18bdf5d',
+      bookId: '63e18520707b083af13c97c7',
+    },
+  };
+  const oldReview = await getOneReview(reqReview);
+  await UserRecord.updateBookReview(reqReview);
+  const review = await getOneReview(reqReview);
+
+  expect(oldReview).not.toStrictEqual(review);
+});
 test('remove one review', async () => {
   const reqParams:any = {
     params: {
@@ -104,11 +129,6 @@ test('remove one review', async () => {
     },
   };
   await BookRecord.deleteRating2(reqParams);
-  const review:OneReview = await getOneReview(req);
-  expect(review).toBeUndefined();
-});
-
-test('get one review ', async () => {
   const review:OneReview = await getOneReview(req);
   expect(review).toBeUndefined();
 });
