@@ -1,6 +1,12 @@
 import { NextFunction, Request, Response } from 'express';
 
 export class ValidationError extends Error {
+  public statusCode:number;
+
+  constructor(message:string, statusCode:number) {
+    super(message);
+    this.statusCode = statusCode;
+  }
 }
 
 export const handleError = (err: Error, req: Request, res: Response, next: NextFunction) => {
