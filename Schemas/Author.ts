@@ -21,7 +21,9 @@ export const authorSchema = new mongoose.Schema<AuthorEntity>({
   name: String,
   birth_date: String,
   photos: [String],
-  bio: String,
+  bio: String || {
+    value: String,
+  },
   last_modified: Schema.Types.Mixed,
 
 });

@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { HydratedDocument } from 'mongoose';
+import Joi from 'joi';
 import { Book } from '../Schemas/Book';
 import { authenticateToken, authRole, setUser } from './Login';
 import { BookRecord } from '../records/book.record';
@@ -19,7 +20,11 @@ bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (re
 })
   .post('/book', authenticateToken, async (req, res) => {
     const book = new BookRecord(req.body);
-    await book.insert(res);
+    try {
+      await book.insert(req);
+    } catch (e) {
+      res.status(e.statusCode).json(e.message);
+    }
     res.sendStatus(201);
   })
   .put('/book/:bookId', authenticateToken, async (req, res) => {

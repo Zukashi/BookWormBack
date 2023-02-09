@@ -2,6 +2,7 @@ import axios from 'axios';
 import { Response, Request } from 'express';
 import mongoose, { HydratedDocument, Types } from 'mongoose';
 import { ObjectId } from 'mongodb';
+import Joi from 'joi';
 import { BookEntity, NewBookEntity, UserEntity } from '../types';
 import { Book } from '../Schemas/Book';
 import { User } from '../Schemas/User';
@@ -27,18 +28,22 @@ export class BookRecord implements BookEntity {
     this.title = obj.title;
   }
 
-  async insert(res: Response): Promise<void> {
+  async insert(req:Request): Promise<void> {
+    const newBookSchema = Joi.object({
+      isbn: Joi.string().min(10).max(13).required(),
+      title: Joi.string(),
+      author: Joi.string(),
+    });
+    await newBookSchema.validateAsync(req.body);
     if (await Book.findOne({ isbn: this.isbn })) {
-      res.status(409);
-      throw new Error('Book is already in the database');
+      throw new ValidationError('Book is already in the database', 409);
     } else {
       this.id = new mongoose.Types.ObjectId();
       let response;
       try {
         response = await axios.get(`https://openlibrary.org/isbn/${this.isbn}.json`);
       } catch (e) {
-        res.sendStatus(404);
-        return;
+        throw new ValidationError('isbn of book doesnt exist in external api', 404);
       }
 
       const response2 = await axios.get(`https://openlibrary.org${response.data.works[0].key}.json`);
@@ -46,6 +51,7 @@ export class BookRecord implements BookEntity {
       const ratingsResponseGet = await axios.get(`https://openlibrary.org${response.data.works[0].key}/ratings.json`);
       const shelvesResponseGet = await axios.get(`https://openlibrary.org${response.data.works[0].key}/bookshelves.json`);
       const bookDetails:HydratedDocument<BookEntity> = await axios.get(`https://openlibrary.org/api/books?bibkeys=ISBN:${this.isbn}&jscmd=details&format=json`);
+      response3.data.bio = response3.data.bio.value ? response3.data.bio.value : response3.data;
       const newAuthor = new Author(response3.data);
       await newAuthor.save();
 
@@ -108,6 +114,7 @@ export class BookRecord implements BookEntity {
         sumOfRates: getSum(ratingsResponseGet.data.counts),
       });
       await book.save();
+      return book;
     }
   }
 
