@@ -33,9 +33,12 @@ bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (re
     res.sendStatus(200);
   })
   .delete('/book/:bookId', authenticateToken, async (req, res) => {
-    const { bookId } = req.params;
-    await Book.deleteOne({ _id: bookId });
-    res.sendStatus(204);
+    try {
+      await BookRecord.deleteOneBook(req.params.bookId);
+      res.sendStatus(204);
+    } catch (e) {
+      res.status(e.statusCode).json(e.message);
+    }
   })
   .post('/book/:bookId/:rating', authenticateToken, async (req, res) => {
     try {

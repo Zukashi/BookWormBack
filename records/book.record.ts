@@ -28,7 +28,7 @@ export class BookRecord implements BookEntity {
     this.title = obj.title;
   }
 
-  async insert(req:Request): Promise<void> {
+  async insert(req:Request): Promise<string> {
     const newBookSchema = Joi.object({
       isbn: Joi.string().min(10).max(13).required(),
       title: Joi.string(),
@@ -114,7 +114,7 @@ export class BookRecord implements BookEntity {
         sumOfRates: getSum(ratingsResponseGet.data.counts),
       });
       await book.save();
-      return book;
+      return book.id;
     }
   }
 
@@ -373,5 +373,13 @@ export class BookRecord implements BookEntity {
       return result;
     });
     res.status(200).json(newBooks);
+  }
+
+  static async deleteOneBook(BookId: string) {
+    try {
+      await Book.deleteOne({ id: BookId });
+    } catch (e) {
+      throw new ValidationError('id doesnt exits in database', 400);
+    }
   }
 }
