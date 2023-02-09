@@ -189,13 +189,14 @@ export class UserRecord implements UserEntity {
     }
   }
 
-  static async addBookReview(req: Request, res: Response) {
+  static async addBookReview(req: Request) {
     const book:HydratedDocument<BookEntity> = await Book.findById(req.params.bookId)
       .populate({
         path: 'reviews.user',
       });
+    console.log(req.body);
     const schemaNewReview = Joi.object({
-      description: Joi.string().empty().required(),
+      description: Joi.string().valid(''),
       rating: Joi.number().min(1).max(5).required(),
       status: Joi.string().valid('wantToRead', 'currentlyReading', 'read'),
       spoilers: Joi.boolean(),
@@ -204,10 +205,11 @@ export class UserRecord implements UserEntity {
     try {
       await schemaNewReview.validateAsync(req.body);
     } catch (e) {
+      console.log(e);
       throw new Error('Incorrect data provided to review form');
     }
     const user = await User.findById(req.params.userId);
-    if (book.reviews.some((review:OneReview) => review.user.id === user.id)) res.sendStatus(400);
+    if (book.reviews.some((review:OneReview) => review.user.id === user.id)) throw new Error('Review already exists');
     user.shelves[req.body.status].push(new Types.ObjectId(req.params.bookId));
     await user.save();
 
@@ -225,7 +227,6 @@ export class UserRecord implements UserEntity {
       },
     });
     await book.save();
-    res.json(book).status(201);
   }
 
   static async updateBookReview(req:Request, res:Response) {
