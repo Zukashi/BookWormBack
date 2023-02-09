@@ -8,6 +8,8 @@ import { BookEntity, UserEntity } from '../types';
 import { filterUsersByValue } from '../functions/users/getFilteredUsersByValue';
 import { User } from '../Schemas/User';
 import { Book } from '../Schemas/Book';
+import { getOneReview } from '../functions/users/getOneReview';
+import { OneReview } from '../types/book/book-entity';
 
 let userNew:UserRecord;
 
@@ -24,7 +26,12 @@ beforeAll(() => {
     username: '',
   });
 });
-
+const req:any = {
+  params: {
+    userId: '63dac1e49dcd4c2de18bdf5d',
+    bookId: '63e18520707b083af13c97c7',
+  },
+};
 afterAll(async () => {
   await mongoose.disconnect();
   await server.close();
@@ -53,12 +60,6 @@ test('test if filtering users is correct', async () => {
   expect(new UserRecord(user)).toStrictEqual(filteredUsers[0]);
 });
 test('is book added to favorites', async () => {
-  const req:any = {
-    params: {
-      userId: '63dac1e49dcd4c2de18bdf5d',
-      bookId: '63e18520707b083af13c97c7',
-    },
-  };
   const formerUser:UserEntity = await User.findById(req.params.userId);
   const book:BookEntity = await Book.findById(req.params.bookId);
   const newUser = await UserRecord.addToFavorites(book, req.params.userId);
@@ -67,12 +68,6 @@ test('is book added to favorites', async () => {
 });
 
 test('was book removed from favorites of user', async () => {
-  const req:any = {
-    params: {
-      userId: '63dac1e49dcd4c2de18bdf5d',
-      bookId: '63e18520707b083af13c97c7',
-    },
-  };
   const formerUser:UserEntity = await User.findById(req.params.userId);
   const book:BookEntity = await Book.findById(req.params.bookId);
   const formerLength = formerUser.favorites.length;
@@ -80,4 +75,26 @@ test('was book removed from favorites of user', async () => {
   expect(formerLength).toBeGreaterThan(user.favorites.length);
   expect(user).toBeDefined();
   expect(user.favorites.find((bookEntity) => bookEntity.id === req.params.bookId)).toBeUndefined();
+});
+
+test('add review', async () => {
+  const reqReview:any = {
+    body: {
+      rating: 3,
+      description: '',
+      status: 'read',
+      spoilers: false,
+      comments: [],
+    },
+    params: {
+      userId: '63dac1e49dcd4c2de18bdf5d',
+      bookId: '63e18520707b083af13c97c7',
+    },
+  };
+  await UserRecord.addBookReview(reqReview);
+});
+
+test('get one review ', async () => {
+  const review:OneReview = await getOneReview(req);
+  expect(review).toBeDefined();
 });

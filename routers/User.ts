@@ -74,13 +74,20 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
     res.json(user);
   })
   .put('/:userId/newPassword', async (req, res) => {
-    await UserRecord.newPassword(req, res);
+    await UserRecord.newPassword(req);
+    res.sendStatus(204);
   })
   .get('/:userId/book/:bookId', setUser, async (req:Request, res) => {
     await UserRecord.getReview(req, res);
   })
   .post('/:userId/book/:bookId', async (req, res) => {
-    await UserRecord.addBookReview(req, res);
+    try {
+      await UserRecord.addBookReview(req);
+      res.sendStatus(201);
+    } catch (e) {
+      console.log(e);
+      res.end();
+    }
   })
   .put('/:userId/book/:bookId', async (req, res) => {
     await UserRecord.updateBookReview(req, res);
