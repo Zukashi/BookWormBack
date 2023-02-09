@@ -9,6 +9,8 @@ import { Book } from '../Schemas/Book';
 import { RequestEntityWithUser } from '../types/request';
 import { client } from '../index';
 import { filterUsersByValue } from '../functions/users/getFilteredUsersByValue';
+import { getOneReview } from '../functions/users/getOneReview';
+import { OneReview } from '../types/book/book-entity';
 
 const bcrypt = require('bcrypt');
 
@@ -169,37 +171,19 @@ export class UserRecord implements UserEntity {
     });
   }
 
-  static async newPassword(req:Request, res:Response) {
+  static async newPassword(req:Request) {
     const saltAmount = 10;
     const user = await User.findById(req.params.userId);
     bcrypt.hash(req.body.newPassword, saltAmount, async (err:string, hash:string) => {
       user.password = hash;
       user.save();
-      res.sendStatus(204);
     });
   }
 
   static async getReview(req:Request, res:Response) {
-    const booksPopulated:any = await Book.findById(req.params.bookId)
-      .populate({
-        path: 'reviews.user',
-      });
-    let reviewFound;
-
-    booksPopulated.reviews.forEach((review:BookEntity) => {
-      if (review.user.id === req.params.userId) {
-        reviewFound = {
-          userId: review.user.id,
-          description: review.description,
-          rating: review.rating,
-          status: review.status,
-          date: review.date,
-          spoilers: review.spoilers,
-        };
-      }
-    });
+    const reviewFound = await getOneReview(req);
     if (!reviewFound) {
-      res.sendStatus(404).end();
+      res.sendStatus(200);
     } else {
       res.status(200).json(reviewFound);
     }
@@ -210,9 +194,23 @@ export class UserRecord implements UserEntity {
       .populate({
         path: 'reviews.user',
       });
-    const user:any = await User.findById(req.params.userId);
-    user.shelves[req.body.status].push(req.params.bookId);
+    const schemaNewReview = Joi.object({
+      description: Joi.string().empty().required(),
+      rating: Joi.number().min(1).max(5).required(),
+      status: Joi.string().valid('wantToRead', 'currentlyReading', 'read'),
+      spoilers: Joi.boolean(),
+      comments: Joi.array().empty(),
+    });
+    try {
+      await schemaNewReview.validateAsync(req.body);
+    } catch (e) {
+      throw new Error('Incorrect data provided to review form');
+    }
+    const user = await User.findById(req.params.userId);
+    if (book.reviews.some((review:OneReview) => review.user.id === user.id)) res.sendStatus(400);
+    user.shelves[req.body.status].push(new Types.ObjectId(req.params.bookId));
     await user.save();
+
     console.log(req.body.status);
     book.reviews.push({
       user: req.params.userId,
