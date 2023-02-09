@@ -31,10 +31,16 @@ export class BookRecord implements BookEntity {
   async insert(req:Request): Promise<string> {
     const newBookSchema = Joi.object({
       isbn: Joi.string().min(10).max(13).required(),
-      title: Joi.string(),
-      author: Joi.string(),
+      title: Joi.string().allow(''),
+      author: Joi.string().allow(''),
     });
-    await newBookSchema.validateAsync(req.body);
+
+    try {
+      await newBookSchema.validateAsync(req.body);
+    } catch (e) {
+      throw new ValidationError('Incorrect data', 400);
+    }
+
     if (await Book.findOne({ isbn: this.isbn })) {
       throw new ValidationError('Book is already in the database', 409);
     } else {
@@ -45,13 +51,17 @@ export class BookRecord implements BookEntity {
       } catch (e) {
         throw new ValidationError('isbn of book doesnt exist in external api', 404);
       }
-
       const response2 = await axios.get(`https://openlibrary.org${response.data.works[0].key}.json`);
+
       const response3 = await axios.get(`http://localhost:3001/author${response.data.authors[0].key}`);
+
       const ratingsResponseGet = await axios.get(`https://openlibrary.org${response.data.works[0].key}/ratings.json`);
+
       const shelvesResponseGet = await axios.get(`https://openlibrary.org${response.data.works[0].key}/bookshelves.json`);
+
       const bookDetails:HydratedDocument<BookEntity> = await axios.get(`https://openlibrary.org/api/books?bibkeys=ISBN:${this.isbn}&jscmd=details&format=json`);
-      response3.data.bio = response3.data.bio.value ? response3.data.bio.value : response3.data;
+      response3.data.bio = response3.data.bio.value ? response3.data.bio.value : response3.data.bio;
+
       const newAuthor = new Author(response3.data);
       await newAuthor.save();
 

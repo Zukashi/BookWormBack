@@ -5,6 +5,7 @@ import { Book } from '../Schemas/Book';
 import { authenticateToken, authRole, setUser } from './Login';
 import { BookRecord } from '../records/book.record';
 import { BookEntity } from '../types';
+import { ValidationError } from '../utils/errors';
 
 export const bookRouter = Router();
 
@@ -23,7 +24,9 @@ bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (re
     try {
       await book.insert(req);
     } catch (e) {
-      res.status(e.statusCode).json(e.message);
+      if (e instanceof ValidationError) {
+        res.status(e.statusCode).json(e.message);
+      }
     }
     res.sendStatus(201);
   })
