@@ -1,4 +1,4 @@
-import mongoose, { HydratedDocument } from 'mongoose';
+import mongoose, { HydratedDocument, Types } from 'mongoose';
 import request from 'supertest';
 
 import express from 'express';
@@ -38,7 +38,7 @@ test('is  instance of userRecord', async () => {
   expect(users[0]).toBeInstanceOf(UserRecord);
   expect(users[0]).toBeDefined();
 });
-test('user should be exist', async () => {
+test('user should exist', async () => {
   const user = await UserRecord.getUser('63dac1e49dcd4c2de18bdf5d');
   expect(user).toBeDefined();
 });
@@ -64,9 +64,20 @@ test('is book added to favorites', async () => {
   const newUser = await UserRecord.addToFavorites(book, req.params.userId);
   const result = newUser.favorites.find((bookFavorite) => bookFavorite.id.toString() === req.params.bookId);
   expect(result).toBeTruthy();
+});
 
-  // expect(formerUser.favorites.length).toEqual(0);
-  // const user = await UserRecord.deleteBookFromFavorites(req);
-  // expect(user).toBeDefined();
-  // expect(user.favorites.length).toBeLessThan(formerUser.favorites.length);
+test('was book removed from favorites of user', async () => {
+  const req:any = {
+    params: {
+      userId: '63dac1e49dcd4c2de18bdf5d',
+      bookId: '63e18520707b083af13c97c7',
+    },
+  };
+  const formerUser:UserEntity = await User.findById(req.params.userId);
+  const book:BookEntity = await Book.findById(req.params.bookId);
+  const formerLength = formerUser.favorites.length;
+  const user = await UserRecord.deleteBookFromFavorites(req);
+  expect(formerLength).toBeGreaterThan(user.favorites.length);
+  expect(user).toBeDefined();
+  expect(user.favorites.find((bookEntity) => bookEntity.id === req.params.bookId)).toBeUndefined();
 });
