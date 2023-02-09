@@ -194,7 +194,6 @@ export class UserRecord implements UserEntity {
       .populate({
         path: 'reviews.user',
       });
-    console.log(req.body);
     const schemaNewReview = Joi.object({
       description: Joi.string().valid(''),
       rating: Joi.number().min(1).max(5).required(),
@@ -205,7 +204,6 @@ export class UserRecord implements UserEntity {
     try {
       await schemaNewReview.validateAsync(req.body);
     } catch (e) {
-      console.log(e);
       throw new Error('Incorrect data provided to review form');
     }
     const user = await User.findById(req.params.userId);
@@ -229,30 +227,28 @@ export class UserRecord implements UserEntity {
     await book.save();
   }
 
-  static async updateBookReview(req:Request, res:Response) {
+  static async updateBookReview(req:Request) {
     const book = await Book.findById(req.params.bookId)
       .populate({
         path: 'reviews.user',
       })as HydratedDocument<BookEntity>;
-    book.reviews.forEach((review:BookEntity, i:number) => {
-      if (review.user.id === req.params.userId) {
+    let oldReview:OneReview | undefined;
+    book.reviews.forEach((review:OneReview, i:number) => {
+      if (review.user.id.toString() === req.params.userId) {
+        oldReview = review;
         book.reviews.splice(i, 1);
       }
     });
-    const user:any = await User.findById(req.params.userId);
-    user.shelves
-      .book.reviews.push({
-        user: req.params.userId,
-        description: req.body.description,
-        rating: req.body.rating,
-        status: req.body.status,
-        spoilers: req.body.spoilers,
-        date: Date.now(),
-        comments: [],
-      });
+    book.reviews.push({
+      user: req.params.userId,
+      description: req.body.description,
+      rating: req.body.rating,
+      status: req.body.status,
+      spoilers: req.body.spoilers,
+      date: Date.now(),
+      comments: oldReview.comments,
+    });
     await book.save();
-
-    res.sendStatus(201);
   }
 
   static async getAllBooksFromShelves(req:Request, res:Response) {
