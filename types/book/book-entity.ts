@@ -1,6 +1,30 @@
 import { Types } from 'mongoose';
 import { UserEntity } from '../users/user.entity';
 
+export interface OneReview {
+
+    readonly _id:string,
+    readonly user:UserEntity,
+    description?:string,
+    rating:number,
+    status:string,
+    date:Date,
+    likes:{
+        usersThatLiked:{
+            user:UserEntity,
+            _id:string,
+        }[],
+        amount:number,
+    },
+    spoilers:boolean,
+    comments:{
+        user:UserEntity,
+        commentMsg:string,
+        date:Date,
+        _id:string,
+
+    }
+}
 export interface BookEntity {
     id:Types.ObjectId,
     author?:string,
@@ -24,30 +48,9 @@ export interface BookEntity {
         already_read:number,
     }
     sumOfRates?:number,
-    reviews?: {
-        readonly _id:string,
-        readonly user:UserEntity,
-        description?:string,
-        rating:number,
-        status:string,
-        date:Date,
-        likes:{
-            usersThatLiked:{
-                user:UserEntity,
-                _id:string,
-            }[],
-            amount:number,
-        },
-        spoilers:boolean,
-        comments:{
-            user:UserEntity,
-            commentMsg:string,
-            date:Date,
-            _id:string,
-
-        }
-    }[]
+    reviews?: OneReview[]
 }
+
 export interface NewBookEntity extends Omit<BookEntity, 'id'>{
     id?:Types.ObjectId,
 }
