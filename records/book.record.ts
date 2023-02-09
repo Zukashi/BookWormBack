@@ -8,7 +8,7 @@ import { User } from '../Schemas/User';
 import { Author } from '../Schemas/Author';
 import { Genre } from '../Schemas/Genre';
 import { OneReview } from '../types/book/book-entity';
-import { UserRecord } from './user.record';
+import { ValidationError } from '../utils/errors';
 
 export class BookRecord implements BookEntity {
   private readonly isbn: string;
@@ -113,7 +113,7 @@ export class BookRecord implements BookEntity {
 
   static async getAllBooks(): Promise<HydratedDocument<BookEntity>[]> {
     const books = await Book.find({}) as HydratedDocument<BookEntity>[];
-    console.log(books);
+
     return books;
   }
 
@@ -183,32 +183,21 @@ export class BookRecord implements BookEntity {
     return newBook;
   }
 
-  static async deleteRating(req:Request, res:Response) {
-    try {
-      const book: HydratedDocument<BookEntity> = await Book.findById(req.params.bookId);
-      book.ratingTypeAmount[(parseInt(req.params.previousRating, 10)) - 1] -= 1;
-      book.sumOfRates -= parseInt(req.params.previousRating, 10);
-      book.amountOfRates -= 1;
-      book.rating = (book.sumOfRates + parseInt(req.params.previousRating, 10)) / book.amountOfRates;
-      await book.save();
-      res.sendStatus(200);
-    } catch (e) {
-      res.status(400);
-      throw new Error('Deletion of rating unsuccessful');
-    }
-  }
-
   // @TODO SEARCH FOR DELETE RATING AND MAKE ONE FUNCTION INSTEAD OF 2
   static async deleteRating2(req:Request) {
-    const book: HydratedDocument<BookEntity> = await Book.findById(req.params.bookId).populate({
+    const book: HydratedDocument<BookEntity> = await Book.findById(new Types.ObjectId(req.params.bookId)).populate({
       path: 'reviews.user',
     });
 
     if (!book) {
-      throw new Error('Book not found');
+      throw new ValidationError(
+        'Book not found',
+        404,
+      );
     }
-    book.ratingTypeAmount[(parseInt(req.params.previousRating, 10)) - 1] -= 1;
-    book.sumOfRates -= parseInt(req.params.previousRating, 10);
+    const oldReview:OneReview = book.reviews.find((review:OneReview) => review.user.id.toString() === req.params.userId);
+    book.ratingTypeAmount[(oldReview.rating) - 1] -= 1;
+    book.sumOfRates -= oldReview.rating;
     book.amountOfRates -= 1;
     if (book.amountOfRates > 0 && book.sumOfRates > 0) {
       book.rating = book.sumOfRates / book.amountOfRates;
@@ -220,19 +209,19 @@ export class BookRecord implements BookEntity {
       if (review.user.id.toString() !== req.params.userId) {
         return null;
       }
-      console.log(review);
+
       const user: HydratedDocument<UserEntity> = await User.findById(req.params.userId).populate({
         path: `shelves.${review.status}`,
       });
       if (!user) {
-        throw new Error('User not found');
+        throw new ValidationError('User not found', 404);
       }
-      console.log(user.shelves.read);
+
       const newShelf = user.shelves[review.status].filter((book:BookEntity) => req.params.bookId !== book.id.toString());
       user.shelves[review.status] = [...newShelf];
       await user.save();
     });
-    console.log(result);
+
     book.reviews = [...result];
     await book.save();
   }
@@ -244,9 +233,8 @@ export class BookRecord implements BookEntity {
     const newId = new mongoose.Types.ObjectId();
     book.reviews.forEach((review:any) => {
       const objectId = new ObjectId(req.params.reviewId);
-      console.log(objectId);
+
       if (review._id.toString() === objectId.toString()) {
-        console.log(1234);
         review.comments.push({
           _id: newId,
           user: req.params.userId,
@@ -329,7 +317,7 @@ export class BookRecord implements BookEntity {
     let newUsersThatLiked = [];
     book.reviews.forEach((review: any) => {
       const objectId = new ObjectId(req.params.reviewId);
-      console.log(objectId);
+
       if (review._id.toString() === objectId.toString()) {
         newUsersThatLiked = review.likes.usersThatLiked
           .filter((user:any, i:number) => user.user._id.toString() !== req.params.currentUser);

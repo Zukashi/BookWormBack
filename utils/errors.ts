@@ -1,9 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 
 export class ValidationError extends Error {
-  public statusCode:number;
-
-  constructor(message:string, statusCode:number) {
+  constructor(message:string, public statusCode?:number) {
     super(message);
     this.statusCode = statusCode;
   }
