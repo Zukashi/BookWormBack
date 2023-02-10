@@ -132,3 +132,18 @@ test('remove one review', async () => {
   const review:OneReview = await getOneReview(req);
   expect(review).toBeUndefined();
 });
+
+test('status clear', async () => {
+  const req:any = {
+    params: {
+      bookId: '63e676e37a8c52cf171c273b',
+      userId: '63dac1e49dcd4c2de18bdf5d',
+    },
+  };
+  await UserRecord.clearStatus(req);
+  const user = await User.findById(req.params.userId);
+
+  const found = user.shelves.read.find((id) => id.toString() === req.params.bookId);
+  expect(found).toBeUndefined();
+  expect(user.shelves.read.length).toBeLessThan(1);
+});
