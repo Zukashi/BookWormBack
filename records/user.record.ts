@@ -303,6 +303,7 @@ export class UserRecord implements UserEntity {
 
   static async clearStatus(req: Request) {
     const user = await User.findById(req.params.userId);
+    if (!user) throw new ValidationError('user unidentified', 404);
     for (const [status, bookObjectIds] of Object.entries(user.shelves)) {
       const filtered = bookObjectIds.filter((objectId) => objectId.toString() !== req.params.bookId);
       user.shelves[status] = [...filtered];
