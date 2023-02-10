@@ -89,11 +89,9 @@ export class BookRecord implements BookEntity {
           genre[0].genres = subjects;
           return;
         }
-        genre[0].genres.forEach((oneGenre:any) => {
-          if (oneGenre !== subject) {
-            genre[0].genres.push(subject);
-          }
-        });
+        if (!genre[0].genres.includes(subject)) {
+          genre[0].genres.push(subject);
+        }
       });
       console.log(shelvesResponseGet.data.counts);
       details.publish_date && genre[0].years.push(details.publish_date);
