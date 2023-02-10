@@ -47,27 +47,34 @@ export class BookRecord implements BookEntity {
       this.id = new mongoose.Types.ObjectId();
       let response;
       try {
-        response = await axios.get(`https://openlibrary.org/isbn/${this.isbn}.json`);// dziala
+        response = await axios.get(`https://openlibrary.org/isbn/${this.isbn}.json`);// dziala;
+        console.log(12345);
       } catch (e) {
         throw new ValidationError('isbn of book doesnt exist in external api', 404);
       }
       const response2 = await axios.get(`https://openlibrary.org${response.data.works[0].key}.json`);// dziala
-      const response3 = await axios.get(`http://localhost:3001/author${response.data.authors[0].key}`);
+      console.log(response.data);
+      let response3;
+      if (response.data.authors) {
+        response3 = await axios.get(`http://localhost:3001/author${response.data.authors[0].key}`);
+      }
       console.log(response3, 345678);
       const ratingsResponseGet = await axios.get(`https://openlibrary.org${response.data.works[0].key}/ratings.json`);// dziala
 
       const shelvesResponseGet = await axios.get(`https://openlibrary.org${response.data.works[0].key}/bookshelves.json`);// dziala
       const bookDetails:HydratedDocument<BookEntity> = await axios.get(`https://openlibrary.org/api/books?bibkeys=ISBN:${this.isbn}&jscmd=details&format=json`);// dziala
-      console.log(response3.data);
-      try {
-        response3.data.bio = response3.data.bio ? response3.data.bio : '';
-        response3.data.bio = response3.data.bio.value ? response3.data.bio.value : '';
-        const newAuthor = new Author(response3.data);
-        await newAuthor.save();
-      } catch (e) {
-        console.log(e);
+      console.log(111);
+      if (response3.data) {
+        try {
+          response3.data.bio = response3.data.bio ? response3.data.bio : '';
+          response3.data.bio = response3.data.bio.value ? response3.data.bio.value : '';
+          const newAuthor = new Author(response3.data);
+          await newAuthor.save();
+        } catch (e) {
+          console.log(e);
+        }
       }
-      console.log(1234);
+      console.log(555);
       let description;
       if (response2.data.description?.value) {
         description = response2.data.description.value;
@@ -89,6 +96,7 @@ export class BookRecord implements BookEntity {
           genre[0].genres = subjects;
           return;
         }
+        console.log(1234);
         if (!genre[0].genres.includes(subject)) {
           genre[0].genres.push(subject);
         }
@@ -121,7 +129,7 @@ export class BookRecord implements BookEntity {
         title: response.data.title,
         description: typeof description === 'string' ? description : description.value,
         subject_people: response2.data.subject_people,
-        author: response3.data.personal_name ? response3.data.personal_name : response3.data.name,
+        author: response3.data.personal_name ? response3.data.personal_name : '',
         isbn: this.isbn,
         number_of_pages: response.data.number_of_pages,
         works: response.data.works[0].key,

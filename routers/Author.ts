@@ -14,10 +14,10 @@ authorRouter.get('/author', async (req, res) => {
   console.log(req.params.authorId);
   // Searching for author through authorID
   const response = await axios.get(`https://openlibrary.org/authors/${req.params.authorId}.json`);
-
+  console.log(222);
   res.json(response.data);
 }).get('/author/authors/:olId', async (req, res) => {
   const response = await axios.get(`https://openlibrary.org/authors/${req.params.olId}.json`);
-
+  console.log(999);
   res.json(response.data);
 });
