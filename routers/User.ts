@@ -124,7 +124,7 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
   .patch('/:userId/:bookId/:status', authenticateToken, async (req, res) => {
     await UserRecord.setStatusOfBook(req, res);
   })
-  .delete('/:userId/:bookId/status', authenticateToken, async (req, res) => {
+  .delete('/:userId/book/:bookId/status', authenticateToken, async (req, res) => {
     try {
       await UserRecord.clearStatus(req);
       res.sendStatus(204);
