@@ -3,6 +3,7 @@ import { server } from '../index';
 import { BookRecord } from '../records/book.record';
 import { BookEntity } from '../types';
 import { Book } from '../Schemas/Book';
+import { User } from '../Schemas/User';
 
 afterAll(async () => {
   await mongoose.disconnect();
