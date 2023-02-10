@@ -267,18 +267,27 @@ export class UserRecord implements UserEntity {
     const user:HydratedDocument<UserEntity> = await User.findById(req.params.userId);
     let typeOfShelf;
     for (const [key, valueBookIdArr] of Object.entries(user.shelves)) {
-      const foundId = valueBookIdArr.find((id) => id.toString() === req.params.bookId);
+      console.log(valueBookIdArr);
+      const foundId = valueBookIdArr.find((id) => {
+        console.log(req.params.bookId);
+        return id.toString() === req.params.bookId;
+      });
+      console.log(valueBookIdArr[0], 2222);
       if (foundId) {
         typeOfShelf = key;
       }
     }
-    console.log(1234);
+    console.log(typeOfShelf);
     return typeOfShelf;
   }
 
   static async setStatusOfBook(req:Request, res:Response) {
     const { userId, bookId, status } = req.params;
     const user:HydratedDocument<UserEntity> = await User.findById(userId);
+    for (const [key, valueBookIdArr] of Object.entries(user.shelves)) {
+      const filtered = user.shelves[key].filter((id) => id.toString() !== bookId);
+      user.shelves[key] = [...filtered];
+    }
     user.shelves[status] = [...user.shelves[status], new Types.ObjectId(bookId)];
     await user.save();
     res.sendStatus(201);
