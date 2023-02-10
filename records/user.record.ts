@@ -300,4 +300,13 @@ export class UserRecord implements UserEntity {
     await user.save();
     return user;
   }
+
+  static async clearStatus(req: Request) {
+    const user = await User.findById(req.params.userId);
+    for (const [status, bookObjectIds] of Object.entries(user.shelves)) {
+      const filtered = bookObjectIds.filter((objectId) => objectId.toString() !== req.params.bookId);
+      user.shelves[status] = [...filtered];
+    }
+    await user.save();
+  }
 }
