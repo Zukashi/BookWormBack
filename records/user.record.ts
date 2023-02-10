@@ -263,15 +263,16 @@ export class UserRecord implements UserEntity {
     res.end();
   }
 
-  static async getStatusOfBook(req:Request) {
+  static async getStatusOfBook(req:Request):Promise<string | undefined> {
     const user:HydratedDocument<UserEntity> = await User.findById(req.params.userId);
-    let typeOfShelf = '';
+    let typeOfShelf;
     for (const [key, valueBookIdArr] of Object.entries(user.shelves)) {
       const foundId = valueBookIdArr.find((id) => id.toString() === req.params.bookId);
       if (foundId) {
         typeOfShelf = key;
       }
     }
+    console.log(1234);
     return typeOfShelf;
   }
 
