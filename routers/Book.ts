@@ -22,10 +22,8 @@ bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (re
   .post('/book', authenticateToken, async (req, res) => {
     const book = new BookRecord(req.body);
     try {
-      setTimeout(() => {
-        res.status(500).json('Cannot add book.');
-      }, 5000);
       await book.insert(req);
+      console.log('inserted');
       res.sendStatus(201);
     } catch (e) {
       if (e instanceof ValidationError) {

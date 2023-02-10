@@ -47,24 +47,27 @@ export class BookRecord implements BookEntity {
       this.id = new mongoose.Types.ObjectId();
       let response;
       try {
-        response = await axios.get(`https://openlibrary.org/isbn/${this.isbn}.json`);
+        response = await axios.get(`https://openlibrary.org/isbn/${this.isbn}.json`);// dziala
       } catch (e) {
         throw new ValidationError('isbn of book doesnt exist in external api', 404);
       }
-      const response2 = await axios.get(`https://openlibrary.org${response.data.works[0].key}.json`);
-
+      const response2 = await axios.get(`https://openlibrary.org${response.data.works[0].key}.json`);// dziala
       const response3 = await axios.get(`http://localhost:3001/author${response.data.authors[0].key}`);
+      console.log(response3, 345678);
+      const ratingsResponseGet = await axios.get(`https://openlibrary.org${response.data.works[0].key}/ratings.json`);// dziala
 
-      const ratingsResponseGet = await axios.get(`https://openlibrary.org${response.data.works[0].key}/ratings.json`);
-
-      const shelvesResponseGet = await axios.get(`https://openlibrary.org${response.data.works[0].key}/bookshelves.json`);
-
-      const bookDetails:HydratedDocument<BookEntity> = await axios.get(`https://openlibrary.org/api/books?bibkeys=ISBN:${this.isbn}&jscmd=details&format=json`);
-      response3.data.bio = response3.data.bio.value ? response3.data.bio.value : response3.data.bio;
-
-      const newAuthor = new Author(response3.data);
-      await newAuthor.save();
-
+      const shelvesResponseGet = await axios.get(`https://openlibrary.org${response.data.works[0].key}/bookshelves.json`);// dziala
+      const bookDetails:HydratedDocument<BookEntity> = await axios.get(`https://openlibrary.org/api/books?bibkeys=ISBN:${this.isbn}&jscmd=details&format=json`);// dziala
+      console.log(response3.data);
+      try {
+        response3.data.bio = response3.data.bio ? response3.data.bio : '';
+        response3.data.bio = response3.data.bio.value ? response3.data.bio.value : '';
+        const newAuthor = new Author(response3.data);
+        await newAuthor.save();
+      } catch (e) {
+        console.log(e);
+      }
+      console.log(1234);
       let description;
       if (response2.data.description?.value) {
         description = response2.data.description.value;
@@ -78,7 +81,9 @@ export class BookRecord implements BookEntity {
       const subjects = [...new Set(details.subjects)] as string[];
 
       console.log(subjects);
+      console.log(shelvesResponseGet.data);
       const genre:any = await Genre.find({});
+      console.log(genre);
       subjects?.forEach((subject:string) => {
         if (genre[0].genres.length === 0) {
           genre[0].genres = subjects;
@@ -92,7 +97,10 @@ export class BookRecord implements BookEntity {
       });
       console.log(shelvesResponseGet.data.counts);
       details.publish_date && genre[0].years.push(details.publish_date);
+      genre[0].years = [...new Set(genre[0].years)];
+
       response3.data.personal_name ? genre[0].authors.push(response3.data.personal_name) : genre[0].authors.push(response3.data.name);
+      genre[0].authors = [...new Set(genre[0].authors)];
       function getSum(counts: { [key: string]: number }): number {
         let sum = 0;
         for (const key in counts) {
@@ -100,6 +108,10 @@ export class BookRecord implements BookEntity {
         }
         return sum;
       }
+
+      console.log(555);
+      const genreSet = new Set(genre[0].genres);
+      genre[0].genres = [...genreSet];
       const newRatingCounts = Array(5).fill(0);
       for (let i = 0; i < 5; i++) {
         newRatingCounts[i] = parseInt(ratingsResponseGet.data.counts[`${i + 1}`], 10);
