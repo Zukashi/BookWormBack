@@ -145,7 +145,7 @@ export class UserRecord implements UserEntity {
   }
 
   static async resetPassword(req:Request, res:Response) {
-    const code = (Math.floor(Math.random() * 10000) + 10000).toString().substring(1);
+    const code = Math.floor(1000 + Math.random() * 9000);
     const details = {
       from: 'testBookWorm@gmail.com',
       to: `${req.body.email}`,
