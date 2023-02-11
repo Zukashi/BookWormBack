@@ -197,7 +197,7 @@ export class BookRecord implements BookEntity {
     }
   }
 
-  static async updateRatingOfBook(req: Request, res: Response): Promise<HydratedDocument<BookEntity>> {
+  static async updateRatingOfBook(req: Request): Promise<HydratedDocument<BookEntity>> {
     const book: HydratedDocument<BookEntity> = await Book.findById(req.params.bookId);
 
     await Book.findByIdAndDelete(req.params.bookId);
@@ -407,5 +407,14 @@ export class BookRecord implements BookEntity {
     } catch (e) {
       throw new ValidationError('id doesnt exits in database', 400);
     }
+  }
+
+  static async deletePreviousRatings(req:Request) {
+    const book:HydratedDocument<BookEntity> = await Book.findById(req.params.bookId);
+    book.ratingTypeAmount[(parseInt(req.params.rating, 10)) - 1] += 1;
+    book.sumOfRates += parseInt(req.params.rating, 10);
+    book.rating = (book.sumOfRates + parseInt(req.params.rating, 10)) / (book.amountOfRates + 1);
+    book.amountOfRates += 1;
+    await book.save();
   }
 }
