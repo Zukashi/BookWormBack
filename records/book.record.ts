@@ -87,8 +87,6 @@ export class BookRecord implements BookEntity {
 
       const subjects = [...new Set(details.subjects)] as string[];
 
-      console.log(subjects);
-      console.log(shelvesResponseGet.data);
       const genre:any = await Genre.find({});
       console.log(genre);
       subjects?.forEach((subject:string) => {
@@ -96,12 +94,10 @@ export class BookRecord implements BookEntity {
           genre[0].genres = subjects;
           return;
         }
-        console.log(1234);
         if (!genre[0].genres.includes(subject)) {
           genre[0].genres.push(subject);
         }
       });
-      console.log(shelvesResponseGet.data.counts);
       details.publish_date && genre[0].years.push(details.publish_date);
       genre[0].years = [...new Set(genre[0].years)];
 
@@ -403,9 +399,11 @@ export class BookRecord implements BookEntity {
     res.status(200).json(newBooks);
   }
 
-  static async deleteOneBook(BookId: string) {
+  static async deleteOneBook(bookIsbn: string) {
+    const book:BookEntity = await Book.findOne({ isbn: bookIsbn });
+    if (book.isbn !== bookIsbn) throw new ValidationError('Book which you want to delete doesnt exist already', 404);
     try {
-      await Book.deleteOne({ id: BookId });
+      await Book.deleteOne({ isbn: book.isbn });
     } catch (e) {
       throw new ValidationError('id doesnt exits in database', 400);
     }
