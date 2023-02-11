@@ -208,9 +208,13 @@ export class UserRecord implements UserEntity {
     }
     const user = await User.findById(req.params.userId);
     if (book.reviews.some((review:OneReview) => review.user.id === user.id)) throw new Error('Review already exists');
+    for (const [key, value] of Object.entries(user.shelves)) {
+      const filtered = user.shelves[key].filter((id) => req.params.bookId !== id.toString());
+      user.shelves[key] = [...filtered];
+    }
     user.shelves[req.body.status].push(new Types.ObjectId(req.params.bookId));
     await user.save();
-
+    console.log(5555);
     book.reviews.push({
       user: req.params.userId,
       description: req.body.description,
@@ -284,10 +288,12 @@ export class UserRecord implements UserEntity {
   static async setStatusOfBook(req:Request, res:Response) {
     const { userId, bookId, status } = req.params;
     const user:HydratedDocument<UserEntity> = await User.findById(userId);
+    console.log(req.params);
     for (const [key, valueBookIdArr] of Object.entries(user.shelves)) {
       const filtered = user.shelves[key].filter((id) => id.toString() !== bookId);
       user.shelves[key] = [...filtered];
     }
+
     user.shelves[status] = [...user.shelves[status], new Types.ObjectId(bookId)];
     await user.save();
     res.sendStatus(201);

@@ -111,7 +111,6 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
   .get('/:userId/:bookId/status', async (req, res) => {
     try {
       const typeOfShelf = await UserRecord.getStatusOfBook(req);
-      console.log(typeOfShelf, 333);
       if (typeOfShelf) {
         res.status(200).json(typeOfShelf);
       } else {
