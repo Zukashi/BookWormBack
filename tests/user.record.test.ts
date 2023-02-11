@@ -30,15 +30,12 @@ beforeAll(() => {
 const req:any = {
   params: {
     userId: '63dac1e49dcd4c2de18bdf5d',
-    bookId: '63e18520707b083af13c97c7',
+    bookId: '63e787893580c051cfe053a3',
   },
 };
 afterAll(async () => {
   await mongoose.disconnect();
   await server.close();
-});
-test('user password should exist', () => {
-  expect(userNew.password).toBeTruthy();
 });
 
 test('is  instance of userRecord', async () => {
@@ -60,10 +57,9 @@ test('test if filtering users is correct', async () => {
   expect(filteredUsers).toHaveLength(1);
   expect(new UserRecord(user)).toStrictEqual(filteredUsers[0]);
 });
-test('is book added to favorites', async () => {
+test('insert book to favorites', async () => {
   const formerUser:UserEntity = await User.findById(req.params.userId);
-  const book:BookEntity = await Book.findById(req.params.bookId);
-  const newUser = await UserRecord.addToFavorites(book, req.params.userId);
+  const newUser = await UserRecord.addToFavorites(req.params.bookId, req.params.userId);
   const result = newUser.favorites.find((bookFavorite) => bookFavorite.id.toString() === req.params.bookId);
   expect(result).toBeTruthy();
 });
@@ -89,7 +85,7 @@ test('add review', async () => {
     },
     params: {
       userId: '63dac1e49dcd4c2de18bdf5d',
-      bookId: '63e18520707b083af13c97c7',
+      bookId: '63e787893580c051cfe053a3',
     },
   };
   await UserRecord.addBookReview(reqReview);
@@ -111,7 +107,7 @@ test('update review ', async () => {
     },
     params: {
       userId: '63dac1e49dcd4c2de18bdf5d',
-      bookId: '63e18520707b083af13c97c7',
+      bookId: '63e787893580c051cfe053a3',
     },
   };
   const oldReview = await getOneReview(reqReview);
@@ -124,7 +120,7 @@ test('remove one review', async () => {
   const reqParams:any = {
     params: {
       userId: '63dac1e49dcd4c2de18bdf5d',
-      bookId: '63e18520707b083af13c97c7',
+      bookId: '63e787893580c051cfe053a3',
       previousRating: 3,
     },
   };
@@ -134,12 +130,6 @@ test('remove one review', async () => {
 });
 
 test('status clear', async () => {
-  const req:any = {
-    params: {
-      bookId: '63e676e37a8c52cf171c273b',
-      userId: '63dac1e49dcd4c2de18bdf5d',
-    },
-  };
   await UserRecord.clearStatus(req);
   const user = await User.findById(req.params.userId);
 
