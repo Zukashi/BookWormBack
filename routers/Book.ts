@@ -53,8 +53,11 @@ bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (re
     }
   })
   .put('/book/:bookId/:rating', authenticateToken, async (req, res) => {
-    const newBook:HydratedDocument<BookEntity> = await BookRecord.updateRatingOfBook(req, res);
+    const newBook:HydratedDocument<BookEntity> = await BookRecord.updateRatingOfBook(req);
     res.json(newBook);
+  })
+  .delete('/book/:bookId/:previousRating', async (req, res) => {
+    await BookRecord.deletePreviousRatings(req);
   })
   .delete('/book/:bookId/user/:userId/review/:previousRating', authenticateToken, async (req, res) => {
     try {
