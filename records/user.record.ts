@@ -293,10 +293,11 @@ export class UserRecord implements UserEntity {
     res.sendStatus(201);
   }
 
-  static async addToFavorites(body: BookEntity, userId:string) {
+  static async addToFavorites(bookId:string, userId:string) {
     const user = await User.findById(userId);
+    const book:BookEntity = await Book.findById(bookId);
     if (!user) throw new ValidationError('User not found', 404);
-    user.favorites.push(body);
+    user.favorites.push(book);
     await user.save();
     return user;
   }
