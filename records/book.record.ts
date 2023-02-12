@@ -411,10 +411,10 @@ export class BookRecord implements BookEntity {
 
   static async deletePreviousRatings(req:Request) {
     const book:HydratedDocument<BookEntity> = await Book.findById(req.params.bookId);
-    book.ratingTypeAmount[(parseInt(req.params.rating, 10)) - 1] += 1;
-    book.sumOfRates += parseInt(req.params.rating, 10);
-    book.rating = (book.sumOfRates + parseInt(req.params.rating, 10)) / (book.amountOfRates + 1);
-    book.amountOfRates += 1;
+    book.ratingTypeAmount[(parseInt(req.params.previousRating, 10)) - 1] -= 1;
+    book.sumOfRates -= parseInt(req.params.previousRating, 10);
+    book.rating = (book.sumOfRates + parseInt(req.params.previousRating, 10)) / (book.amountOfRates - 1);
+    book.amountOfRates -= 1;
     await book.save();
   }
 }

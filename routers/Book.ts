@@ -58,6 +58,7 @@ bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (re
   })
   .delete('/book/:bookId/:previousRating', async (req, res) => {
     await BookRecord.deletePreviousRatings(req);
+    res.sendStatus(204);
   })
   .delete('/book/:bookId/user/:userId/review/:previousRating', authenticateToken, async (req, res) => {
     try {
