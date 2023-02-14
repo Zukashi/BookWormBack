@@ -291,7 +291,7 @@ export class UserRecord implements UserEntity {
     const user:HydratedDocument<UserEntity> = await User.findById(userId);
     console.log(req.params);
     for (const [key, valueBookIdArr] of Object.entries(user.shelves)) {
-      const filtered = user.shelves[key].filter((id) => id.toString() !== bookId);
+      const filtered = user.shelves[key].filter((book) => progress.toString() !== bookId);
       user.shelves[key] = [...filtered];
     }
 
