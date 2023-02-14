@@ -34,16 +34,25 @@ const userSchema = new mongoose.Schema<UserEntity>({
   role: String,
   shelves: {
     read: [{
-      type: mongoose.SchemaTypes.ObjectId,
-      ref: 'Book',
+      book: {
+        type: mongoose.SchemaTypes.ObjectId,
+        ref: 'Book',
+      },
+      progress: Number,
     }],
     wantToRead: [{
-      type: mongoose.SchemaTypes.ObjectId,
-      ref: 'Book',
+      book: {
+        type: mongoose.SchemaTypes.ObjectId,
+        ref: 'Book',
+      },
+      progress: Number,
     }],
     currentlyReading: [{
-      type: mongoose.SchemaTypes.ObjectId,
-      ref: 'Book',
+      book: {
+        type: mongoose.SchemaTypes.ObjectId,
+        ref: 'Book',
+      },
+      progress: Number,
     }],
   },
 });
