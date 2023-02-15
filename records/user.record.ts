@@ -340,4 +340,14 @@ export class UserRecord implements UserEntity {
     if (!bookWithProgress) throw new ValidationError('Something went wrong we apologize', 500);
     return bookWithProgress;
   }
+
+  static async updateProgressOfBook(req: Request) {
+    const user = await User.findById(req.params.userId);
+    if (!user) throw new ValidationError('user unidentified', 404);
+    const indexToDelete = user.shelves[req.params.status].findIndex((entity:any) => entity.book.toString() === req.params.bookId);
+    const element = user.shelves[req.params.status].find((entity:any) => entity.book.toString() === req.params.bookId);
+    element.progress = parseInt(req.params.pageNumber);
+    user.shelves[req.params.status].splice(indexToDelete, 1, element);
+    await user.save();
+  }
 }
