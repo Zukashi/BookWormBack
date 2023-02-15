@@ -43,7 +43,16 @@ export class UserRecord implements UserEntity {
 
   role: string;
 
-  shelves: { read: Types.ObjectId[]; wantToRead: Types.ObjectId[]; currentlyReading: Types.ObjectId[] };
+  shelves: { read: {
+    book:Types.ObjectId,
+      progress:number,
+    }[]; wantToRead: {
+      book:Types.ObjectId,
+      progress:number,
+    }[]; currentlyReading: {
+      book:Types.ObjectId,
+      progress:number,
+    }[]};
 
   username: string;
 
@@ -201,6 +210,7 @@ export class UserRecord implements UserEntity {
       spoilers: Joi.boolean(),
       comments: Joi.array().empty(),
     });
+    console.log(req.body);
     try {
       await schemaNewReview.validateAsync(req.body);
     } catch (e) {
@@ -208,13 +218,16 @@ export class UserRecord implements UserEntity {
     }
     const user = await User.findById(req.params.userId);
     if (book.reviews.some((review:OneReview) => review.user.id === user.id)) throw new Error('Review already exists');
+    console.log(1234);
     for (const [key, value] of Object.entries(user.shelves)) {
-      const filtered = user.shelves[key].filter((id) => req.params.bookId !== id.toString());
+      const filtered = user.shelves[key].filter((entity:any) => req.params.bookId !== entity.book.id.toString());
       user.shelves[key] = [...filtered];
     }
-    user.shelves[req.body.status].push(new Types.ObjectId(req.params.bookId));
+    user.shelves[req.body.status].push({
+      book: new Types.ObjectId(req.params.bookId),
+      progress: 0,
+    });
     await user.save();
-    console.log(5555);
     book.reviews.push({
       user: req.params.userId,
       description: req.body.description,
@@ -227,6 +240,7 @@ export class UserRecord implements UserEntity {
         amount: 0,
       },
     });
+    console.log(5555);
     await book.save();
   }
 
@@ -270,32 +284,27 @@ export class UserRecord implements UserEntity {
   static async getStatusOfBook(req:Request):Promise<string | undefined> {
     const user:HydratedDocument<UserEntity> = await User.findById(req.params.userId);
     let typeOfShelf;
-    console.log(req.params, 55555);
     for (const [key, valueBookIdArr] of Object.entries(user.shelves)) {
-      console.log(valueBookIdArr);
-      const foundId = valueBookIdArr.find((id) => {
-        console.log(valueBookIdArr, 5555);
-        return id.toString() === req.params.bookId;
-      });
-      console.log(valueBookIdArr[0], 2222);
+      const foundId = user.shelves[key].find((entity:{book:Types.ObjectId, progress:number}) => entity.book.toString() === req.params.bookId);
       if (foundId) {
         typeOfShelf = key;
       }
     }
-    console.log(typeOfShelf);
     return typeOfShelf;
   }
 
   static async setStatusOfBook(req:Request, res:Response) {
     const { userId, bookId, status } = req.params;
     const user:HydratedDocument<UserEntity> = await User.findById(userId);
-    console.log(req.params);
     for (const [key, valueBookIdArr] of Object.entries(user.shelves)) {
-      const filtered = user.shelves[key].filter((book) => progress.toString() !== bookId);
+      const filtered = user.shelves[status].filter((entity:{book:Types.ObjectId, progress:number }) => entity.book.toString() !== bookId);
       user.shelves[key] = [...filtered];
     }
 
-    user.shelves[status] = [...user.shelves[status], new Types.ObjectId(bookId)];
+    user.shelves[status] = [...user.shelves[status], {
+      book: new Types.ObjectId(bookId),
+      progress: 0,
+    }];
     await user.save();
     res.sendStatus(201);
   }
@@ -312,10 +321,23 @@ export class UserRecord implements UserEntity {
   static async clearStatus(req: Request) {
     const user = await User.findById(req.params.userId);
     if (!user) throw new ValidationError('user unidentified', 404);
-    for (const [status, bookObjectIds] of Object.entries(user.shelves)) {
-      const filtered = bookObjectIds.filter((objectId) => objectId.toString() !== req.params.bookId);
+    for (const [status, entities] of Object.entries(user.shelves)) {
+      const filtered = user.shelves[status].filter((entity: {book:Types.ObjectId, progress:number }) => entity.book.toString() !== req.params.bookId);
       user.shelves[status] = [...filtered];
     }
     await user.save();
+  }
+
+  static async getBookWithUserProgress(req:Request) {
+    const user = await User.findById(req.params.userId).populate({
+      path: `shelves.${req.params.status}.book`,
+    });
+    if (!user) throw new ValidationError('user unidentified', 404);
+    console.log(req.params);
+    console.log(user.shelves[req.params.status]);
+
+    const bookWithProgress = user.shelves[req.params.status].find((entity:any) => entity.book.id.toString() === req.params.bookId);
+    if (!bookWithProgress) throw new ValidationError('Something went wrong we apologize', 500);
+    return bookWithProgress;
   }
 }
