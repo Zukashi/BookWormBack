@@ -294,13 +294,16 @@ export class UserRecord implements UserEntity {
   }
 
   static async setStatusOfBook(req:Request, res:Response) {
-    const { userId, bookId, status } = req.params;
+    const {
+      userId, bookId, status, oldStatus,
+    } = req.params;
     const user:HydratedDocument<UserEntity> = await User.findById(userId);
-    for (const [key, valueBookIdArr] of Object.entries(user.shelves)) {
-      const filtered = user.shelves[status].filter((entity:{book:Types.ObjectId, progress:number }) => entity.book.toString() !== bookId);
-      user.shelves[key] = [...filtered];
+    if (oldStatus !== 'notfound') {
+      for (const [key, valueBookIdArr] of Object.entries(user.shelves)) {
+        const filtered = user.shelves[oldStatus].filter((entity:{book:Types.ObjectId, progress:number }) => entity.book.toString() !== bookId);
+        user.shelves[oldStatus] = [...filtered];
+      }
     }
-
     user.shelves[status] = [...user.shelves[status], {
       book: new Types.ObjectId(bookId),
       progress: 0,
@@ -334,8 +337,6 @@ export class UserRecord implements UserEntity {
     });
     if (!user) throw new ValidationError('user unidentified', 404);
     console.log(req.params);
-    console.log(user.shelves[req.params.status]);
-
     const bookWithProgress = user.shelves[req.params.status].find((entity:any) => entity.book.id.toString() === req.params.bookId);
     if (!bookWithProgress) throw new ValidationError('Something went wrong we apologize', 500);
     return bookWithProgress;
