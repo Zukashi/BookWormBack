@@ -17,6 +17,7 @@ export interface UserEntity {
     favorites?: BookEntity[],
     role:string,
     shelves?:{
+        [key:string]:any,
         read:{
             book:Types.ObjectId,
             progress:number,
