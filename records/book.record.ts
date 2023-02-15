@@ -149,7 +149,9 @@ export class BookRecord implements BookEntity {
   }
 
   static async getOneBook(paramsId: string): Promise<BookEntity> {
-    const book: BookEntity = await Book.findById(paramsId);
+    console.log(paramsId);
+    const book: BookEntity = await Book.findById(new Types.ObjectId(paramsId));
+    console.log(12345);
     return book;
   }
 
@@ -216,7 +218,7 @@ export class BookRecord implements BookEntity {
 
   // @TODO SEARCH FOR DELETE RATING AND MAKE ONE FUNCTION INSTEAD OF 2
   static async deleteRating2(req:Request) {
-    const book: HydratedDocument<BookEntity> = await Book.findById(new Types.ObjectId(req.params.bookId)).populate({
+    const book: HydratedDocument<BookEntity> = await Book.findById(req.params.bookId).populate({
       path: 'reviews.user',
     });
 
@@ -226,7 +228,10 @@ export class BookRecord implements BookEntity {
         404,
       );
     }
+    console.log(book.reviews);
+    console.log(req.params);
     const oldReview:OneReview = book.reviews.find((review:OneReview) => review.user.id.toString() === req.params.userId);
+    console.log(oldReview);
     book.ratingTypeAmount[(oldReview.rating) - 1] -= 1;
     book.sumOfRates -= oldReview.rating;
     book.amountOfRates -= 1;
@@ -235,14 +240,14 @@ export class BookRecord implements BookEntity {
     } else {
       book.rating = 0;
     }
+
     const result:OneReview[] = book.reviews.filter((review:OneReview):boolean => review.user.id.toString() !== req.params.userId);
     book.reviews.forEach(async (review:OneReview):Promise<void> => {
       if (review.user.id.toString() !== req.params.userId) {
         return null;
       }
-
       const user: HydratedDocument<UserEntity> = await User.findById(req.params.userId).populate({
-        path: `shelves.${review.status}`,
+        path: `shelves.${review.status}.book`,
       });
       if (!user) {
         throw new ValidationError('User not found', 404);
