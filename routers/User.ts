@@ -100,6 +100,7 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
     try {
       await UserRecord.updateBookReview(req);
     } catch (e) {
+      console.log(e);
       res.status(e.statusCode);
       res.json(e.message);
     }
@@ -130,4 +131,14 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
     } catch (e) {
       res.status(e.statusCode).json(e.message);
     }
+  })
+  .get('/:userId/book/:bookId/:status', authenticateToken, async (req, res) => {
+    const bookWithProgress = await UserRecord.getBookWithUserProgress(req);
+    res.json(bookWithProgress);
+  })
+  .patch('/:userId/book/:bookId/:status/:pageNumber', authenticateToken, async (req, res) => {
+    console.log(req.params);
+    await UserRecord.updateProgressOfBook(req);
+
+    res.end();
   });
