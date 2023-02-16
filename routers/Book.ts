@@ -46,7 +46,7 @@ bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (re
   })
   .post('/book/:bookId/:rating', authenticateToken, async (req, res) => {
     try {
-      const book = await BookRecord.addRatingOfBook(req.params) as HydratedDocument<BookEntity>;
+      const book = await BookRecord.addRatingOfBook(req.params as any);
       res.status(201).json(book);
     } catch (e) {
       res.sendStatus(400);

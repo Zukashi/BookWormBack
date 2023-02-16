@@ -1,10 +1,8 @@
 import {
   NextFunction, Request, Router, Response,
 } from 'express';
-import { HydratedDocument } from 'mongoose';
+
 import { User } from '../Schemas/User';
-import { UserRecord } from '../records/user.record';
-import { UserEntity } from '../types';
 import { RequestEntityWithUser } from '../types/request';
 
 const jwt = require('jsonwebtoken');
@@ -93,7 +91,7 @@ loginRouter.post('/login', async (req, res) => {
   }
 });
 
-export function authenticateToken(req:any, res:any, next:any) {
+export function authenticateToken(req:Request, res:Response, next:NextFunction) {
   const { accessToken } = req.cookies;
   if (accessToken == null) return res.sendStatus(401);
   jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET, (err:any, user:any) => {

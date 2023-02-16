@@ -185,7 +185,7 @@ export class BookRecord implements BookEntity {
     await newBook.save();
   }
 
-  static async addRatingOfBook(reqParams: { rating: string, bookId: string }): Promise<HydratedDocument<BookEntity>> {
+  static async addRatingOfBook(reqParams: {bookId:string, rating:string}) {
     try {
       const book: HydratedDocument<BookEntity> = await Book.findById(reqParams.bookId);
       book.ratingTypeAmount[(parseInt(reqParams.rating, 10)) - 1] += 1;
