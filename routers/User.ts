@@ -31,10 +31,11 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
     console.log(12345);
     res.status(200).json(user);
   })
-  .put('/:userId/avatar', setUser, authenticateToken, async (req:RequestEntityWithUser, res) => {
-    const user = await new UserRecord(req.user);
+  .put('/:userId/avatar', authenticateToken, async (req:RequestEntityWithUser, res) => {
+    const user = await User.findById(req.params.userId);
     user.base64Avatar = req.body.preview;
-    await user.updateUser(user, res);
+    await user.save();
+    res.end();
   })
   .put('/:userId', setUser, authenticateToken, async (req:RequestEntityWithUser, res) => {
     const user = new UserRecord(req.user);
