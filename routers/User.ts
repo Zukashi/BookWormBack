@@ -28,14 +28,14 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
 })
   .put('/password', async (req, res) => {
     const user = await UserRecord.updatePassword(req, res);
-    console.log(12345);
     res.status(200).json(user);
   })
-  .put('/:userId/avatar', authenticateToken, async (req:RequestEntityWithUser, res) => {
+  .put('/:userId/avatar', authenticateToken, async (req, res) => {
     const user = await User.findById(req.params.userId);
+    // @TODO doesn't save changes
     user.base64Avatar = req.body.preview;
     await user.save();
-    res.end();
+    res.sendStatus(201);
   })
   .put('/:userId', setUser, authenticateToken, async (req:RequestEntityWithUser, res) => {
     await UserRecord.updateUser(req.body, res, req.params.userId);
