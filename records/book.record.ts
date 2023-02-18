@@ -410,7 +410,7 @@ export class BookRecord implements BookEntity {
     try {
       await Book.deleteOne({ isbn: book.isbn });
     } catch (e) {
-      throw new ValidationError('id doesnt exits in database', 400);
+      throw new ValidationError('id doesnt exist in database', 400);
     }
   }
 

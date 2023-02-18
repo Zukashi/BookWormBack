@@ -22,7 +22,7 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
   res.json(req.user);
 }).put('/admin/:userId', authenticateToken, async (req, res) => {
   const user = new UserRecord(req.body);
-  await user.updateUser(user, res);
+  await UserRecord.updateUser(user, res, req.params.userId);
 }).post('/search/:value', authenticateToken, async (req, res) => {
   await UserRecord.getSearchedUsers(req, res);
 })
@@ -38,8 +38,7 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
     res.end();
   })
   .put('/:userId', setUser, authenticateToken, async (req:RequestEntityWithUser, res) => {
-    const user = new UserRecord(req.user);
-    await user.updateUser(req.body, res);
+    await UserRecord.updateUser(req.body, res, req.params.userId);
   })
   .put('/:userId/favorite', authenticateToken, async (req, res) => {
     try {

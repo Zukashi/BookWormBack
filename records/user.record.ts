@@ -95,10 +95,10 @@ export class UserRecord implements UserEntity {
     return new UserRecord(user);
   }
 
-  async updateUser(newUser:UserEntity, res:Response):Promise<void> {
-    const oldUser = User.findById(this.id);
+  static async updateUser(newUser:UserEntity, res:Response, userId:string):Promise<void> {
+    const oldUser = User.findById(userId);
     if (!oldUser) { res.status(500); throw new Error('We are sorry something went wrong'); }
-    await User.findByIdAndDelete(this.id);
+    await User.findByIdAndDelete(userId);
     const userNew = new User({
       ...oldUser,
       ...newUser,
