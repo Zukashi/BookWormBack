@@ -422,4 +422,9 @@ export class BookRecord implements BookEntity {
     book.amountOfRates -= 1;
     await book.save();
   }
+
+  static async getBooksSpecifiedByPageAndNumberFromQueryParams(req: Request) {
+    const books = await Book.find({}).skip((Number(req.query.page) * Number(req.query.booksPerPage)) - Number(req.query.booksPerPage)).limit(Number(req.query.booksPerPage));
+    return books;
+  }
 }

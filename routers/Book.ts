@@ -10,6 +10,10 @@ import { ValidationError } from '../utils/errors';
 export const bookRouter = Router();
 
 bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (req, res) => {
+  if (req.query.page) {
+    const books = await BookRecord.getBooksSpecifiedByPageAndNumberFromQueryParams(req);
+    res.json(books);
+  }
   const books = await Book.find({}) as HydratedDocument<BookEntity>[];
   res.json(books).status(201);
 }).get('/book/:id', authenticateToken, async (req, res) => {
