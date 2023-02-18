@@ -404,9 +404,9 @@ export class BookRecord implements BookEntity {
     res.status(200).json(newBooks);
   }
 
-  static async deleteOneBook(bookIsbn: string) {
-    const book:BookEntity = await Book.findOne({ isbn: bookIsbn });
-    if (book.isbn !== bookIsbn) throw new ValidationError('Book which you want to delete doesnt exist already', 404);
+  static async deleteOneBook(bookId: string) {
+    const book:BookEntity = await Book.findOne({ id: bookId });
+    if (book.id !== bookId) throw new ValidationError('Book which you want to delete doesnt exist already', 404);
     try {
       await Book.deleteOne({ isbn: book.isbn });
     } catch (e) {
