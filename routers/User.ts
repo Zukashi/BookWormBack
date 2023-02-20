@@ -5,7 +5,7 @@ import nodemailer from 'nodemailer';
 import { HydratedDocument, Types, Document } from 'mongoose';
 import { User } from '../Schemas/User';
 import { Book } from '../Schemas/Book';
-import { authenticateToken, setUser } from './Login';
+import { authenticateToken } from './Login';
 import { UserRecord } from '../records/user.record';
 import { RequestEntityWithUser } from '../types/request';
 import { UserEntity } from '../types';
@@ -18,8 +18,9 @@ export const userRouter = Router();
 userRouter.get('/users', authenticateToken, async (req, res) => {
   const users = await UserRecord.getAllUsers();
   res.json(users);
-}).get('/:userId', setUser, authenticateToken, async (req:RequestEntityWithUser, res) => {
-  res.json(req.user);
+}).get('/:userId', authenticateToken, async (req:RequestEntityWithUser, res) => {
+  const user = await User.findById(req.params.userId);
+  res.json(user);
 }).put('/admin/:userId', authenticateToken, async (req, res) => {
   const user = new UserRecord(req.body);
   await UserRecord.updateUser(user, res, req.params.userId);
@@ -37,7 +38,7 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
     await user.save();
     res.sendStatus(201);
   })
-  .put('/:userId', setUser, authenticateToken, async (req:RequestEntityWithUser, res) => {
+  .put('/:userId', authenticateToken, async (req:RequestEntityWithUser, res) => {
     await UserRecord.updateUser(req.body, res, req.params.userId);
   })
   .put('/:userId/favorite', authenticateToken, async (req, res) => {
@@ -48,7 +49,7 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
       res.status(e.statusCode).json(e.message);
     }
   })
-  .delete('/:userId/book/:bookId/favorite', setUser, authenticateToken, async (req, res) => {
+  .delete('/:userId/book/:bookId/favorite', authenticateToken, async (req, res) => {
     try {
       const newUser = await UserRecord.deleteBookFromFavorites(req);
       res.status(200).json({ status: 'success', newUser });
@@ -60,7 +61,7 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
     await UserRecord.sendSmsForPinForPasswordReset(req, res);
     res.sendStatus(201);
   })
-  .get('/:userId/favorites', setUser, authenticateToken, async (req:RequestEntityWithUser, res) => {
+  .get('/:userId/favorites', authenticateToken, async (req:RequestEntityWithUser, res) => {
     await UserRecord.getFavoritesOfUser(req, res);
   })
   .delete('/:userId', authenticateToken, async (req, res) => {
@@ -85,7 +86,7 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
     await UserRecord.newPassword(req);
     res.sendStatus(204);
   })
-  .get('/:userId/book/:bookId', setUser, async (req:Request, res) => {
+  .get('/:userId/book/:bookId', async (req:Request, res) => {
     await UserRecord.getReview(req, res);
   })
   .post('/:userId/book/:bookId', async (req, res) => {
