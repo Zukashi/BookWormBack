@@ -22,7 +22,9 @@ export async function setUser(req:RequestEntityWithUser, res:Response, next:Next
   next();
 }
 export function authRole(role:string) {
-  return async (req:any, res:any, next:any) => {
+  return async (req:RequestEntityWithUser, res:Response, next:NextFunction) => {
+    const user = await User.findOne({ refreshTokenId: req.cookies.refreshToken });
+    req.user = user;
     if (req.user.role === 'admin') {
       next();
       return;
@@ -40,7 +42,7 @@ loginRouter.post('/auth/refreshToken', setUser, async (req, res) => {
   if (refreshToken === null) return res.sendStatus(403).redirect('/');
   if (!user2) return res.sendStatus(403);
   console.log(process.env.TWILIO_ACCOUNT_SID, 39);
-  jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err:any, user:any) => {
+  jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err:Error, user:UserEntity) => {
     if (err) return res.sendStatus(403);
 
     const accessToken = jwt.sign({ id: user.id }, process.env.ACCESS_TOKEN_SECRET, {
