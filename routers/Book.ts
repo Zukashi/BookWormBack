@@ -2,14 +2,14 @@ import { Router } from 'express';
 import { HydratedDocument } from 'mongoose';
 import Joi from 'joi';
 import { Book } from '../Schemas/Book';
-import { authenticateToken, authRole, setUser } from './Login';
+import { authenticateToken, authRole } from './Login';
 import { BookRecord } from '../records/book.record';
 import { BookEntity } from '../types';
 import { ValidationError } from '../utils/errors';
 
 export const bookRouter = Router();
 
-bookRouter.get('/books', setUser, authenticateToken, authRole('user'), async (req, res) => {
+bookRouter.get('/books', authenticateToken, authRole('user'), async (req, res) => {
   if (req.query.page) {
     const books = await BookRecord.getBooksSpecifiedByPageAndNumberFromQueryParams(req);
     res.json(books);
