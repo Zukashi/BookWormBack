@@ -53,7 +53,10 @@ export const bookSchema = new mongoose.Schema<BookEntity>({
       ref: 'User',
     },
     status: String,
-    description: String,
+    description: {
+      type: String,
+      required: false,
+    },
     rating: Number,
     date: {
       type: Date,
