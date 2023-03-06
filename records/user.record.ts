@@ -204,17 +204,16 @@ export class UserRecord implements UserEntity {
         path: 'reviews.user',
       });
     const schemaNewReview = Joi.object({
-      description: Joi.string().valid(''),
+      description: Joi.any(),
       rating: Joi.number().min(1).max(5).required(),
       status: Joi.string().valid('wantToRead', 'currentlyReading', 'read'),
       spoilers: Joi.boolean(),
-      comments: Joi.array().empty(),
     });
     console.log(req.body);
     try {
       await schemaNewReview.validateAsync(req.body);
     } catch (e) {
-      throw new ValidationError('Incorrect data provided to review form', 400);
+      throw new ValidationError(`Incorrect data provided to review form${e}`, 400);
     }
     const user = await User.findById(req.params.userId);
     if (book.reviews.some((review:OneReview) => review.user.id === user.id)) throw new Error('Review already exists');
