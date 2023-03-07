@@ -31,6 +31,8 @@ export class UserRecord implements UserEntity {
 
   firstName: string;
 
+  lists:{};
+
   country:string;
 
   gender: string;

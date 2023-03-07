@@ -16,6 +16,7 @@ export interface UserEntity {
     dateOfBirth?:string,
     favorites?: BookEntity[],
     role:string,
+    lists:{},
     shelves?:{
         [key:string]:any,
         read:{

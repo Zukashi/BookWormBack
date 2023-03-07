@@ -32,6 +32,9 @@ const userSchema = new mongoose.Schema<UserEntity>({
   }],
   refreshTokenId: String,
   role: String,
+  lists: {
+    type: Object,
+  },
   shelves: {
     read: [{
       book: {
