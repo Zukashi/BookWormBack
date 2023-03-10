@@ -26,7 +26,7 @@ export interface OneReview {
     }
 }
 export interface BookEntity {
-    id:Types.ObjectId,
+    _id:Types.ObjectId,
     author?:string,
     title?:string
     isbn:string,
@@ -40,8 +40,8 @@ export interface BookEntity {
     works:{key:string}[],
     number_of_pages:number,
     ratingTypeAmount?:number[],
-    rating?:number,
-    amountOfRates?:number,
+    rating:number,
+    amountOfRates:number,
     shelves:{
         want_to_read:number,
         currently_reading:number,
