@@ -14,14 +14,14 @@ import { ValidationError } from '../utils/errors';
 export class BookRecord implements BookEntity {
   private readonly isbn: string;
 
-  private id: Types.ObjectId;
+  private _id: Types.ObjectId;
 
   private author?: string;
 
   private title?: string;
 
   constructor(obj: NewBookEntity) {
-    this.id = obj.id;
+    this._id = obj.id;
 
     this.isbn = obj.isbn;
     this.author = obj.author;
@@ -44,26 +44,22 @@ export class BookRecord implements BookEntity {
     if (await Book.findOne({ isbn: this.isbn })) {
       throw new ValidationError('Book is already in the database', 409);
     } else {
-      this.id = new mongoose.Types.ObjectId();
+      this._id = new mongoose.Types.ObjectId();
       let response;
       try {
         response = await axios.get(`https://openlibrary.org/isbn/${this.isbn}.json`);// dziala;
-        console.log(12345);
       } catch (e) {
         throw new ValidationError('isbn of book doesnt exist in external api', 404);
       }
       const response2 = await axios.get(`https://openlibrary.org${response.data.works[0].key}.json`);// dziala
-      console.log(response.data);
       let response3;
       if (response.data.authors) {
         response3 = await axios.get(`http://localhost:3001/author${response.data.authors[0].key}`);
       }
-      console.log(response3, 345678);
       const ratingsResponseGet = await axios.get(`https://openlibrary.org${response.data.works[0].key}/ratings.json`);// dziala
 
       const shelvesResponseGet = await axios.get(`https://openlibrary.org${response.data.works[0].key}/bookshelves.json`);// dziala
       const bookDetails:HydratedDocument<BookEntity> = await axios.get(`https://openlibrary.org/api/books?bibkeys=ISBN:${this.isbn}&jscmd=details&format=json`);// dziala
-      console.log(111);
       if (response3.data) {
         try {
           response3.data.bio = response3.data.bio ? response3.data.bio : '';
@@ -71,10 +67,8 @@ export class BookRecord implements BookEntity {
           const newAuthor = new Author(response3.data);
           await newAuthor.save();
         } catch (e) {
-          console.log(e);
         }
       }
-      console.log(555);
       let description;
       if (response2.data.description?.value) {
         description = response2.data.description.value;

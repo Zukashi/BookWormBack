@@ -142,7 +142,7 @@ export class UserRecord implements UserEntity {
 
   static async deleteBookFromFavorites(req:Request) {
     const userPopulated = await User.findById(req.params.userId).populate('favorites');
-    const bookIndex = userPopulated.favorites.findIndex((bookInFavorites) => bookInFavorites.id.toString() === req.params.bookId);
+    const bookIndex = userPopulated.favorites.findIndex((bookInFavorites) => bookInFavorites._id.toString() === req.params.bookId);
     if (bookIndex === -1) throw new ValidationError('Book not found in favorites', 404);
 
     userPopulated.favorites.splice(bookIndex, 1);
@@ -210,12 +210,13 @@ export class UserRecord implements UserEntity {
       rating: Joi.number().min(1).max(5).required(),
       status: Joi.string().valid('wantToRead', 'currentlyReading', 'read'),
       spoilers: Joi.boolean(),
+      comments: Joi.array(),
     });
-    console.log(req.body);
+    console.log(req.body, 12345);
     try {
       await schemaNewReview.validateAsync(req.body);
     } catch (e) {
-      throw new ValidationError(`Incorrect data provided to review form${e}`, 400);
+      console.log(`Incorrect data provided to review form${e}`);
     }
     const user = await User.findById(req.params.userId);
     if (book.reviews.some((review:OneReview) => review.user.id === user.id)) throw new Error('Review already exists');
@@ -298,9 +299,11 @@ export class UserRecord implements UserEntity {
     const {
       userId, bookId, status, oldStatus,
     } = req.params;
+    console.log(req.params, 'params');
     const user:HydratedDocument<UserEntity> = await User.findById(userId);
-    if (oldStatus !== 'notfound') {
+    if (oldStatus !== 'not found' && oldStatus !== 'notfound') {
       for (const [key, valueBookIdArr] of Object.entries(user.shelves)) {
+        console.log(user);
         const filtered = user.shelves[oldStatus].filter((entity:{book:Types.ObjectId, progress:number }) => entity.book.toString() !== bookId);
         user.shelves[oldStatus] = [...filtered];
       }
@@ -309,6 +312,7 @@ export class UserRecord implements UserEntity {
       book: new Types.ObjectId(bookId),
       progress: 0,
     }];
+    console.log(user);
     await user.save();
     res.sendStatus(201);
   }
