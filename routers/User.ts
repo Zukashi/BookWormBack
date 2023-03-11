@@ -142,4 +142,9 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
     await UserRecord.updateProgressOfBook(req);
 
     res.end();
+  })
+  .post('/:userId/list/:listName', authenticateToken, async (req, res) => {
+    console.log(req.params);
+    await UserRecord.addList(req);
+    res.sendStatus(201);
   });
