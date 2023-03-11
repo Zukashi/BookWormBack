@@ -17,6 +17,7 @@ registerRouter.post('/register', validateRegister, async (req, res) => {
       res.status(400).json({ status: 'false', result: 'Username is taken', type: 'username' });
       throw new ValidationError('Username is taken', 400);
     }
+    console.log(user);
     await user.insert();
   } catch (e) {
     console.log(e);

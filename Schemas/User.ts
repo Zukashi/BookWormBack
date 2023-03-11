@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 import { ObjectId } from 'mongodb';
 import { Book } from './Book';
 import { UserEntity } from '../types';
@@ -32,9 +32,7 @@ const userSchema = new mongoose.Schema<UserEntity>({
   }],
   refreshTokenId: String,
   role: String,
-  lists: {
-    type: Object,
-  },
+  lists: Schema.Types.Mixed,
   shelves: {
     read: [{
       book: {
@@ -58,6 +56,8 @@ const userSchema = new mongoose.Schema<UserEntity>({
       progress: Number,
     }],
   },
+}, {
+  minimize: false,
 });
 
 export const User = mongoose.model<UserEntity>('User', userSchema);
