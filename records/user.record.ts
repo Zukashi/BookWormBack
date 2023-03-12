@@ -369,4 +369,15 @@ export class UserRecord implements UserEntity {
     };
     await user.save();
   }
+
+  static async addEntityToList(req: Request) {
+    const user:HydratedDocument<UserEntity> = await User.findById(req.params.userId);
+    if (!user) throw new ValidationError('user not found', 404);
+    user.lists[req.params.listName].push(req.params.bookId);
+    await user.updateOne({
+      lists: {
+        ...user.lists,
+      },
+    });
+  }
 }
