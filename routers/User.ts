@@ -151,4 +151,8 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
   .put('/:userId/list/:listName/book/:bookId', authenticateToken, async (req, res) => {
     await UserRecord.addEntityToList(req);
     res.sendStatus(201);
+  })
+  .delete('/:userId/list/:listName/book/:bookId', authenticateToken, async (req, res) => {
+    await UserRecord.deleteEntityFromList(req);
+    res.sendStatus(204);
   });
