@@ -159,4 +159,8 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
   .put('/:userId/list/:listName', authenticateToken, async (req, res) => {
     await UserRecord.updateListName(req);
     res.sendStatus(201);
+  })
+  .delete('/:userId/list/:listName', authenticateToken, async (req, res) => {
+    await UserRecord.deleteList(req);
+    res.end();
   });
