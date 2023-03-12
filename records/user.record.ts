@@ -394,4 +394,18 @@ export class UserRecord implements UserEntity {
       },
     });
   }
+
+  static async updateListName(req: Request) {
+    const { newListName } = req.body;
+    const user:HydratedDocument<UserEntity> = await User.findById(req.params.userId);
+    if (!user) throw new ValidationError('user not found', 404);
+    const formerValuesOfFormerProperty = user.lists[req.params.listName];
+    delete user.lists[req.params.listName];
+    console.log(user);
+    user.lists = {
+      ...user.lists,
+      [newListName]: formerValuesOfFormerProperty,
+    };
+    await user.save();
+  }
 }
