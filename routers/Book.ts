@@ -11,7 +11,7 @@ export const bookRouter = Router();
 
 bookRouter.get('/books', authenticateToken, authRole('user'), async (req, res) => {
   if (req.query.page) {
-    const books = await BookRecord.getBooksSpecifiedByPageAndNumberFromQueryParams(req);
+    const books = await BookRecord.getBooksSpecifiedByPageAndNumberFromQueryParamsAndOptionallyFilteredBySearchValue(req);
     res.json(books);
   }
   const books = await Book.find({}) as HydratedDocument<BookEntity>[];
