@@ -82,7 +82,7 @@ export class BookRecord implements BookEntity {
       const subjects = [...new Set(details.subjects)] as string[];
 
       const genre:any = await Genre.find({});
-      console.log(genre);
+
       subjects?.forEach((subject:string) => {
         if (genre[0].genres.length === 0) {
           genre[0].genres = subjects;
@@ -105,7 +105,6 @@ export class BookRecord implements BookEntity {
         return sum;
       }
 
-      console.log(555);
       const genreSet = new Set(genre[0].genres);
       genre[0].genres = [...genreSet];
       const newRatingCounts = Array(5).fill(0);
@@ -143,9 +142,8 @@ export class BookRecord implements BookEntity {
   }
 
   static async getOneBook(paramsId: string): Promise<BookEntity> {
-    console.log(paramsId);
     const book: BookEntity = await Book.findById(new Types.ObjectId(paramsId));
-    console.log(12345);
+
     return book;
   }
 
@@ -222,10 +220,9 @@ export class BookRecord implements BookEntity {
         404,
       );
     }
-    console.log(book.reviews);
-    console.log(req.params);
+
     const oldReview:OneReview = book.reviews.find((review:OneReview) => review.user.id.toString() === req.params.userId);
-    console.log(oldReview);
+
     book.ratingTypeAmount[(oldReview.rating) - 1] -= 1;
     book.sumOfRates -= oldReview.rating;
     book.amountOfRates -= 1;
@@ -362,7 +359,7 @@ export class BookRecord implements BookEntity {
   static async changeStatusOfBookFromUserBooks(req:Request, res:Response) {
     try {
       const user:any = await User.findById(req.params.userId).populate(`shelves.${req.body.statuses.oldStatus}`);
-      console.log(user.shelves);
+
       const filteredShelves = user.shelves[req.body.statuses.oldStatus]
         .filter((oneBook:BookEntity) => oneBook._id.toString() !== req.params.bookId);
       user.shelves[req.body.statuses.oldStatus] = filteredShelves;
@@ -399,8 +396,9 @@ export class BookRecord implements BookEntity {
   }
 
   static async deleteOneBook(bookId: string) {
-    const book:BookEntity = await Book.findOne({ id: bookId });
-    if (book.id !== bookId) throw new ValidationError('Book which you want to delete doesnt exist already', 404);
+    const book:BookEntity = await Book.findById(bookId);
+    console.log(book._id.toString(), bookId);
+    if (book._id.toString() !== bookId) throw new ValidationError('Book which you want to delete doesnt exist already', 404);
     try {
       await Book.deleteOne({ isbn: book.isbn });
     } catch (e) {
@@ -417,8 +415,19 @@ export class BookRecord implements BookEntity {
     await book.save();
   }
 
-  static async getBooksSpecifiedByPageAndNumberFromQueryParams(req: Request) {
-    const books = await Book.find({}).skip((Number(req.query.page) * Number(req.query.booksPerPage)) - Number(req.query.booksPerPage)).limit(Number(req.query.booksPerPage));
+  static async getBooksSpecifiedByPageAndNumberFromQueryParamsAndOptionallyFilteredBySearchValue(req: Request) {
+    let books = await Book.find({}).skip((Number(req.query.page) * Number(req.query.booksPerPage)) - Number(req.query.booksPerPage)).limit(Number(req.query.booksPerPage));
+    if (req.query.searchValue) {
+      books = books.filter((book:BookEntity) => {
+        let result = true;
+
+        result = (book.author.toLowerCase().includes((req.query.searchValue as string).toLowerCase()))
+            || book.title.toLowerCase().includes((req.query.searchValue as string).toLowerCase());
+
+        return result;
+      });
+    }
+    console.log(3333);
     return books;
   }
 }
