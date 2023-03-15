@@ -116,7 +116,7 @@ export class BookRecord implements BookEntity {
         publish_date: details?.publish_date ? details.publish_date : null,
         subjects,
         title: response.data.title,
-        description: typeof description === 'string' ? description : description.value,
+        description: typeof description === 'object' ? description.value : description,
         subject_people: response2.data.subject_people,
         author: response3.data.personal_name ? response3.data.personal_name : '',
         isbn: this.isbn,
@@ -392,7 +392,16 @@ export class BookRecord implements BookEntity {
       }
       return result;
     });
-    res.status(200).json(newBooks);
+    console.log(books);
+    const filterBySearch = newBooks.filter((book:BookEntity) => {
+      if (book.title.toLowerCase().includes(req.body.search.toLowerCase())) {
+        return book;
+      }
+      if (book.author.toLowerCase().includes(req.body.search.toLowerCase())) {
+        return book;
+      }
+    });
+    res.status(200).json(filterBySearch);
   }
 
   static async deleteOneBook(bookId: string) {
