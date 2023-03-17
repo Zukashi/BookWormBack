@@ -26,7 +26,7 @@ app.use(cors({
   credentials: true,
 }));
 (async function () {
-  await mongoose.connect('mongodb://0.0.0.0:27017/BookWorm');
+  await mongoose.connect('mongodb+srv://Zukashi:VasdirHisaki2@cluster0.dxvdqkk.mongodb.net/?retryWrites=true&w=majority');
 }());
 
 app.use(cookieParser());
