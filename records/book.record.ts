@@ -49,8 +49,9 @@ export class BookRecord implements BookEntity {
       try {
         response = await axios.get(`https://openlibrary.org/isbn/${this.isbn}.json`);// dziala;
       } catch (e) {
-        throw new ValidationError('isbn of book doesnt exist in external api', 404);
+        throw new ValidationError('book with given isbn doesnt exist', 404);
       }
+
       const response2 = await axios.get(`https://openlibrary.org${response.data.works[0].key}.json`);// dziala
       let response3;
       if (response.data.authors) {
@@ -81,8 +82,16 @@ export class BookRecord implements BookEntity {
 
       const subjects = [...new Set(details.subjects)] as string[];
 
-      const genre:any = await Genre.find({});
-
+      const oldGenre:any = await Genre.find({});
+      if (oldGenre.length === 0) {
+        const newGenre = new Genre({
+          authors: [],
+          years: [],
+          genres: [],
+        });
+        await newGenre.save();
+      }
+      const genre = await Genre.find({});
       subjects?.forEach((subject:string) => {
         if (genre[0].genres.length === 0) {
           genre[0].genres = subjects;
@@ -100,7 +109,7 @@ export class BookRecord implements BookEntity {
       function getSum(counts: { [key: string]: number }): number {
         let sum = 0;
         for (const key in counts) {
-          sum += parseInt(key) * counts[key];
+          sum += parseInt(key, 10) * counts[key];
         }
         return sum;
       }
@@ -108,6 +117,7 @@ export class BookRecord implements BookEntity {
       const genreSet = new Set(genre[0].genres);
       genre[0].genres = [...genreSet];
       const newRatingCounts = Array(5).fill(0);
+      // eslint-disable-next-line no-plusplus
       for (let i = 0; i < 5; i++) {
         newRatingCounts[i] = parseInt(ratingsResponseGet.data.counts[`${i + 1}`], 10);
       }
@@ -338,7 +348,7 @@ export class BookRecord implements BookEntity {
   }
 
   static async deleteUserThatLikedFromLikedUsers(req:Request, res:Response) {
-    const book: any = await Book.findById(req.params.bookId).populate({
+    const book: HydratedDocument<BookEntity> = await Book.findById(req.params.bookId).populate({
       path: 'reviews.likes.usersThatLiked.user',
     });
     let newUsersThatLiked = [];
@@ -358,7 +368,7 @@ export class BookRecord implements BookEntity {
 
   static async changeStatusOfBookFromUserBooks(req:Request, res:Response) {
     try {
-      const user:any = await User.findById(req.params.userId).populate(`shelves.${req.body.statuses.oldStatus}`);
+      const user:HydratedDocument<UserEntity> = await User.findById(req.params.userId).populate(`shelves.${req.body.statuses.oldStatus}`);
 
       const filteredShelves = user.shelves[req.body.statuses.oldStatus]
         .filter((oneBook:BookEntity) => oneBook._id.toString() !== req.params.bookId);
@@ -405,7 +415,7 @@ export class BookRecord implements BookEntity {
   }
 
   static async deleteOneBook(bookId: string) {
-    const book:BookEntity = await Book.findById(bookId);
+    const book:HydratedDocument<BookEntity> = await Book.findById(bookId);
     console.log(book._id.toString(), bookId);
     if (book._id.toString() !== bookId) throw new ValidationError('Book which you want to delete doesnt exist already', 404);
     try {
@@ -425,12 +435,10 @@ export class BookRecord implements BookEntity {
   }
 
   static async getBooksSpecifiedByPageAndNumberFromQueryParamsAndOptionallyFilteredBySearchValue(req: Request) {
-    let books = await Book.find({}).skip((Number(req.query.page) * Number(req.query.booksPerPage)) - Number(req.query.booksPerPage)).limit(Number(req.query.booksPerPage));
+    let books:HydratedDocument<BookEntity>[] = await Book.find({}).skip((Number(req.query.page) * Number(req.query.booksPerPage)) - Number(req.query.booksPerPage)).limit(Number(req.query.booksPerPage));
     if (req.query.searchValue) {
       books = books.filter((book:BookEntity) => {
-        let result = true;
-
-        result = (book.author.toLowerCase().includes((req.query.searchValue as string).toLowerCase()))
+        const result = (book.author.toLowerCase().includes((req.query.searchValue as string).toLowerCase()))
             || book.title.toLowerCase().includes((req.query.searchValue as string).toLowerCase());
 
         return result;
