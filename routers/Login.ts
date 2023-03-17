@@ -64,35 +64,35 @@ loginRouter.post('/login', async (req, res) => {
   const user = await User.findOne({ username });
   if (!user) return res.sendStatus(401);
   const hash = user.password;
-  const isSamePassword = await bcrypt.compare('VasdirHisaki2', hash);
+  await bcrypt.compare(password, hash, (err:Error, result:boolean) => {
+    if (result) {
+      const userJWT = { id: user._id };
+      const accessToken = jwt.sign(userJWT, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: '15m',
+      });
+      const refreshToken = jwt.sign(userJWT, process.env.REFRESH_TOKEN_SECRET, {
+        expiresIn: '7d',
+      });
+      user.refreshTokenId = refreshToken;
+      user.save();
 
-  if (isSamePassword) {
-    const userJWT = { id: user._id };
-    const accessToken = jwt.sign(userJWT, process.env.ACCESS_TOKEN_SECRET, {
-      expiresIn: '15m',
-    });
-    const refreshToken = jwt.sign(userJWT, process.env.REFRESH_TOKEN_SECRET, {
-      expiresIn: '7d',
-    });
-    user.refreshTokenId = refreshToken;
-    user.save();
-
-    const accessCookieExpiryDate = new Date(Date.now() + 60 * 15 * 1000);
-    const refreshCookieExpiryDate = new Date(Date.now() + 60 * 60 * 1000 * 24 * 7);
-    res.cookie('accessToken', accessToken, {
-      httpOnly: true,
-      sameSite: 'strict',
-      secure: true,
-      expires: accessCookieExpiryDate,
-    }).cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      sameSite: 'strict',
-      secure: true,
-      expires: refreshCookieExpiryDate,
-    }).json({ user, accessToken });
-  } else {
-    res.status(401);
-  }
+      const accessCookieExpiryDate = new Date(Date.now() + 60 * 15 * 1000);
+      const refreshCookieExpiryDate = new Date(Date.now() + 60 * 60 * 1000 * 24 * 7);
+      res.cookie('accessToken', accessToken, {
+        httpOnly: true,
+        sameSite: 'strict',
+        secure: true,
+        expires: accessCookieExpiryDate,
+      }).cookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        sameSite: 'strict',
+        secure: true,
+        expires: refreshCookieExpiryDate,
+      }).json({ user, accessToken });
+    } else {
+      res.sendStatus(401);
+    }
+  });
 });
 
 export function authenticateToken(req:Request, res:Response, next:NextFunction) {
