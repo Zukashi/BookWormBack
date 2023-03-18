@@ -100,12 +100,11 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
   .put('/:userId/book/:bookId', async (req, res) => {
     try {
       await UserRecord.updateBookReview(req);
+      res.sendStatus(200);
     } catch (e) {
-      console.log(e);
       res.status(e.statusCode);
       res.json(e.message);
     }
-    res.sendStatus(201);
   })
   .get('/:userId/books', async (req, res) => {
     await UserRecord.getAllBooksFromShelves(req, res);
