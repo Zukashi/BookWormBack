@@ -9,7 +9,7 @@ export const registerRouter = Router();
 registerRouter.post('/register', validateRegister, async (req, res) => {
   try {
     const user = new UserRecord(req.body);
-    if (await User.findOne({ email: user.email })) {
+    if (await User.findOne({ email: req.body.email })) {
       res.status(400).json({ status: 'false', result: 'Email is taken', type: 'email' });
       throw new ValidationError('Email is taken', 400);
     }
@@ -17,9 +17,9 @@ registerRouter.post('/register', validateRegister, async (req, res) => {
       res.status(400).json({ status: 'false', result: 'Username is taken', type: 'username' });
       throw new ValidationError('Username is taken', 400);
     }
-    console.log(user);
     await user.insert();
+    res.sendStatus(201);
   } catch (e) {
-    console.log(e);
+    res.sendStatus(400);
   }
 });
