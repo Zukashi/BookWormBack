@@ -22,8 +22,7 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
   const user = await User.findById(req.params.userId);
   res.json(user);
 }).put('/admin/:userId', authenticateToken, async (req, res) => {
-  const user = new UserRecord(req.body);
-  await UserRecord.updateUser(user, res, req.params.userId);
+  await UserRecord.updateUser(req.body, res, req.params.userId);
 }).post('/search/:value', authenticateToken, async (req, res) => {
   await UserRecord.getSearchedUsers(req, res);
 })
