@@ -26,9 +26,10 @@ bookRouter.get('/books', authenticateToken, authRole('user'), async (req, res) =
   .post('/book', authenticateToken, async (req, res) => {
     const book = new BookRecord(req.body);
     try {
-      await book.insert(req);
-      res.sendStatus(201);
+      const id = await book.insert(req);
+      res.status(201).json(id);
     } catch (e) {
+      console.log(e);
       if (e instanceof ValidationError) {
         res.status(e.statusCode).json(e.message);
       }
