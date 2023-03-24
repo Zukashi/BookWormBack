@@ -27,8 +27,7 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
   await UserRecord.getSearchedUsers(req, res);
 })
   .put('/password', async (req, res) => {
-    const user = await UserRecord.updatePassword(req, res);
-    res.status(200).json(user);
+    await UserRecord.updatePassword(req, res);
   })
   .put('/:userId/avatar', authenticateToken, async (req, res) => {
     const user = await User.findById(req.params.userId);

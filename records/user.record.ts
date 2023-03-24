@@ -123,7 +123,7 @@ export class UserRecord implements UserEntity {
     }
   }
 
-  static async updatePassword(req:Request, res:Response):Promise<UserEntity> {
+  static async updatePassword(req:Request, res:Response):Promise<void> {
     const user = await User.findById(`${req.body.id}`);
     const isSamePassword = await bcrypt.compare(req.body.currentPassword, user.password);
     if (isSamePassword) {
@@ -131,15 +131,16 @@ export class UserRecord implements UserEntity {
         bcrypt.hash(req.body.verifyPassword, 10, async (err: string, hash: string) => {
           user.password = hash;
           await user.save();
-          res.end().status(200);
+          res.sendStatus(200);
         });
       } else {
+        console.log(123);
         res.status(400).json("Passwords don't match");
       }
     } else {
+      console.log(444);
       res.status(400).json('Current Password Invalid');
     }
-    return user;
   }
 
   static async deleteBookFromFavorites(req:Request) {
