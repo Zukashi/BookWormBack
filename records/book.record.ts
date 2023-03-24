@@ -40,7 +40,6 @@ export class BookRecord implements BookEntity {
     } catch (e) {
       throw new ValidationError('Incorrect data', 400);
     }
-
     if (await Book.findOne({ isbn: this.isbn })) {
       throw new ValidationError('Book is already in the database', 409);
     } else {
@@ -51,7 +50,6 @@ export class BookRecord implements BookEntity {
       } catch (e) {
         throw new ValidationError('book with given isbn doesnt exist', 404);
       }
-
       const response2 = await axios.get(`https://openlibrary.org${response.data.works[0].key}.json`);// dziala
       let response3;
       if (response.data.authors) {
@@ -61,13 +59,15 @@ export class BookRecord implements BookEntity {
 
       const shelvesResponseGet = await axios.get(`https://openlibrary.org${response.data.works[0].key}/bookshelves.json`);// dziala
       const bookDetails:HydratedDocument<BookEntity> = await axios.get(`https://openlibrary.org/api/books?bibkeys=ISBN:${this.isbn}&jscmd=details&format=json`);// dziala
-      if (response3.data) {
+      if (response3?.data) {
         try {
           response3.data.bio = response3.data.bio ? response3.data.bio : '';
           response3.data.bio = response3.data.bio.value ? response3.data.bio.value : '';
           const newAuthor = new Author(response3.data);
           await newAuthor.save();
         } catch (e) {
+          console.log(e);
+          throw new Error(e);
         }
       }
       let description;
@@ -79,7 +79,7 @@ export class BookRecord implements BookEntity {
         description = '';
       }
       const { details } = bookDetails.data[`ISBN:${this.isbn}`];
-
+      console.log(333);
       const subjects = [...new Set(details.subjects)] as string[];
 
       const oldGenre:any = await Genre.find({});
@@ -104,7 +104,7 @@ export class BookRecord implements BookEntity {
       details.publish_date && genre[0].years.push(details.publish_date);
       genre[0].years = [...new Set(genre[0].years)];
 
-      response3.data.personal_name ? genre[0].authors.push(response3.data.personal_name) : genre[0].authors.push(response3.data.name);
+      response3?.data?.personal_name ? genre[0].authors.push(response3.data.personal_name) : genre[0].authors.push(response3?.data?.name);
       genre[0].authors = [...new Set(genre[0].authors)];
       function getSum(counts: { [key: string]: number }): number {
         let sum = 0;
@@ -128,7 +128,7 @@ export class BookRecord implements BookEntity {
         title: response.data.title,
         description: typeof description === 'object' ? description.value : description,
         subject_people: response2.data.subject_people,
-        author: response3.data.personal_name ? response3.data.personal_name : '',
+        author: response3?.data?.personal_name ? response3.data.personal_name : '',
         isbn: this.isbn,
         number_of_pages: response.data.number_of_pages,
         works: response.data.works[0].key,
@@ -333,18 +333,23 @@ export class BookRecord implements BookEntity {
       path: 'reviews.likes.usersThatLiked.user',
     });
     let foundUser = {};
+    let hasLiked = false;
     book.reviews.forEach((review: any) => {
       const objectId = new ObjectId(req.params.reviewId);
       if (review._id.toString() === objectId.toString()) {
         foundUser = review.likes.usersThatLiked.find((user:any, i:number) => {
           if (user.user._id.toString() === req.params.currentUser) {
+            hasLiked = true;
             return true;
           }
           return false;
         });
       }
     });
-    res.status(200).json(foundUser);
+    res.status(200).json({
+      foundUser,
+      hasLiked,
+    });
   }
 
   static async deleteUserThatLikedFromLikedUsers(req:Request, res:Response) {
