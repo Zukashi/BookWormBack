@@ -11,27 +11,7 @@ searchRouter.get('/search', async (req, res) => {
 }).get('/searchOL', async (req, res) => {
   const { q, page } = req.query;
   try {
-    const response = await axios.get('https://openlibrary.org/search.json', {
-      params: { q, page },
-    });
-    console.log(1);
-    const seen = new Set();
-    const uniqueTitles = response.data.docs.filter((item:any) => {
-      const duplicate = seen.has(item.title);
-      seen.add(item.title);
-      return !duplicate;
-    });
-    const hasAuthor = response.data.docs.filter((item:any) => {
-      if (item.author_name) {
-        return true;
-      }
-      return false;
-    });
-    response.data.docs = [
-      ...uniqueTitles,
-      ...hasAuthor,
-    ];
-    console.log(response.data.docs);
+    const response = await axios.get(`https://openlibrary.org/search.json?q=${q}&page=${page}`);
     res.json(response.data);
   } catch (e) {
   }

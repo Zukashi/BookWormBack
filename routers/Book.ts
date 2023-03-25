@@ -15,7 +15,7 @@ bookRouter.get('/books', authenticateToken, authRole('user'), async (req, res) =
     res.json(books);
   }
   const books = await Book.find({}) as HydratedDocument<BookEntity>[];
-  res.json(books).status(201);
+  res.json(books);
 }).get('/book/:id', authenticateToken, async (req, res) => {
   const book:HydratedDocument<BookEntity> = await BookRecord.getOneBook(req.params.id);
   res.json(book);
@@ -105,4 +105,8 @@ bookRouter.get('/books', authenticateToken, authRole('user'), async (req, res) =
 
   .post('/filterBooks', authenticateToken, async (req, res) => {
     await BookRecord.filterBooksByYearAuthorOrSubject(req, res);
+  })
+
+  .get('/books/list', authenticateToken, async (req, res) => {
+    await BookRecord.getBookLists(req, res);
   });
