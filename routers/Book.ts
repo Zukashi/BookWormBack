@@ -109,4 +109,7 @@ bookRouter.get('/books', authenticateToken, authRole('user'), async (req, res) =
 
   .get('/books/list', authenticateToken, async (req, res) => {
     await BookRecord.getBookLists(req, res);
+  })
+  .get('/books/list/all', authenticateToken, async (req, res) => {
+    await BookRecord.getAllBooksOfList(req, res);
   });
