@@ -449,32 +449,43 @@ export class BookRecord implements BookEntity {
         return result;
       });
     }
-    console.log(3333);
     return books;
   }
 
   static async getBookLists(req: Request, res:Response) {
-    console.log(req.query);
     const user:HydratedDocument<UserEntity> = await User.findById(req.query.id);
     const listOfIdsOfBooks = user.lists[req.query.list as string];
     const populatedBooks = await Promise.all(listOfIdsOfBooks.map(async (id:string) => {
       const book:HydratedDocument<BookEntity> = await Book.findById(id);
       return book;
     }));
-    console.log(parseInt(req.query.page as string, 10) - 1);
-    console.log(parseInt(req.query.booksPerPage as string, 10));
-    console.log((parseInt(req.query.page as string, 10)));
-    const pagedBooks = populatedBooks.slice((parseInt(req.query.booksPerPage as string, 10) * parseInt(req.query.page as string, 10)) - parseInt(req.query.booksPerPage as string, 10), parseInt(req.query.booksPerPage as string, 10) * (parseInt(req.query.page as string, 10)));
+    let sorted:BookEntity[] = [];
+    if (req.query.sort && req.query.list) {
+      if (req.query.typeOfSort && req.query.arrow === 'desc') {
+        sorted = [...populatedBooks.sort((a:BookEntity, b:BookEntity) => (a[req.query.typeOfSort] < b[req.query.typeOfSort] ? 1 : -1))];
+      } if (req.query.typeOfSort && req.query.arrow === 'asc') {
+        sorted = [...populatedBooks.sort((a:BookEntity, b:BookEntity) => (a[req.query.typeOfSort] < b[req.query.typeOfSort] ? -1 : 1))];
+      }
+    }
+    if (sorted.length <= 1) sorted = [...populatedBooks];
+    const newBooks = sorted.filter((book:BookEntity) => {
+      const result = (book?.author?.toLowerCase().includes((req.query.searchValue as string).toLowerCase()))
+          || book?.title?.toLowerCase().includes((req.query.searchValue as string).toLowerCase());
+
+      return result;
+    });
+    const pagedBooks = newBooks.slice((parseInt(req.query.booksPerPage as string, 10) * parseInt(req.query.page as string, 10)) - parseInt(req.query.booksPerPage as string, 10), parseInt(req.query.booksPerPage as string, 10) * (parseInt(req.query.page as string, 10)));
+
     res.json(pagedBooks);
-    // if (req.query.searchValue) {
-    //   books = books.filter((book:BookEntity) => {
-    //     const result = (book.author.toLowerCase().includes((req.query.searchValue as string).toLowerCase()))
-    //         || book.title.toLowerCase().includes((req.query.searchValue as string).toLowerCase());
-    //
-    //     return result;
-    //   });
-    // }
-    // console.log(books);
-    // console.log(3333);
+  }
+
+  static async getAllBooksOfList(req: Request, res:Response) {
+    const user:HydratedDocument<UserEntity> = await User.findById(req.query.id);
+    const listOfIdsOfBooks = user.lists[req.query.list as string];
+    const populatedBooks = await Promise.all(listOfIdsOfBooks.map(async (id:string) => {
+      const book:HydratedDocument<BookEntity> = await Book.findById(id);
+      return book;
+    }));
+    res.json(populatedBooks);
   }
 }
