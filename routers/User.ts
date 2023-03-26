@@ -160,4 +160,7 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
   .delete('/:userId/list/:listName', authenticateToken, async (req, res) => {
     await UserRecord.deleteList(req);
     res.end();
+  })
+  .get('/:userId/shelf/:status', authenticateToken, async (req, res) => {
+    await UserRecord.getSpecifiedShelfOfUserBooks(req, res);
   });
