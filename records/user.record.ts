@@ -414,4 +414,22 @@ export class UserRecord implements UserEntity {
       },
     });
   }
+
+  static getSpecifiedShelfOfUserBooks = async (req:Request, res:Response) => {
+    const user = await User.findById(req.params.userId);
+    const shelf = user.shelves[req.params.status];
+    if (shelf.length > 0) {
+      const populatedBooks = await Promise.all(shelf.map(async (id:any) => {
+        const book:BookEntity = await Book.findById(id.book.toString()).lean();
+        const newBook = {
+          ...book,
+          progress: id.progress,
+        };
+        return newBook;
+      }));
+      res.json(populatedBooks);
+    } else {
+      res.json([]);
+    }
+  };
 }
