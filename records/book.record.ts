@@ -488,4 +488,10 @@ export class BookRecord implements BookEntity {
     }));
     res.json(populatedBooks);
   }
+
+  static async getBookByISBN(req:Request, res:Response) {
+    const book = await Book.findOne({ isbn: req.params.isbn });
+    if (!book) res.sendStatus(404);
+    res.json(book);
+  }
 }
