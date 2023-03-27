@@ -9,6 +9,7 @@ export class ValidationError extends Error {
 
 export const handleError = (err: Error, req: Request, res: Response, next: NextFunction) => {
   console.error(err);
+
   const statusCode = res.statusCode ? res.statusCode : 500;
   res.status(statusCode);
   res
