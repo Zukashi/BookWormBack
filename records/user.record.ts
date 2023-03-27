@@ -417,7 +417,10 @@ export class UserRecord implements UserEntity {
 
   static getSpecifiedShelfOfUserBooks = async (req:Request, res:Response) => {
     const user = await User.findById(req.params.userId);
+    if (!user) throw new ValidationError('user not found', 404);
+
     const shelf = user.shelves[req.params.status];
+    if (!shelf) res.status(404).send('shelf of user not found');
     if (shelf.length > 0) {
       const populatedBooks = await Promise.all(shelf.map(async (id:any) => {
         const book:BookEntity = await Book.findById(id.book.toString()).lean();
@@ -428,6 +431,36 @@ export class UserRecord implements UserEntity {
         return newBook;
       }));
       res.json(populatedBooks);
+    } else {
+      res.json([]);
+    }
+  };
+
+  static getSpecifiedFilteredBooksOfUserShelf = async (req:Request, res:Response) => {
+    const user = await User.findById(req.params.userId);
+    if (!user) throw new ValidationError('user not found', 404);
+
+    const shelf = user.shelves[req.params.status];
+    if (!shelf) res.status(404).send('shelf of user not found');
+
+    if (shelf.length > 0) {
+      const populatedBooks = await Promise.all(shelf.map(async (id:any) => {
+        const book:BookEntity = await Book.findById(id.book.toString()).lean();
+        const newBook = {
+          ...book,
+          progress: id.progress,
+        };
+        return newBook;
+      }));
+      const filteredBySearch = populatedBooks.filter((book:BookEntity) => {
+        if (book.title.toLowerCase().includes(req.params.search.toLowerCase())) {
+          return book;
+        }
+        if (book?.author?.toLowerCase().includes(req.params.search.toLowerCase())) {
+          return book;
+        }
+      });
+      res.json(filteredBySearch);
     } else {
       res.json([]);
     }
