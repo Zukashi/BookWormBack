@@ -9,6 +9,7 @@ import { authenticateToken } from './Login';
 import { UserRecord } from '../records/user.record';
 import { RequestEntityWithUser } from '../types/request';
 import { UserEntity } from '../types';
+import { ValidationError } from '../utils/errors';
 
 const bcrypt = require('bcrypt');
 //
@@ -19,8 +20,12 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
   const users = await UserRecord.getAllUsers();
   res.json(users);
 }).get('/:userId', authenticateToken, async (req:RequestEntityWithUser, res) => {
-  const user = await User.findById(req.params.userId);
-  res.json(user);
+  try {
+    const user = await User.findById(req.params.userId);
+    res.json(user);
+  } catch (e) {
+    res.sendStatus(404);
+  }
 }).put('/admin/:userId', authenticateToken, async (req, res) => {
   await UserRecord.updateUser(req.body, res, req.params.userId);
 }).post('/search/:value', authenticateToken, async (req, res) => {
@@ -76,6 +81,7 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
     const { email } = req.body;
     if (!email) return res.sendStatus(404);
     const user = await User.findOne({ email });
+    if (!user) res.sendStatus(404);
     user.password = '';
     user.save();
     res.json(user);
@@ -166,4 +172,7 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
   })
   .get('/:userId/shelf/:status/:search/filtered', authenticateToken, async (req, res) => {
     await UserRecord.getSpecifiedFilteredBooksOfUserShelf(req, res);
+  })
+  .get('/:userId/favorites/filter/:search', authenticateToken, async (req, res) => {
+    await UserRecord.getFilteredBooksOfUserFavorites(req, res);
   });
