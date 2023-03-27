@@ -17,7 +17,7 @@ export interface UserEntity {
     favorites?: BookEntity[],
     role:string,
     lists:any,
-    shelves?:{
+    shelves:{
         [key:string]:any,
         read:{
             book:Types.ObjectId,

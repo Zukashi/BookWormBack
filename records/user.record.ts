@@ -465,4 +465,19 @@ export class UserRecord implements UserEntity {
       res.json([]);
     }
   };
+
+  static async getFilteredBooksOfUserFavorites(req:Request, res:Response) {
+    const user = await User.findById(req.params.userId).populate('favorites');
+    if (!user) throw new ValidationError('user not found', 404);
+    if (!user.favorites.length) res.json(user.favorites);
+    const filteredBySearch = user.favorites.filter((book:BookEntity) => {
+      if (book.title.toLowerCase().includes(req.params.search.toLowerCase())) {
+        return book;
+      }
+      if (book?.author?.toLowerCase().includes(req.params.search.toLowerCase())) {
+        return book;
+      }
+    });
+    res.json(filteredBySearch);
+  }
 }
