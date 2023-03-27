@@ -163,4 +163,7 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
   })
   .get('/:userId/shelf/:status', authenticateToken, async (req, res) => {
     await UserRecord.getSpecifiedShelfOfUserBooks(req, res);
+  })
+  .get('/:userId/shelf/:status/:search/filtered', authenticateToken, async (req, res) => {
+    await UserRecord.getSpecifiedFilteredBooksOfUserShelf(req, res);
   });
