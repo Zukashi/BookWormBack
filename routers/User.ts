@@ -71,7 +71,7 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
     await User.findByIdAndDelete(req.params.userId);
     res.sendStatus(204);
   })
-  .delete('/:userId/logout', async (req, res) => {
+  .delete('/:userId/logout', authenticateToken, async (req, res) => {
     res.clearCookie('accessToken').clearCookie('refreshToken').sendStatus(200);
   })
   .post('/reset-password', async (req, res) => {
@@ -90,10 +90,10 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
     await UserRecord.newPassword(req);
     res.sendStatus(204);
   })
-  .get('/:userId/book/:bookId', async (req:Request, res) => {
+  .get('/:userId/book/:bookId', authenticateToken, async (req:Request, res) => {
     await UserRecord.getReview(req, res);
   })
-  .post('/:userId/book/:bookId', async (req, res) => {
+  .post('/:userId/book/:bookId', authenticateToken, async (req, res) => {
     try {
       await UserRecord.addBookReview(req);
       res.sendStatus(201);
@@ -101,7 +101,7 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
       res.status(e.statusCode).json(e.message);
     }
   })
-  .put('/:userId/book/:bookId', async (req, res) => {
+  .put('/:userId/book/:bookId', authenticateToken, async (req, res) => {
     try {
       await UserRecord.updateBookReview(req);
       res.sendStatus(200);
@@ -110,10 +110,10 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
       res.json(e.message);
     }
   })
-  .get('/:userId/books', async (req, res) => {
+  .get('/:userId/books', authenticateToken, async (req, res) => {
     await UserRecord.getAllBooksFromShelves(req, res);
   })
-  .get('/:userId/:bookId/status', async (req, res) => {
+  .get('/:userId/:bookId/status', authenticateToken, async (req, res) => {
     try {
       const typeOfShelf = await UserRecord.getStatusOfBook(req);
       if (typeOfShelf) {
