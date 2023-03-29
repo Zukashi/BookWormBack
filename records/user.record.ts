@@ -7,7 +7,6 @@ import { User } from '../Schemas/User';
 import { ValidationError } from '../utils/errors';
 import { Book } from '../Schemas/Book';
 import { RequestEntityWithUser } from '../types/request';
-import { client } from '../index';
 import { filterUsersByValue } from '../functions/users/getFilteredUsersByValue';
 import { getOneReview } from '../functions/users/getOneReview';
 import { OneReview } from '../types/book/book-entity';
@@ -276,13 +275,6 @@ export class UserRecord implements UserEntity {
   static async getAllBooksFromShelves(req:Request, res:Response) {
     const user = await User.findById(req.params.userId);
     res.json(user.shelves).status(200);
-  }
-
-  static async sendSmsForPinForPasswordReset(req:Request, res:Response) {
-    client.messages
-      .create({ body: 'Hello from Twilio', from: '+16506632010', to: '+48513031628' })
-      .then((message: any) => console.log(message.sid));
-    res.end();
   }
 
   static async getStatusOfBook(req:Request):Promise<string | undefined> {

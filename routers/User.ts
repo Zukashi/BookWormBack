@@ -60,10 +60,6 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
       res.status(e.statusCode).json(e.message);
     }
   })
-  .post('/:userId/sms', authenticateToken, async (req, res) => {
-    await UserRecord.sendSmsForPinForPasswordReset(req, res);
-    res.sendStatus(201);
-  })
   .get('/:userId/favorites', authenticateToken, async (req:RequestEntityWithUser, res) => {
     await UserRecord.getFavoritesOfUser(req, res);
   })
