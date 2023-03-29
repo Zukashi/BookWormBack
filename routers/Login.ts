@@ -39,6 +39,7 @@ export function authRole(role:string) {
 }
 loginRouter.post('/auth/refreshToken', setUser, async (req, res) => {
   const { refreshToken } = req.cookies;
+  console.log(req.cookies);
   const user2 = await User.findOne({ refreshTokenId: refreshToken });
   if (refreshToken === null) return res.sendStatus(403).redirect('/');
   if (!user2) return res.sendStatus(403);
