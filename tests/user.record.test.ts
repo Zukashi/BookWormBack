@@ -12,21 +12,6 @@ import { getOneReview } from '../functions/users/getOneReview';
 import { OneReview } from '../types/book/book-entity';
 import { BookRecord } from '../records/book.record';
 
-let userNew:UserRecord;
-
-beforeAll(() => {
-  userNew = new UserRecord({
-    id: undefined,
-    firstName: 'Test',
-    age: 16,
-    base64Avatar: '',
-    country: '',
-    email: '',
-    password: '123',
-    role: '',
-    username: '',
-  });
-});
 const req:any = {
   params: {
     userId: '63dac1e49dcd4c2de18bdf5d',
@@ -60,7 +45,7 @@ test('test if filtering users is correct', async () => {
 test('insert book to favorites', async () => {
   const formerUser:UserEntity = await User.findById(req.params.userId);
   const newUser = await UserRecord.addToFavorites(req.params.bookId, req.params.userId);
-  const result = newUser.favorites.find((bookFavorite) => bookFavorite.id.toString() === req.params.bookId);
+  const result = newUser.favorites.find((bookFavorite) => bookFavorite._id.toString() === req.params.bookId);
   expect(result).toBeTruthy();
 });
 
@@ -71,7 +56,7 @@ test('was book removed from favorites of user', async () => {
   const user = await UserRecord.deleteBookFromFavorites(req);
   expect(formerLength).toBeGreaterThan(user.favorites.length);
   expect(user).toBeDefined();
-  expect(user.favorites.find((bookEntity) => bookEntity.id === req.params.bookId)).toBeUndefined();
+  expect(user.favorites.find((bookEntity) => bookEntity._id === req.params.bookId)).toBeUndefined();
 });
 
 test('add review', async () => {

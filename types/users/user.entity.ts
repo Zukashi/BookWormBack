@@ -2,7 +2,7 @@ import { Types } from 'mongoose';
 import { BookEntity } from '../book/book-entity';
 
 export interface UserEntity {
-    id:Types.ObjectId,
+    id:Types.ObjectId | string,
     username:string,
     email:string,
     password:string,
