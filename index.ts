@@ -1,7 +1,7 @@
 import express, { json } from 'express';
 import * as dotenv from 'dotenv';
 import 'express-async-errors';
-import mongoose from 'mongoose';
+import mongoose, { ConnectOptions } from 'mongoose';
 import { registerRouter } from './routers/Register';
 import { loginRouter } from './routers/Login';
 import { authorRouter } from './routers/Author';
@@ -22,7 +22,10 @@ app.use(cors({
   credentials: true,
 }));
 (async function () {
-  await mongoose.connect(process.env.MONGODB_URL);
+  await mongoose.connect(process.env.MONGODB_URL as string, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  } as ConnectOptions);
 }());
 
 app.use(cookieParser());
