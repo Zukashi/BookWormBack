@@ -12,6 +12,7 @@ const bcrypt = require('bcrypt');
 // eslint-disable-next-line import/prefer-default-export,no-undef
 export const loginRouter = Router();
 export async function setUser(req:RequestEntityWithUser, res:Response, next:NextFunction) {
+  console.log(req.cookies);
   const user = await User.findOne({ refreshTokenId: req.cookies.refreshToken }).lean() as HydratedDocument<UserEntity>;
   if (user) {
     req.user = user;
