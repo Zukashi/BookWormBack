@@ -53,7 +53,6 @@ loginRouter.post('/auth/refreshToken', setUser, async (req, res) => {
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
       sameSite: 'none',
-      secure: true,
       expires: accessCookieExpiryDate,
     }).status(201).json({ user: user2, token: accessToken });
   });
@@ -81,12 +80,12 @@ loginRouter.post('/login', async (req, res) => {
       res.cookie('accessToken', accessToken, {
         httpOnly: true,
         sameSite: 'none',
-        secure: true,
+
         expires: accessCookieExpiryDate,
       }).cookie('refreshToken', refreshToken, {
         httpOnly: true,
         sameSite: 'none',
-        secure: true,
+
         expires: refreshCookieExpiryDate,
       }).json({ user, accessToken });
     } else {
@@ -133,12 +132,11 @@ loginRouter.post('/demo', async (req, res) => {
   res.cookie('accessToken', accessToken, {
     httpOnly: true,
     sameSite: 'none',
-    secure: true,
+
     expires: accessCookieExpiryDate,
   }).cookie('refreshToken', refreshToken, {
     httpOnly: true,
     sameSite: 'none',
-    secure: true,
     expires: refreshCookieExpiryDate,
   }).json({ user, accessToken });
 });
