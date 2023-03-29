@@ -23,6 +23,10 @@ const cookieParser = require('cookie-parser');
 const cors = require('cors');
 
 export const app = express();
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  next();
+});
 app.use(cors({
   origin: ['https://book-worm-kjh8.onrender.com', 'http://localhost:3000'],
   credentials: true,
