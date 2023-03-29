@@ -9,6 +9,7 @@ import { searchRouter } from './routers/Search';
 import { userRouter } from './routers/User';
 import { bookRouter } from './routers/Book';
 import { handleError } from './utils/errors';
+import { corsOptions } from './config/corsOptions';
 
 dotenv.config();
 
@@ -27,10 +28,7 @@ app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   next();
 });
-app.use(cors({
-  origin: ['https://book-worm-kjh8.onrender.com', 'http://localhost:3000'],
-  credentials: true,
-}));
+app.use(cors(corsOptions));
 
 app.use(cookieParser());
 app.use(json());

@@ -41,7 +41,6 @@ loginRouter.post('/auth/refreshToken', setUser, async (req, res) => {
   const user2 = await User.findOne({ refreshTokenId: refreshToken });
   if (refreshToken === null) return res.sendStatus(403).redirect('/');
   if (!user2) return res.sendStatus(403);
-  console.log(process.env.TWILIO_ACCOUNT_SID, 39);
   jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err:Error, user:UserEntity) => {
     if (err) return res.sendStatus(403);
 
