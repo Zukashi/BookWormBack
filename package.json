@@ -4,10 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "ts-node index.ts",
+    "start": "node ./build/index.js",
     "test": "jest",
     "start-dev": "ts-node-dev index.ts",
-    "build": "tsc"
+    "build": "yarn install && tsc"
   },
   "license": "ISC",
   "dependencies": {
