@@ -7,7 +7,7 @@
     "start": "ts-node index.ts",
     "test": "jest",
     "start-dev": "ts-node-dev index.ts",
-    "build": "npx tsc"
+    "build": "tsc -p ."
   },
   "author": "",
   "license": "ISC",
