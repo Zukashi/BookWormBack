@@ -24,7 +24,7 @@ const cors = require('cors');
 
 export const app = express();
 app.use(cors({
-  origin: 'https://book-worm-kjh8.onrender.com',
+  origin: 'http://book-worm-kjh8.onrender.com',
   credentials: true,
 }));
 
