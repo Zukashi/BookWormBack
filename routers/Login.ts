@@ -61,6 +61,7 @@ loginRouter.post('/auth/refreshToken', setUser, async (req, res) => {
 loginRouter.post('/login', async (req, res) => {
   const { username, password } = req.body;
   const user = await User.findOne({ username });
+  console.log(user);
   if (!user) return res.sendStatus(401);
   const hash = user.password;
   await bcrypt.compare(password, hash, (err:Error, result:boolean) => {
