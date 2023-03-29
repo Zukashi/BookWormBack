@@ -47,12 +47,15 @@ loginRouter.post('/auth/refreshToken', setUser, async (req, res) => {
 
     const accessToken = jwt.sign({ id: user.id }, process.env.ACCESS_TOKEN_SECRET, {
       expiresIn: '15m',
+      sameSite: 'none',
+      secure: true,
     });
     const accessCookieExpiryDate = new Date(Date.now() + 60 * 15 * 1000);
 
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
       sameSite: 'none',
+      secure: true,
       expires: accessCookieExpiryDate,
     }).status(201).json({ user: user2, token: accessToken });
   });
@@ -75,18 +78,16 @@ loginRouter.post('/login', async (req, res) => {
       });
       user.refreshTokenId = refreshToken;
       user.save();
-
+      console.log(user);
       const accessCookieExpiryDate = new Date(Date.now() + 60 * 15 * 1000);
       const refreshCookieExpiryDate = new Date(Date.now() + 60 * 60 * 1000 * 24 * 7);
       res.cookie('accessToken', accessToken, {
         httpOnly: true,
-        sameSite: 'none',
-
+        secure: true,
         expires: accessCookieExpiryDate,
       }).cookie('refreshToken', refreshToken, {
         httpOnly: true,
-        sameSite: 'none',
-
+        secure: true,
         expires: refreshCookieExpiryDate,
       }).json({ user, accessToken });
     } else {
@@ -133,11 +134,13 @@ loginRouter.post('/demo', async (req, res) => {
   res.cookie('accessToken', accessToken, {
     httpOnly: true,
     sameSite: 'none',
+    secure: true,
 
     expires: accessCookieExpiryDate,
   }).cookie('refreshToken', refreshToken, {
     httpOnly: true,
     sameSite: 'none',
+    secure: true,
     expires: refreshCookieExpiryDate,
   }).json({ user, accessToken });
 });
