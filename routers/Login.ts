@@ -80,12 +80,12 @@ loginRouter.post('/login', async (req, res) => {
       const refreshCookieExpiryDate = new Date(Date.now() + 60 * 60 * 1000 * 24 * 7);
       res.cookie('accessToken', accessToken, {
         httpOnly: true,
-        sameSite: 'strict',
+        sameSite: 'none',
         secure: true,
         expires: accessCookieExpiryDate,
       }).cookie('refreshToken', refreshToken, {
         httpOnly: true,
-        sameSite: 'strict',
+        sameSite: 'none',
         secure: true,
         expires: refreshCookieExpiryDate,
       }).json({ user, accessToken });
@@ -132,12 +132,12 @@ loginRouter.post('/demo', async (req, res) => {
   const refreshCookieExpiryDate = new Date(Date.now() + 60 * 60 * 1000 * 24 * 7);
   res.cookie('accessToken', accessToken, {
     httpOnly: true,
-    sameSite: 'strict',
+    sameSite: 'none',
     secure: true,
     expires: accessCookieExpiryDate,
   }).cookie('refreshToken', refreshToken, {
     httpOnly: true,
-    sameSite: 'strict',
+    sameSite: 'none',
     secure: true,
     expires: refreshCookieExpiryDate,
   }).json({ user, accessToken });
