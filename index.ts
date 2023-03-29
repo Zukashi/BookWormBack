@@ -10,15 +10,11 @@ import { userRouter } from './routers/User';
 import { bookRouter } from './routers/Book';
 import { handleError } from './utils/errors';
 
-export const client = require('twilio')('ACb180490ec56aae49f9e66d21245e4abf', 'ffcc735a9c51aab68d6a0f5f1592b9b0');
-
 dotenv.config();
 
 const cookieParser = require('cookie-parser');
 
 const cors = require('cors');
-
-// see https://github.com/motdotla/dotenv#how-do-i-use-dotenv-with-import
 
 export const app = express();
 app.use(cors({
@@ -26,7 +22,7 @@ app.use(cors({
   credentials: true,
 }));
 (async function () {
-  await mongoose.connect('mongodb+srv://Zukashi:VasdirHisaki2@cluster0.dxvdqkk.mongodb.net/?retryWrites=true&w=majority');
+  await mongoose.connect(process.env.MONGODB_URL);
 }());
 
 app.use(cookieParser());
@@ -38,6 +34,6 @@ app.use('/', searchRouter);
 app.use('/user', userRouter);
 app.use('', bookRouter);
 app.use(handleError);
-export const server = app.listen(3001, 'localhost', () => {
+export const server = app.listen(process.env.PORT || 3001, () => {
   console.log('Listening on port http://localhost:3000');
 });
