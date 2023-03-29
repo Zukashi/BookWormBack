@@ -24,7 +24,7 @@ const cookieParser = require('cookie-parser');
 export const app = express();
 app.use((req, res, next) => {
   // Website you wish to allow to connect
-  res.setHeader('Access-Control-Allow-Origin', ['https://book-worm-kjh8.onrender.com', 'http://localhost:3000']);
+  res.setHeader('Access-Control-Allow-Origin', 'https://book-worm-kjh8.onrender.com');
 
   // Request methods you wish to allow
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
