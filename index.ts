@@ -24,7 +24,7 @@ const cors = require('cors');
 
 export const app = express();
 app.use(cors({
-  origin: 'http://localhost:3000',
+  origin: ['https://book-worm-kjh8.onrender.com', 'http://localhost:3000'],
   credentials: true,
 }));
 
