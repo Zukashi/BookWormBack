@@ -9,5 +9,7 @@ export const corsOptions = {
     }
   },
   credentials: true,
+  methods: ['GET,HEAD,OPTIONS,PUT,PATCH,POST,DELETE'],
+  allowedHeaders: ['Content-Type'],
   optionsSuccessStatus: 200,
 };
