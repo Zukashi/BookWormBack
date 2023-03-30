@@ -68,7 +68,8 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
     res.sendStatus(204);
   })
   .delete('/:userId/logout', authenticateToken, async (req, res) => {
-    res.clearCookie('accessToken').clearCookie('refreshToken').sendStatus(200);
+    console.log(req.cookies, 'check if there are cookies to be cleared');
+    res.clearCookie('accessToken', { httpOnly: true, sameSite: 'none', secure: true }).clearCookie('refreshToken', { httpOnly: true, sameSite: 'none', secure: true }).sendStatus(200);
   })
   .post('/reset-password', async (req, res) => {
     await UserRecord.resetPassword(req, res);
