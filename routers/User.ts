@@ -68,7 +68,9 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
     res.sendStatus(204);
   })
   .delete('/:userId/logout', authenticateToken, async (req, res) => {
-    res.clearCookie('accessToken').clearCookie('refreshToken').sendStatus(200);
+    res.clearCookie('accessToken', { domain: 'https://bookworm-8nw5.onrender.com' }).clearCookie('refreshToken', {
+      domain: 'https://bookworm-8nw5.onrender.com',
+    }).sendStatus(200);
   })
   .post('/reset-password', async (req, res) => {
     await UserRecord.resetPassword(req, res);
