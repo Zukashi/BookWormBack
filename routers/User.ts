@@ -172,4 +172,19 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
   })
   .get('/:userId/favorites/filter/:search', authenticateToken, async (req, res) => {
     await UserRecord.getFilteredBooksOfUserFavorites(req, res);
+  })
+  .get('/:userId/checkIfInList/:bookId', authenticateToken, async (req, res) => {
+    const user = await User.findById(req.params.userId);
+    let found = null;
+    Object.keys(user.lists).forEach((key:string) => {
+      user.lists[key].find((id:string) => {
+        if (id === req.params.bookId) {
+          found = key;
+        }
+      });
+    });
+    res.json({
+      found,
+      user,
+    });
   });
