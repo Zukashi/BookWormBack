@@ -39,7 +39,7 @@
     ·
     <a href="https://book-worm-kjh8.onrender.com">Live</a>
     ·
-    <a href="https://github.com/Zukashi/BookWormFront">Frontend</a>
+    <a href="https://github.com/Zukashi/BookWormFront">Frontend Repository</a>
    
   </p>
 </div>
