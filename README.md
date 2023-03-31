@@ -158,7 +158,14 @@
    ```sh
    npm install
    ```
-4. Run the script
+4. Create .env file inside BookWormBack directory. MONGODB_URL is mongodb URI for connecting to db through     <a href="https://www.mongodb.com/atlas/database" target="_blank">cloud</a> or locally it's up to you
+   ACCESS_TOKEN_SECRET and REFRESH_TOKEN_SECRET in those two you can just write some random random letters 
+    ```sh
+    MONGODB_URL=
+    ACCESS_TOKEN_SECRET=
+    REFRESH_TOKEN_SECRET=
+    ```
+5. Run the script
    ```sh
    npm run start-dev
    ```
