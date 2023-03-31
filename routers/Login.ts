@@ -96,7 +96,7 @@ loginRouter.post('/login', async (req, res) => {
   });
 });
 
-loginRouter.post('/demo', async (req, res) => {
+loginRouter.get('/demo', async (req, res) => {
   let user = await User.findOne({ username: 'admin' });
   if (!user) {
     const user = new User({
