@@ -114,7 +114,7 @@
 * User can show reviews based on selected rating
 * User can sort books by avg rating book name or author (user lists only)
 * User can change amount of entities he views in his lists
-* User can see other people's favorites and want to read / reading / read lists
+* User can see other people's favorites and want to read / reading / read lists.
 
 
 
