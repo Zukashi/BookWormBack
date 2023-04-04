@@ -159,7 +159,7 @@
    npm install
    ```
 4. Create .env file inside BookWormBack directory. MONGODB_URL is mongodb URI for connecting to db through     <a href="https://www.mongodb.com/atlas/database" target="_blank">cloud</a> or locally it's up to you
-   ACCESS_TOKEN_SECRET and REFRESH_TOKEN_SECRET in those two you can just write some random random letters 
+   ACCESS_TOKEN_SECRET and REFRESH_TOKEN_SECRET in those two you should input random string 
     ```sh
     MONGODB_URL=
     ACCESS_TOKEN_SECRET=
