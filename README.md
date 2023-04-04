@@ -25,7 +25,7 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/Zukashi/BookWormFront">
+  <a href="https://github.com/Zukashi/BookWormBack">
     <img src="https://cdn-icons-png.flaticon.com/512/2490/2490295.png" alt="Logo" width="80" height="80">
   </a>
 
