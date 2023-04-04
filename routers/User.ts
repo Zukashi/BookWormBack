@@ -36,10 +36,8 @@ userRouter.get('/users', authenticateToken, async (req, res) => {
   })
   .put('/:userId/avatar', authenticateToken, async (req, res) => {
     const user = await User.findById(req.params.userId);
-    // @TODO doesn't save changes
     user.base64Avatar = req.body.preview;
     await user.save();
-    res.sendStatus(201);
   })
   .put('/:userId', authenticateToken, async (req:RequestEntityWithUser, res) => {
     await UserRecord.updateUser(req.body, res, req.params.userId);
