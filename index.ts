@@ -24,7 +24,7 @@ const cookieParser = require('cookie-parser');
 const cors = require('cors');
 
 export const app = express();
-app.use(cors({ credentials: true, origin: true, exposedHeaders: ['Set-Cookie'] }));
+app.use(cors(corsOptions));
 
 app.use(cookieParser());
 app.use(json());
