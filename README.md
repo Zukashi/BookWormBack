@@ -42,6 +42,7 @@
     <a href="https://github.com/Zukashi/BookWormFront">Frontend Repository</a>
    
   </p>
+  <p>Note: Please wait 30 seconds for site to load</p>
 </div>
 
 
@@ -92,6 +93,8 @@
 
 ![alt screenshot of app](https://i.imgur.com/odflOyV.jpeg)
 #### Common functionalities
+* Responsive
+* Mobile first
 * JWT Auth
 * This project consumes OpenLibrary API
 * User/Admin Must be logged in to use site 
