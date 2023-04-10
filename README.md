@@ -35,8 +35,6 @@
     This project aims to provide a user-friendly platform for managing book information, improving the efficiency of book management, and enhancing accessibility to    book information. The app can also facilitate community engagement and increase visibility for lesser-known books. Overall, the project seeks to create a comprehensive and engaging online resource for book lovers, promoting a love for reading and literature.
     <br/>
     <br/>
-    <a href="https://book-worm-kjh8.onrender.com/demo">Demo</a>
-    ·
     <a href="https://book-worm-kjh8.onrender.com">Live</a>
     ·
     <a href="https://github.com/Zukashi/BookWormFront">Frontend Repository</a>
