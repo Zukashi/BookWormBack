@@ -179,7 +179,7 @@ export class UserRecord implements UserEntity {
         console.log('it has an error', err);
       } else {
         console.log('works');
-        res.json({ code });
+        res.json({ code, email: req.body.email });
       }
     });
   }
